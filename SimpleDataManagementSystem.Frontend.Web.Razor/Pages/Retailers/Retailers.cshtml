@@ -1,0 +1,148 @@
+﻿@page "/Retailers"
+
+@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers.RetailersModel
+
+@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
+@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
+
+@{
+    ViewData["Title"] = "Retailers";
+}
+
+<h1>Retailers</h1>
+
+<br />
+
+
+@if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+    ||
+    User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+    )
+{
+    <div>
+        <a href="/Retailers/Create"><button>Create</button></a>
+    </div>
+
+    <hr />
+}
+
+<div>
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    Logo
+                </th>
+                <th>
+                    Name
+                </th>
+                @if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+                    ||
+                    User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+                    )
+                {
+                    <th>
+                        Management
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Retailers != null)
+            {
+                @foreach (var retailer in Model.Retailers)
+                {
+                    <tr>
+                        <td>
+                            <img height=64 width=64 src="@retailer.LogoImageUri" />
+                        </td>
+                        <td>
+                            @retailer.Name
+                        </td>
+                        @if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+                           ||
+                           User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+                           )
+                        {
+                            <td>
+                                <div class="options @retailer.ID">
+                                    <a href="/Retailers/@retailer.ID/Edit"><button type="button">Edit</button></a>
+                                    |
+                                    <button class="delete" id="@retailer.ID">Delete</button>
+                                </div>
+
+                                <div class="confirm @retailer.ID" style="display:none;">
+                                    Confirm:
+                                    <button onclick="confirmDelete(@retailer.ID)">Yes</button>
+                                    <button onclick="cancelDelete(@retailer.ID)">No</button>
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<div style="text-align:center; width:50%; margin: auto;">
+
+    <form method="get">
+        <div style="padding:20px; display:inline-block;">
+            <label>Page: </label>
+            <input name="pagenr" size="4" value="@Model.PageNr" />
+        </div>
+
+        <div style="padding:20px; display: inline-block;">
+            <label>Items per page: </label>
+            <input name="ipp" size="4" value="@Model.ItemsPerPage" />
+        </div>
+
+        <br />
+
+        <div>
+            <button type="submit">Search</button>
+        </div>
+    </form>
+
+</div>
+
+@section scripts {
+    <script>
+        function confirmDelete(retailerId) {
+            var user = { "retailerId": retailerId };
+
+            $.ajax({
+                type: "POST",
+                url: "/Retailers/" + retailerId + "/Delete/?handler=DeleteRetailer",
+
+                success: function (r) {
+                    $(".confirm." + retailerId).closest("tr").remove();
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
+        }
+
+        function cancelDelete(userId) {
+            $(".options." + userId).css("display", "inline-block");
+            $(".confirm." + userId).css("display", "none");
+        }
+
+        $(document).ready(function () {
+            $(".delete").click(function (e) {
+                e.preventDefault();
+                var retailerId = $(this).attr("id");
+
+                var parent = $("#" + retailerId).parent();
+
+                parent.hide();
+
+                $(".confirm." + retailerId).css("display", "");
+            });
+        });
+    </script>
+}

@@ -1,0 +1,39 @@
+﻿@page "/Retailers/Create"
+
+@using Microsoft.AspNetCore.Mvc.ModelBinding
+@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
+
+@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers.CreateRetailerModel
+
+@{
+    ViewData["Title"] = "Create Retailer";
+}
+
+<h1>Create Retailer</h1>
+
+<br />
+
+<div style="border:1px solid black; margin:auto;width:70%; text-align:center;padding:20px;">
+    <form method="post" enctype="multipart/form-data">
+        <label for="name">Name:</label>
+        <br />
+        <input name="name" />
+
+        <br />
+
+        <label for="priority">Priority:</label>
+        <br />
+        <input name="priority" />
+
+        <br />
+
+        <label for="logoImage">Logo:</label>
+        <br />
+        <input type="file" name="logoImage" />
+
+        <br />
+        <br />
+
+        <button type="submit">Create</button>
+    </form>
+</div>

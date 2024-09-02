@@ -1,0 +1,41 @@
+﻿@page "/Retailers/{RetailerId:int}/Edit"
+
+@model EditRetailerModel
+
+@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
+@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
+
+@{
+    ViewData["Title"] = "Edit Retailer";
+}
+
+<h1>Edit Retailer</h1>
+<hr />
+
+<div style="text-align:center; border:1px solid black; padding:20px;">
+    <form method="post" enctype="multipart/form-data">
+        <label for="name">Retailer Name:</label>
+        <br />
+        <input value="@Model.Retailer.Name" name="name" />
+
+        <br />
+
+        <label for="priority">Priority:</label>
+        <br />
+        <input value="@Model.Retailer.Priority" name="priority" />
+
+        <br />
+
+        <label for="logoImage">Logo:</label>
+        <br />
+        <img src="@Model.Retailer.LogoImageUri" />
+        <br />
+        <br />
+        <input type="file" name="logoImage" />
+
+        <br />
+        <br />
+
+        <button type="submit">Update</button>
+    </form>
+</div>
