@@ -1,0 +1,165 @@
+﻿@page "/Items"
+
+@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.ItemsModel
+
+@{
+    ViewData["Title"] = "Items";
+}
+
+<h1>Items</h1>
+
+<br />
+
+@if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+   ||
+   User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+   )
+{
+    <div>
+        <a href="/Items/Create"><button>Create</button></a>
+    </div>
+
+    <hr />
+}
+
+<div>
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    Naziv proizvoda
+                </th>
+                <th>
+                    Opis
+                </th>
+                <th>
+                    Datum akcije
+                </th>
+                <th>
+                    Naziv retailera
+                </th>
+                <th>
+                    Cijena
+                </th>
+                <th>
+                    Thumbnail
+                </th>
+                @if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+                    ||
+                    User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+                    )
+                {
+                    <th>
+                        Management
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Items != null)
+            {
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            @item.Nazivproizvoda
+                        </td>
+                        <td>
+                            @(string.IsNullOrEmpty(item.Opis) ? "-" : item.Opis)
+                        </td>
+                        <td>
+                            @(string.IsNullOrEmpty(item.Datumakcije) ? "-" : item.Datumakcije)
+                        </td>
+                        <td>
+                            @item.Nazivretailera
+                        </td>
+                        <td>
+                            @item.Cijena
+                        </td>
+                        <td>
+                            <img height=64 width=64 src="@item.URLdoslikeUri" />
+                        </td>
+                        @if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+                           ||
+                           User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+                           )
+                        {
+                            <td>
+                                <div class="options @item.Nazivproizvoda">
+                                    <a href="/Items/@item.Nazivproizvoda/Edit"><button type="button">Edit</button></a>
+                                    |
+                                    <button class="delete" id="@item.Nazivproizvoda" onclick="deleteItem(this);">Delete</button>
+                                </div>
+
+                                <div class="confirm @item.Nazivproizvoda" style="display:none;">
+                                    Confirm:
+                                    <button onclick="confirmDelete('@item.Nazivproizvoda');">Yes</button>
+                                    <button onclick="cancelDelete(this);">No</button>
+                                    @* <button onclick="cancelDelete(@item.Nazivproizvoda)">No</button> *@
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<div style="text-align:center; width:50%; margin: auto;">
+    
+    <form method="get">
+        <div style="padding:20px; display:inline-block;">
+            <label>Page: </label>
+            <input name="pagenr" size="4" value="@Model.PageNr" />
+        </div>
+
+        <div style="padding:20px; display: inline-block;">
+            <label>Items per page: </label>
+            <input name="ipp" size="4" value="@Model.ItemsPerPage" />
+        </div>
+
+        <br />
+
+        <div>
+            <button type="submit">Search</button>
+        </div>
+    </form>
+
+</div>
+
+@section scripts {
+    <script>
+
+        function deleteItem(element) {
+            var td = $(element).closest("td");
+            td.children(".options").css("display", "none");
+            td.children(".confirm").css("display", "");
+        }
+
+        function confirmDelete(itemId) {
+            $.ajax({
+                type: "POST",
+                url: "/Items/" + itemId + "/Delete/?handler=DeleteItem",
+
+                success: function (r) {
+                    var el = document.getElementById(itemId);
+                    $(el).closest("tr").remove();
+                },
+                error: function (xhr, status, error) {
+                    // TODO display error on screen
+                    console.log(xhr.responseText);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
+        }
+
+        function cancelDelete(element) {
+            var td = $(element).closest("td");
+            td.children(".confirm").css("display", "none");
+            td.children(".options").css("display", "");
+        }
+
+    </script>
+}

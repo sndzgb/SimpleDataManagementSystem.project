@@ -1,0 +1,73 @@
+﻿@page "/Items/Create"
+
+@using Microsoft.AspNetCore.Mvc.ModelBinding
+@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
+
+@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.CreateItemModel
+
+@{
+    ViewData["Title"] = "Create Item";
+}
+
+<h1>Create Item</h1>
+
+<br />
+
+<div style="border:1px solid black; margin:auto;width:70%; text-align:center;padding:20px;">
+    <form method="post" enctype="multipart/form-data">
+        <label for="nazivproizvoda">Naziv proizvoda:</label>
+        <br />
+        <input name="nazivproizvoda" />
+
+        <br />
+        
+        <label for="opis">Opis:</label>
+        <br />
+        <input name="opis" />
+
+        <br />
+        
+        <label for="datumakcije">Datum akcije:</label>
+        <br />
+        <input name="datumakcije" />
+        
+        <br />
+
+        <label for="nazivretailera">Naziv retailera:</label>
+        <br />
+        <input name="nazivretailera" />
+
+        <br />
+
+        <label for="cijena">Cijena:</label>
+        <br />
+        <input type="number" name="cijena" step=".01" />
+
+        <br />
+
+        @* kategorija *@
+        <label for="kategorija">Kategorija</label>
+        <br />
+        <select name="kategorija">
+            @if (Model.AvailableCategories != null)
+            {
+                @foreach (var r in Model.AvailableCategories)
+                {
+                    <option name="kategorija" value="@r.ID">@r.Name</option>
+                }
+            }
+        </select>
+
+        <br />
+        <br />
+
+        <label for="URLdoslike">Thumbnail:</label>
+        <br />
+        <input type="file" name="URLdoslike" />
+
+        <br />
+        <br />
+
+        <button type="submit">Create</button>
+    </form>
+</div>
