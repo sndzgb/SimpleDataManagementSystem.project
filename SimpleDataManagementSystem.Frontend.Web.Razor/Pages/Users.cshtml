@@ -1,0 +1,138 @@
+﻿@page "/Users"
+
+@model UsersModel
+
+@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<h1>Users</h1>
+
+<br />
+
+<div>
+    <a href="/Users/Create"><button>Create</button></a>
+</div>
+
+<hr />
+
+<div>
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    ID
+                </th>
+                <th>
+                    Username
+                </th>
+                <th>
+                    Role
+                </th>
+                @if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin")
+                {
+                    <th>
+                        Management
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Users != null)
+            {
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>
+                            @user.ID
+                        </td>
+                        <td>
+                            @user.Username
+                        </td>
+                        <td>
+                            @user.RoleName
+                        </td>
+                        <td>
+                            <div class="options @user.ID">
+                                <a href="/Users/@user.ID/Edit"><button type="button">Edit</button></a>
+                                |
+                                <button class="delete" id="@user.ID">Delete</button>
+                            </div>
+
+                            <div class="confirm @user.ID" style="display:none;">
+                                Confirm: 
+                                <button onclick="confirmDelete(@user.ID)">Yes</button>
+                                <button onclick="cancelDelete(@user.ID)">No</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<div style="text-align:center; width:50%; margin: auto;">
+
+    <form method="get">
+        <div style="padding:20px; display:inline-block;">
+            <label>Page: </label>
+            <input name="pagenr" size="4" value="@Model.PageNr" />
+        </div>
+
+        <div style="padding:20px; display: inline-block;">
+            <label>Items per page: </label>
+            <input name="ipp" size="4" value="@Model.ItemsPerPage" />
+        </div>
+
+        <br />
+
+        <div>
+            <button type="submit">Search</button>
+        </div>
+    </form>
+
+</div>
+
+@section scripts
+{
+    <script>
+        function confirmDelete(userId) {
+            var user = { "UserId": userId };
+            
+            $.ajax({
+                type: "POST",
+                url: "/Users/" + userId + "/Delete/?handler=DeleteUser",
+                
+                success: function (r) {
+                    $(".confirm." + userId).closest("tr").remove();
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
+        }
+
+        function cancelDelete(userId) {
+            $(".options." + userId).css("display", "inline-block");
+            $(".confirm." + userId).css("display", "none");
+        }
+
+        $(document).ready(function () {
+            $(".delete").click(function (e) {
+                e.preventDefault();
+                var userId = $(this).attr("id");
+
+                var parent = $("#" + userId).parent();
+
+                parent.hide();
+
+                $(".confirm." + userId).css("display", "");
+            });
+        });
+    </script>
+}
