@@ -1,0 +1,34 @@
+﻿@page "/Categories/Create"
+
+@using Microsoft.AspNetCore.Mvc.ModelBinding
+@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
+
+@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories.CreateCategoryModel
+
+@{
+    ViewData["Title"] = "Create Category";
+}
+
+
+<h1>Create Category</h1>
+
+<br />
+
+<div id="createNewCategoryForm" style="border:1px solid black; margin:auto;width:70%; text-align:center;padding:20px;">
+    <form method="post">
+        <label asp-for="NewCategory.Name"></label>
+        <br />
+        <input asp-for="NewCategory.Name" id="name" name="name" type="text" />
+        
+        <br />
+
+        <label asp-for="NewCategory.Priority">Priority:</label>
+        <br />
+        <input asp-for="NewCategory.Priority" id="priority" name="priority" type="text" />
+        
+        <br />
+        <br />
+
+        <button type="submit">Create</button>
+    </form>
+</div>

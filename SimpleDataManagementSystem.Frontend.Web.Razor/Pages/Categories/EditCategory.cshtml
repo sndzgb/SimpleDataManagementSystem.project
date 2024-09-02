@@ -1,0 +1,30 @@
+﻿@page "/Categories/{CategoryId}/Edit"
+
+@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories.EditCategoryModel
+
+@{
+    ViewData["Title"] = "Edit Category";
+}
+
+<h1>Edit Category</h1>
+
+<br />
+
+<div style="text-align:center; border:1px solid black; padding:20px;">
+    <form method="post">
+        <label for="name">Category Name:</label>
+        <br />
+        <input value="@Model.Category.Name" name="name" />
+
+        <br />
+
+        <label for="priority">Priority:</label>
+        <br />
+        <input value="@Model.Category.Priority" name="priority" />
+
+        <br />
+        <br />
+
+        <button type="submit">Update</button>
+    </form>
+</div>

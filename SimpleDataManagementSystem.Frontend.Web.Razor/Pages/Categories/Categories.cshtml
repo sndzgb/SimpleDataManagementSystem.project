@@ -1,0 +1,151 @@
+﻿@page "/Categories"
+
+@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories.CategoriesModel
+
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<h1>Categories</h1>
+
+<br />
+
+@if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+       ||
+       User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+      )
+{
+    <div>
+        <a href="/Categories/Create"><button>Create</button></a>
+    </div>
+
+    <hr />    
+}
+
+<div>
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    ID
+                </th>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Priority
+                </th>
+                @if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+                    ||
+                    User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+                    )
+                {
+                    <th>
+                        Management
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Categories != null)
+            {
+                @foreach (var category in Model.Categories)
+                {
+                    <tr>
+                        <td>
+                            @category.ID
+                        </td>
+                        <td>
+                            @category.Name
+                        </td>
+                        <td>
+                            @category.Priority
+                        </td>
+                        @if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+                           ||
+                           User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+                          )
+                        {
+                            <td>
+                                <div class="options @category.ID">
+                                    <a href="/Categories/@category.ID/Edit"><button type="button">Edit</button></a>
+                                    |
+                                    <button class="delete" id="@category.ID">Delete</button>
+                                </div>
+
+                                <div class="confirm @category.ID" style="display:none;">
+                                    Confirm:
+                                    <button onclick="confirmDelete(@category.ID)">Yes</button>
+
+                                    <button onclick="cancelDelete(@category.ID)">No</button>
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<div style="text-align:center; width:50%; margin: auto;">
+
+    <form method="get">
+        <div style="padding:20px; display:inline-block;">
+            <label>Page: </label>
+            <input name="pagenr" size="4" value="@Model.PageNr" />
+        </div>
+
+        <div style="padding:20px; display: inline-block;">
+            <label>Items per page: </label>
+            <input name="ipp" size="4" value="@Model.ItemsPerPage" />
+        </div>
+
+        <br />
+
+        <div>
+            <button type="submit">Search</button>
+        </div>
+    </form>
+
+</div>
+
+@section scripts {
+    <script>
+        function confirmDelete(categoryId) {
+            var category = { "categoryId": categoryId };
+
+            $.ajax({
+                type: "POST",
+                url: "/Categories/" + categoryId + "/Delete/?handler=DeleteCategory",
+
+                success: function (r) {
+                    $(".confirm." + categoryId).closest("tr").remove();
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
+        }
+
+        function cancelDelete(categoryId) {
+            $(".options." + categoryId).css("display", "inline-block");
+            $(".confirm." + categoryId).css("display", "none");
+        }
+
+        $(document).ready(function () {
+            $(".delete").click(function (e) {
+                e.preventDefault();
+                var categoryId = $(this).attr("id");
+
+                var parent = $("#" + categoryId).parent();
+
+                parent.hide();
+
+                $(".confirm." + categoryId).css("display", "");
+            });
+        });
+    </script>
+}
