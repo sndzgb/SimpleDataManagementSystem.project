@@ -396,3 +396,7 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+/SimpleDataManagementSystem.Frontend.Web.Razor/wwwroot/lib/bootstrap
+/SimpleDataManagementSystem.Frontend.Web.Razor/wwwroot/lib/jquery
+/SimpleDataManagementSystem.Frontend.Web.Razor/wwwroot/lib/jquery-validation
+/SimpleDataManagementSystem.Frontend.Web.Razor/wwwroot/lib/jquery-validation-unobtrusive
