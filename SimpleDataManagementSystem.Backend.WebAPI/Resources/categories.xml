@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Categories>
+	<Category>
+		<ID><![CDATA[1]]></ID>
+		<Name><![CDATA[Ostalo]]></Name>
+		<Priority><![CDATA[10000]]></Priority>
+	</Category>
+	<Category>
+		<ID><![CDATA[2]]></ID>
+		<Name><![CDATA[Osobna njega]]></Name>
+		<Priority><![CDATA[20]]></Priority>
+	</Category>
+	<Category>
+		<ID><![CDATA[3]]></ID>
+		<Name><![CDATA[Dom]]></Name>
+		<Priority><![CDATA[33]]></Priority>
+	</Category>
+	<Category>
+		<ID><![CDATA[4]]></ID>
+		<Name><![CDATA[Meso i mesni proizvodi]]></Name>
+		<Priority><![CDATA[3]]></Priority>
+	</Category>
+	<Category>
+		<ID><![CDATA[5]]></ID>
+		<Name><![CDATA[Kruh i pekarski proizvodi]]></Name>
+		<Priority><![CDATA[4]]></Priority>
+	</Category>
+	<Category>
+		<ID><![CDATA[6]]></ID>
+		<Name><![CDATA[Kolačići, grickalice i slatkiši]]></Name>
+		<Priority><![CDATA[7]]></Priority>
+	</Category>
+	<Category>
+		<ID><![CDATA[7]]></ID>
+		<Name><![CDATA[Alkoholna pića]]></Name>
+		<Priority><![CDATA[9]]></Priority>
+	</Category>
+</Categories>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Retailers>
+	<Retailer>
+		<ID><![CDATA[1]]></ID>
+		<Name><![CDATA[Konzum]]></Name>
+		<Priority><![CDATA[1]]></Priority>
+		<LogoImageUrl><![CDATA[https://images.pexels.com/photos/7661590/pexels-photo-7661590.jpeg]]></LogoImageUrl>
+	</Retailer>
+	<Retailer>
+		<ID><![CDATA[2]]></ID>
+		<Name><![CDATA[Studenac]]></Name>
+		<Priority><![CDATA[7]]></Priority>
+		<LogoImageUrl><![CDATA[https://images.pexels.com/photos/1337382/pexels-photo-1337382.jpeg]]></LogoImageUrl>
+	</Retailer>
+	<Retailer>
+		<ID><![CDATA[3]]></ID>
+		<Name><![CDATA[EuroSpin]]></Name>
+		<Priority><![CDATA[6]]></Priority>
+		<LogoImageUrl><![CDATA[https://images.pexels.com/photos/1111371/pexels-photo-1111371.jpeg]]></LogoImageUrl>
+	</Retailer>
+</Retailers>
