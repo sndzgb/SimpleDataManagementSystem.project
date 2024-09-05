@@ -9,10 +9,13 @@
     ViewData["Title"] = "Create Category";
 }
 
-
 <h1>Create Category</h1>
 
 <br />
+
+
+@await Component.InvokeAsync("InvalidModelState", ModelState)
+
 
 <div id="createNewCategoryForm" style="border:1px solid black; margin:auto;width:70%; text-align:center;padding:20px;">
     <form method="post">

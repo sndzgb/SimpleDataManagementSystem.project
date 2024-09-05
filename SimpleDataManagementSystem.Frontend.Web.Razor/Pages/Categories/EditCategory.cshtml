@@ -10,6 +10,10 @@
 
 <br />
 
+
+@await Component.InvokeAsync("InvalidModelState", ModelState)
+
+
 <div style="text-align:center; border:1px solid black; padding:20px;">
     <form method="post">
         <label for="name">Category Name:</label>

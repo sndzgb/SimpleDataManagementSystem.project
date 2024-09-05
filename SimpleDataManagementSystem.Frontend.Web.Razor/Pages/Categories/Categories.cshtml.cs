@@ -16,18 +16,12 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
         }
 
 
-        [BindProperty(Name = "pagenr", SupportsGet = true)]
-        public int PageNr { get; set; } = 1;
-
-        [BindProperty(Name = "ipp", SupportsGet = true)]
-        public int ItemsPerPage { get; set; } = 8;
-
-        public List<CategoryViewModel> Categories { get; set; }
+        public CategoriesViewModel Categories { get; set; }
 
 
-        public async Task OnGet()
+        public async Task OnGet([FromQuery] int take = 8, [FromQuery] int page = 1)
         {
-            Categories = await _categoriesService.GetAllCategoriesAsync(ItemsPerPage, PageNr);
+            Categories = await _categoriesService.GetAllCategoriesAsync(take, page);
 
             return;
         }

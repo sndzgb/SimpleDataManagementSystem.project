@@ -6,7 +6,7 @@ using System.Net;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
 {
-    [IgnoreAntiforgeryToken]
+    [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin,Employee")]
     public class DeleteCategoryModel : PageModel
     {
@@ -19,6 +19,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
         }
 
 
+        [FromRoute]
         public int CategoryId { get; set; }
 
 
@@ -26,10 +27,8 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
         {
         }
 
-        public async Task<IActionResult> OnPostDeleteCategory(int categoryId)
+        public async Task<IActionResult> OnPostDeleteCategory()
         {
-            CategoryId = categoryId;
-
             await _categoriesService.DeleteCategoryAsync(CategoryId);
 
             return new JsonResult(null) { StatusCode = (int)HttpStatusCode.OK };

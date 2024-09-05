@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
 {
@@ -12,12 +14,14 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
     {
         private readonly ICategoriesService _categoriesService;
 
+
         public EditCategoryModel(ICategoriesService categoriesService)
         {
             _categoriesService = categoriesService;
         }
 
 
+        [FromRoute]
         public int CategoryId { get; set; }
 
         public CategoryViewModel Category { get; set; }
@@ -25,23 +29,34 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
         [BindProperty]
         public UpdateCategoryViewModel UpdatedCategory { get; set; }
 
+        public WebApiCallException Error { get; set; }
 
-        public async Task OnGet(int categoryId)
+
+        public async Task<IActionResult> OnGet()
         {
-            CategoryId = categoryId;
+            Category = await _categoriesService.GetCategoryByIdAsync(CategoryId);
 
-            Category = await _categoriesService.GetCategoryByIdAsync(categoryId);
-
-            return;
+            return null;
         }
 
-        public async Task<IActionResult> OnPost([FromRoute] int categoryId)
+        public async Task<IActionResult> OnPost()
         {
-            CategoryId = categoryId;
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return await OnGet();
+                }
 
-            await _categoriesService.UpdateCategoryAsync(CategoryId, UpdatedCategory);
+                await _categoriesService.UpdateCategoryAsync(CategoryId, UpdatedCategory);
 
-            return RedirectToPage("/Categories/Categories");
+                return RedirectToPage("/Categories/Categories");
+            }
+            catch (WebApiCallException wace)
+            {
+                Error = wace; // set error on model
+                return await OnGet();
+            }
         }
     }
 }

@@ -22,24 +22,31 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
         [BindProperty]
         public NewCategoryViewModel NewCategory { get; set; }
 
+        public WebApiCallException Error { get; set; }
 
-        public void OnGet()
+
+        public async Task<IActionResult> OnGet()
         {
+            return null;
         }
 
         public async Task<IActionResult> OnPost(NewCategoryViewModel newCategoryViewModel)
         {
-            //try
-            //{
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return await OnGet();
+                }
                 var newUserId = await _categoriesService.AddNewCategoryAsync(newCategoryViewModel);
 
                 return RedirectToPage("/Categories/Categories");
-            //}
-            //catch (WebApiCallException wace)
-            //{
-            //    ViewData["Error"] = wace.Error;
-            //    return Page();
-            //}
+            }
+            catch (WebApiCallException wace)
+            {
+                Error = wace; // set error on model
+                return await OnGet();
+            }
         }
     }
 }
