@@ -7,9 +7,22 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Services
     {
         public static void Upload(string relativePath, Stream stream)
         {
+            if (string.IsNullOrEmpty(relativePath))
+            {
+                return;
+            }
+
             var assDirPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-            using (var fs = new FileStream(Path.Combine(assDirPath, relativePath), FileMode.CreateNew))
+            var completePath = Path.Combine(assDirPath, relativePath);
+
+            if (File.Exists(completePath))
+            {
+                return;
+            }
+
+            // Path.Combine(assDirPath, relativePath)
+            using (var fs = new FileStream(completePath, FileMode.CreateNew))
             {
                 stream.CopyToAsync(fs).GetAwaiter().GetResult();
             }
@@ -17,9 +30,21 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Services
 
         public static void Delete(string relativePath)
         {
+            if (string.IsNullOrEmpty(relativePath)) 
+            {
+                return;
+            }
+
             var assDirPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-            File.Delete(Path.Combine(assDirPath, relativePath)); // TODO error handling; + log error & continue
+            var completePath = Path.Combine(assDirPath, relativePath);
+
+            if (!File.Exists(completePath))
+            {
+                return;
+            }
+
+            File.Delete(completePath); // TODO error handling; + log error & continue -- eg.: file in use, ...
         }
     }
 }
