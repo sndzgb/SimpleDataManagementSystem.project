@@ -9,6 +9,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Category priority is required")]
+        [Range(Int32.MinValue, Int32.MaxValue)]
         public int Priority { get; set; }
     }
 }

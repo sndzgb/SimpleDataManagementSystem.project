@@ -5,13 +5,13 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
     public class ErrorViewModel
     {
         [JsonPropertyName("statusCode")]
-        public int StatusCode { get; private set; }
+        public int StatusCode { get; /*private*/ set; }
 
         [JsonPropertyName("message")]
-        public string? Message { get; private set; }
+        public string? Message { get; /*private*/ set; }
 
         [JsonPropertyName("errors")]
-        public List<string> Errors { get; private set; }
+        public List<string> Errors { get; /*private*/ set; }
 
         public ErrorViewModel(int statusCode, string? message, List<string>? errors = null)
         {

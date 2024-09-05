@@ -14,6 +14,6 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
         public int Priority { get; set; }
 
         [JsonPropertyName("logoImageUri")]
-        public string LogoImageUri { get; set; }
+        public string? LogoImageUri { get; set; }
     }
 }

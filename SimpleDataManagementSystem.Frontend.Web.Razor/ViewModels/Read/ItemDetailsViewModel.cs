@@ -1,10 +1,9 @@
 ﻿namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 {
     /// <summary>
-    /// Returned when a new user is created. Contains user details.
+    /// TODO For view "Items/{ItemId}/Details
     /// </summary>
-    public class NewlyCreatedUserViewModel
+    public class ItemDetailsViewModel
     {
-        // TODO
     }
 }

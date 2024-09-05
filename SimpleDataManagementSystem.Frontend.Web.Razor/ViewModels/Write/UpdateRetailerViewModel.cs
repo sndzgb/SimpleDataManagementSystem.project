@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SimpleDataManagementSystem.Shared.Web.Validators;
+using System.ComponentModel.DataAnnotations;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
 {
@@ -11,7 +12,8 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
         [Required(ErrorMessage = "Retailer priority is required")]
         public int Priority { get; set; }
 
-        // TODO validate file size/ length using custom data annotation
+        [MaxFileSizeValidator(8 * 1024 * 1024, ErrorMessage = "Maximum allowed file size is {0} bytes")]
+        [AllowedExtensionsValidator(new string[] { ".jpg", ".jpeg", ".png" })]
         public IFormFile? LogoImage { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SimpleDataManagementSystem.Shared.Web.Validators;
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
@@ -13,6 +14,8 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
         public int Priority { get; set; }
 
         [IgnoreDataMember]
+        [MaxFileSizeValidator(8 * 1024 * 1024, ErrorMessage = "Maximum allowed file size is {0} bytes")]
+        [AllowedExtensionsValidator(new string[] { ".jpg", ".jpeg", ".png" })]
         public IFormFile? LogoImage { get; set; }
     }
 }

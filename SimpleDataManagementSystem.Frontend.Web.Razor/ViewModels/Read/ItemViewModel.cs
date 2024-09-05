@@ -17,6 +17,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
         [JsonPropertyName("nazivretailera")]
         public string Nazivretailera { get; set; }
 
+        [JsonPropertyName("retailerId")]
+        public int RetailerId { get; set; }
+
         [JsonPropertyName("URLdoslikeUri")]
         public string URLdoslikeUri { get; set; }
 
@@ -36,6 +39,6 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
         }
 
         [JsonPropertyName("kategorija")]
-        public int Kategorija { get; set; }
+        public int? Kategorija { get; set; }
     }
 }
