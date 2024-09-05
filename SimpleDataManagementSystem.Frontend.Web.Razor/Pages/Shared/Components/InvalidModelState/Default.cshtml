@@ -1,0 +1,36 @@
+﻿@using Microsoft.AspNetCore.Mvc.ModelBinding
+
+@model ModelStateDictionary
+
+@{
+    var errors = Model?.Values
+        .SelectMany(v => v.Errors)
+        .Select(e => e.ErrorMessage)
+        .ToList();
+}
+
+@if (errors != null && errors.Count > 0)
+{
+    <div>
+        <i>
+            Please review and update the following form errors:
+        </i>
+
+        @foreach (var e in errors)
+        {
+            <div style="color:red; margin-left:30px;">
+                <span>
+                    &#8226;
+                </span>
+
+                <label>
+                    @e
+                </label>
+
+                <br />
+            </div>
+        }
+    </div>
+
+    <br />
+}
