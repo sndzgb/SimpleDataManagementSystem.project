@@ -9,6 +9,6 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Abstractions
 {
     public interface IRolesService
     {
-        Task<List<RoleDTO>> GetAllRolesAsync();
+        Task<List<RoleDTO>?> GetAllRolesAsync();
     }
 }

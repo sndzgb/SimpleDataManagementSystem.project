@@ -10,8 +10,14 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Abstractions
 {
     public interface ICategoriesService
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="newCategoryDTO"></param>
+        /// <exception cref="RecordExistsException"></exception>
+        /// <returns></returns>
         Task<int> AddNewCategoryAsync(NewCategoryDTO newCategoryDTO);
-        Task<List<CategoryDTO>> GetAllCategoriesAsync(int? take = 8, int? page = 1);
+        Task<CategoriesDTO?> GetAllCategoriesAsync(int? take = 8, int? page = 1);
         Task<CategoryDTO?> GetCategoryByIdAsync(int categoryId);
         Task UpdateCategoryAsync(int categoryId, UpdateCategoryDTO updateCategoryDTO);
         Task DeleteCategoryAsync(int categoryId);
