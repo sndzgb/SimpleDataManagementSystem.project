@@ -20,7 +20,7 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
         }
 
 
-        public async Task<List<RoleDTO>> GetAllRolesAsync()
+        public async Task<List<RoleDTO>?> GetAllRolesAsync()
         {
             var roles = await _dbContext.Roles.Select(x => new RoleDTO()
             {

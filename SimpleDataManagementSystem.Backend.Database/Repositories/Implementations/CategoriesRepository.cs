@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SimpleDataManagementSystem.Backend.Database.Entities;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
 using SimpleDataManagementSystem.Backend.Logic.Models;
@@ -24,7 +25,12 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
 
         public async Task<int> AddNewCategoryAsync(NewCategoryDTO newCategoryDTO)
         {
-            var entity = await _dbContext.Categories.AddAsync(new Entities.CategoryEntity()
+            if (newCategoryDTO == null)
+            {
+                throw new ArgumentNullException(nameof(newCategoryDTO));
+            }
+            
+            var entity = await _dbContext.Categories.AddAsync(new CategoryEntity()
             {
                 Name = newCategoryDTO.Name,
                 Priority = newCategoryDTO.Priority
@@ -49,18 +55,35 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<List<CategoryDTO>> GetAllCategoriesAsync(int? take = 8, int? page = 1)
+        public async Task<CategoriesDTO?> GetAllCategoriesAsync(int? take = 8, int? page = 1)
         {
-            return await _dbContext.Categories.OrderBy(x => x.ID)
-                .Skip((page!.Value - 1) * take!.Value)
-                .Take(take.Value)
-                .Select(s => new CategoryDTO()
-                {
-                    Priority = s.Priority,
-                    Name = s.Name,
-                    ID = s.ID
-                })
-                .ToListAsync();
+            var total = await _dbContext.Categories.CountAsync();
+
+            var categories = new CategoriesDTO();
+
+            categories.PageInfo.Total = total;
+            categories.PageInfo.Take = (int)take!;
+            categories.PageInfo.Page = (int)page!;
+
+            if (total > 0)
+            {
+                categories.Categories.AddRange
+                (
+                    await _dbContext.Categories
+                        .OrderBy(x => x.ID)
+                        .Skip((page!.Value - 1) * take!.Value)
+                        .Take(take.Value)
+                        .Select(s => new CategoryDTO()
+                        {
+                            Priority = s.Priority,
+                            Name = s.Name,
+                            ID = s.ID
+                        })
+                        .ToListAsync()
+                );
+            }
+
+            return categories;
         }
 
         public async Task<CategoryDTO?> GetCategoryByIdAsync(int categoryId)
@@ -82,8 +105,32 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
             return categoryDTO;
         }
 
+        public async Task<Category?> GetCategoryByNameAsync(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return null;
+            }
+
+            var entity = await _dbContext.Categories.Where(x => x.Name == name).FirstOrDefaultAsync();
+
+            if (entity == null)
+            {
+                return null;
+            }
+
+            var category = Map(entity);
+
+            return category;
+        }
+
         public async Task UpdateCategoryAsync(int categoryId, UpdateCategoryDTO updateCategoryDTO)
         {
+            if (updateCategoryDTO == null)
+            {
+                return;
+            }
+
             var category = await _dbContext.Categories.Where(x => x.ID == categoryId).FirstOrDefaultAsync();
 
             if (category == null)
@@ -96,5 +143,27 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
 
             await _dbContext.SaveChangesAsync();
         }
+
+
+        #region Mapping
+
+        private Category? Map(CategoryEntity? entity)
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+
+            var category = new Category()
+            {
+                ID = entity.ID,
+                Name = entity.Name,
+                Priority = entity.Priority
+            };
+
+            return category;
+        }
+
+        #endregion
     }
 }
