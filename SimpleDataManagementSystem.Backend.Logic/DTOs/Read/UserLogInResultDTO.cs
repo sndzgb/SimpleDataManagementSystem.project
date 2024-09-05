@@ -9,13 +9,18 @@ namespace SimpleDataManagementSystem.Backend.Logic.DTOs.Read
 {
     public class UserLogInResultDTO
     {
-        public List<MyClaim> Claims { get; set; }
+        public string[] Roles { get; set; }
         public string Username { get; set; }
+        public int UserId { get; set; }
 
-        public class MyClaim
-        {
-            public string Key { get; set; }
-            public string Value { get; set; }
-        }
+        // claims table
+        //public List<MyClaim> Claims { get; set; }
+
+
+        //public class MyClaim
+        //{
+        //    public string Key { get; set; }
+        //    public string Value { get; set; }
+        //}
     }
 }

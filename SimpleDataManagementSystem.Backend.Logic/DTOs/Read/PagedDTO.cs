@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace SimpleDataManagementSystem.Backend.Logic.DTOs.Read
 {
-    public class UserDTO
+    public class PagedDTO
     {
-        public int ID { get; set; }
-        public string Username { get; set; }
-        public string? RoleName { get; set; }
-        public int? RoleId { get; set; }
+        public int Total { get; set; }
+        public int Page { get; set; }
+        public int Take { get; set; }
     }
 }

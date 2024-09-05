@@ -10,12 +10,13 @@ namespace SimpleDataManagementSystem.Backend.Logic.DTOs.Read
     public class ItemDTO
     {
         public string Nazivproizvoda { get; set; }
-        public string Opis { get; set; }
-        public string Datumakcije { get; set; }
-        public string Nazivretailera { get; set; }
-        public string URLdoslike { get; set; }
+        public string? Opis { get; set; }
+        public string? Datumakcije { get; set; }
+        public string? Nazivretailera { get; set; } // TODO maknuti -- višak
+        public int RetailerId { get; set; }
+        public string? URLdoslike { get; set; }
         public decimal Cijena { get; set; }
-        public int Kategorija { get; set; }
+        public int? Kategorija { get; set; }
 
         //public ItemDTO(string nazivproizvoda, string opis, RetailerDTO retailer, CategoryDTO category)
         //{
