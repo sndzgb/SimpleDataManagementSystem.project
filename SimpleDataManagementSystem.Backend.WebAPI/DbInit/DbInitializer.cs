@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SimpleDataManagementSystem.Backend.Database;
 using SimpleDataManagementSystem.Backend.Database.Entities;
 using SimpleDataManagementSystem.Backend.Logic.Models;
@@ -21,26 +22,98 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
                 return;
             }
 
+
+            // TODO add navigation properties: roles, claims
+            var user = new UserEntity();
+            user.Username = "admin";
+            user.Id = 0;
+            user.CreatedUTC = DateTime.UtcNow;
+            user.RoleId = 1;
+            //user.Id = 0;
+            //user.UserName = "admin";
+            //user.EmailConfirmed = false;
+            //user.Email = "admin@email.org";
+            //user.PhoneNumberConfirmed = false;
+            //user.TwoFactorEnabled = false;
+            //user.LockoutEnabled = false;
+            //user.AccessFailedCount = 5;
+
+            var hasher = new PasswordHasher<UserEntity>(); //IdentityUser
+            user.PasswordHash = hasher.HashPassword(user, "admin!1A");
+
+
+
+            // SEED roles
+            using (var transaction = dbContext.Database.BeginTransaction())
+            {
+                dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Roles] ON");
+
+                var roles = new List<RoleEntity>();
+
+                roles.Add(new RoleEntity()
+                {
+                    Id = 1,
+                    Name = "Admin",
+                    CreatedUTC = DateTime.UtcNow
+                });
+                roles.Add(new RoleEntity()
+                {
+                    Id = 2,
+                    Name = "Employee",
+                    CreatedUTC = DateTime.UtcNow
+                });
+                roles.Add(new RoleEntity()
+                {
+                    Id = 3,
+                    Name = "User",
+                    CreatedUTC = DateTime.UtcNow
+                });
+
+                dbContext.Roles.AddRange(roles);
+                dbContext.SaveChanges();
+
+                dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Roles] OFF");
+
+                transaction.Commit();
+            }
+
+
+            // SEED users (admin)
+            using (var transaction = dbContext.Database.BeginTransaction())
+            {
+                //dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Users] ON");
+
+                //var admin = new UserEntity();
+
+                dbContext.Users.Add(user);
+                dbContext.SaveChanges();
+
+                //dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Users] OFF");
+
+                transaction.Commit();
+            }
+
+
             // admin user & roles
-            dbContext.Database.ExecuteSqlRaw(@"
-SET IDENTITY_INSERT Roles ON
-;
+//            dbContext.Database.ExecuteSqlRaw(@"
+//SET IDENTITY_INSERT Roles ON
+//;
 
-INSERT INTO Roles (Id, Name) VALUES (1, 'Admin'), (2, 'Employee'), (3, 'User')
-;
+//INSERT INTO Roles (Id, Name) VALUES (1, 'Admin'), (2, 'Employee'), (3, 'User')
+//;
 
-SET IDENTITY_INSERT Roles OFF
-;
+//SET IDENTITY_INSERT Roles OFF
+//;
 
-SET IDENTITY_INSERT Users ON
-;
+//SET IDENTITY_INSERT Users ON
+//;
 
-INSERT INTO Users(Id, Username, Password, RoleId) VALUES (0, 'admin', 'admin', 1)
-;
+//INSERT INTO Users(Id, Username, Password, RoleId) VALUES (0, 'admin', 'admin', 1)
+//;
 
-SET IDENTITY_INSERT Users OFF
-;
-");
+//SET IDENTITY_INSERT Users OFF
+//;
+//");
 
 
             SeedRetailers(dbContext);

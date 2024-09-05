@@ -4,7 +4,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
 {
     internal static class DbInitializerExtension
     {
-        public static IApplicationBuilder UseItToSeedSqlServer(this IApplicationBuilder app)
+        public static IApplicationBuilder UseSeedSqlServer(this IApplicationBuilder app)
         {
             ArgumentNullException.ThrowIfNull(app, nameof(app));
 
@@ -17,7 +17,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
             }
             catch (Exception ex)
             {
-                // check why db init failed; only required on startup/ init
+                // check why init failed; only required on startup/ init
             }
 
             return app;
