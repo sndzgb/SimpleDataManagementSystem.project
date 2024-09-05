@@ -46,6 +46,24 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Middlewares
                 httpStatusCode = (int)HttpStatusCode.BadRequest;
             }
 
+            if (type == typeof(RecordExistsException))
+            {
+                message = ex.Message;
+                httpStatusCode = (int)HttpStatusCode.BadRequest;
+            }
+            
+            if (type == typeof(RequiredRecordNotFoundException))
+            {
+                message = ex.Message;
+                httpStatusCode = (int)HttpStatusCode.BadRequest;
+            }
+            
+            if (type == typeof(ArgumentNullException))
+            {
+                message = string.IsNullOrEmpty(ex.Message) ? "Request parameters not valid." : ex.Message;
+                httpStatusCode = (int)HttpStatusCode.BadRequest;
+            }
+
             if (type == typeof(Exception))
             {
                 message = "An error occured while processing your request.";
