@@ -2,8 +2,10 @@
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers.RetailersModel
 
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 @using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 @using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
+@using System.Security.Claims
 
 @{
     ViewData["Title"] = "Retailers";
@@ -14,9 +16,9 @@
 <br />
 
 
-@if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+@if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
     ||
-    User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+    User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
     )
 {
     <div>
@@ -36,9 +38,9 @@
                 <th>
                     Name
                 </th>
-                @if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+                @if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
                     ||
-                    User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+                    User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
                     )
                 {
                     <th>
@@ -50,18 +52,27 @@
         <tbody>
             @if (Model.Retailers != null)
             {
-                @foreach (var retailer in Model.Retailers)
+                @foreach (var retailer in Model.Retailers.Retailers)
                 {
                     <tr>
-                        <td>
-                            <img height=64 width=64 src="@retailer.LogoImageUri" />
-                        </td>
+                        @if (string.IsNullOrEmpty(retailer.LogoImageUri))
+                        {
+                            <td>
+                                <img height=64 width=64 src="/Resources/image_not_available.png" alt="image not available" />
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                <img height=64 width=64 src="@retailer.LogoImageUri" alt="@System.IO.Path.GetFileNameWithoutExtension(retailer.LogoImageUri)" />
+                            </td>
+                        }
                         <td>
                             @retailer.Name
                         </td>
-                        @if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+                        @if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
                            ||
-                           User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+                            User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
                            )
                         {
                             <td>
@@ -85,39 +96,28 @@
     </table>
 </div>
 
-<div style="text-align:center; width:50%; margin: auto;">
 
-    <form method="get">
-        <div style="padding:20px; display:inline-block;">
-            <label>Page: </label>
-            <input name="pagenr" size="4" value="@Model.PageNr" />
-        </div>
+<!-- #region Pagination -->
+@await Component.InvokeAsync(typeof(PagerViewComponent), Model.Retailers.PageInfo)
+<!-- #endregion Pagination -->
 
-        <div style="padding:20px; display: inline-block;">
-            <label>Items per page: </label>
-            <input name="ipp" size="4" value="@Model.ItemsPerPage" />
-        </div>
-
-        <br />
-
-        <div>
-            <button type="submit">Search</button>
-        </div>
-    </form>
-
-</div>
 
 @section scripts {
     <script>
         function confirmDelete(retailerId) {
-            var user = { "retailerId": retailerId };
+            var retailer = { "retailerId": retailerId };
+
+            var token = $('input[name="__RequestVerificationToken"]').val();
 
             $.ajax({
                 type: "POST",
                 url: "/Retailers/" + retailerId + "/Delete/?handler=DeleteRetailer",
-
+                data: {
+                    __RequestVerificationToken: token,
+                },
                 success: function (r) {
                     $(".confirm." + retailerId).closest("tr").remove();
+                    showSnackbar("Retailer deleted successfully");
                 },
                 error: function (xhr, status, error) {
                     console.log(xhr.responseText);

@@ -10,7 +10,12 @@
 }
 
 <h1>Edit Retailer</h1>
-<hr />
+
+<br />
+
+
+@await Component.InvokeAsync("InvalidModelState", ModelState)
+
 
 <div style="text-align:center; border:1px solid black; padding:20px;">
     <form method="post" enctype="multipart/form-data">
@@ -28,10 +33,31 @@
 
         <label for="logoImage">Logo:</label>
         <br />
-        <img src="@Model.Retailer.LogoImageUri" />
+        <div id="thumbnailPlaceholder" style="position:relative; max-width:300px; max-height:300px; margin:auto;">
+            @if (Model.Retailer.LogoImageUri != null)
+            {
+                <img id="thumbnail" style="width:300px; height:300px; max-width:300px; max-height:300px;" src="@Model.Retailer.LogoImageUri" />
+                <button onclick="deleteImage('@Model.Retailer.ID')" id="thumbnailDeleteControl" type="button" style="position:absolute; top:5px; right: 5px;">
+                    &#x2715;
+                </button>
+            }
+            else
+            {
+                <div id="thumbnailNotAvailable">
+                    <img style="width:300px; height:300px; max-width:300px; max-height:300px;" src="/Resources/image_not_available.png" alt="image not available" />
+                </div>
+            }
+        </div>
+        
+        <br />
+
+        <label for="logoImage" id="thumbnailAddOrUpdate">Add new logo:</label>
+
         <br />
         <br />
-        <input type="file" name="logoImage" />
+
+        <input id="thumbnailUpload" type="file" name="logoImage" onchange="loadThumbnail(event)" />
+        <br />
 
         <br />
         <br />
@@ -39,3 +65,54 @@
         <button type="submit">Update</button>
     </form>
 </div>
+
+@section scripts {
+
+    <script>
+        function deleteImage(retailerId) {
+            var token = $('input[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                type: "POST",
+                url: "/Retailers/" + retailerId + "/Edit/?handler=DeleteImage",
+                data: {
+                    __RequestVerificationToken: token,
+                },
+                success: function (r) {
+                    $("#thumbnail").remove();
+                    $("#thumbnailDeleteControl").remove();
+                    $("#thumbnailPlaceholder").append(`<div id="thumbnailNotAvailable">
+                                    <img style="width:300px; height:300px; max-width:300px; max-height:300px;" src="/Resources/image_not_available.png" alt="image not available" />
+                        </div>`);
+
+                    showSnackbar("Image deleted successfully");
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
+        }
+    </script>
+
+    <script>
+        var loadThumbnail = function (event) {
+            var output = document.getElementById('thumbnail');
+
+            if (typeof (output) == 'undefined' || output == null) {
+                $("#thumbnailNotAvailable").remove();
+                $("#thumbnailPlaceholder").append(`<img id="thumbnail" style="width:300px; height:300px; max-width:300px; max-height:300px;" />`);
+                output = document.getElementById('thumbnail');
+            }
+
+            $("#thumbnailDeleteControl").remove();
+            $("#thumbnailAddOrUpdate").after(`<label id="thumbnailUploadOk" style="color:white; padding:1px;">&#x2714;</label>`);
+
+            output.src = URL.createObjectURL(event.target.files[0]);
+            output.onload = function () {
+                URL.revokeObjectURL(output.src) // free memory
+            }
+        };
+    </script>
+}

@@ -18,18 +18,12 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
         }
 
 
-        public List<RetailerViewModel> Retailers { get; set; }
-
-        [BindProperty(Name = "pagenr", SupportsGet = true)]
-        public int PageNr { get; set; } = 1;
-
-        [BindProperty(Name = "ipp", SupportsGet = true)]
-        public int ItemsPerPage { get; set; } = 8;
+        public RetailersViewModel Retailers { get; set; }
 
 
-        public async Task OnGet()
+        public async Task OnGet([FromQuery] int take = 8, [FromQuery] int page = 1)
         {
-            Retailers = await _retailersService.GetAllRetailersAsync(ItemsPerPage, PageNr);
+            Retailers = await _retailersService.GetAllRetailersAsync(take, page);
 
             return;
         }

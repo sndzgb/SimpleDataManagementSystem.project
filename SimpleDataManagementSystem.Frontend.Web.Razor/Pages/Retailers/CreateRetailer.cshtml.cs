@@ -8,6 +8,7 @@ using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
 {
     [Authorize(Roles = "Admin,Employee")]
+    [ValidateAntiForgeryToken]
     public class CreateRetailerModel : PageModel
     {
         private readonly IRetailersService _retailersService;
@@ -22,24 +23,32 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
         [BindProperty]
         public NewRetailerViewModel NewRetailer { get; set; }
 
+        public WebApiCallException Error { get; set; }
 
-        public void OnGet()
+
+        public async Task<IActionResult> OnGet()
         {
+            return null;
         }
 
         public async Task<IActionResult> OnPost(NewRetailerViewModel newRetailerViewModel)
         {
-            //try
-            //{
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return await OnGet();
+                }
+
                 var newUserId = await _retailersService.AddNewRetailerAsync(newRetailerViewModel);
 
                 return RedirectToPage("/Retailers/Retailers");
-            //}
-            //catch (WebApiCallException wace)
-            //{
-            //    ViewData["Error"] = wace.Error;
-            //    return Page();
-            //}
+            }
+            catch (WebApiCallException wace)
+            {
+                Error = wace; // set error on model
+                return await OnGet();
+            }
         }
     }
 }

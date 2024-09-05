@@ -6,7 +6,7 @@ using System.Net;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
 {
-    [IgnoreAntiforgeryToken]
+    [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin,Employee")]
     public class DeleteRetailerModel : PageModel
     {
@@ -19,6 +19,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
         }
 
 
+        [FromRoute]
         public int RetailerId { get; set; }
 
 
@@ -26,10 +27,8 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
         {
         }
 
-        public async Task<IActionResult> OnPostDeleteRetailer(int retailerId)
+        public async Task<IActionResult> OnPostDeleteRetailer()
         {
-            RetailerId = retailerId;
-
             await _retailersService.DeleteRetailerAsync(RetailerId);
 
             return new JsonResult(null) { StatusCode = (int)HttpStatusCode.OK };
