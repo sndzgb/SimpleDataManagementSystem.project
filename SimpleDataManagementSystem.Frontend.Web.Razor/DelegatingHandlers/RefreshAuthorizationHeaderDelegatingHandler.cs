@@ -40,11 +40,11 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.DelegatingHandlers
 
                     var claims = ClaimsHelper.GetClaimsFromToken(authorizationHeaderValue);
 
-                    var identity = new ClaimsIdentity(claims, Cookies.AuthorizationCookie.Name);
+                    var identity = new ClaimsIdentity(claims, Cookies.AuthenticationCookie.Name);
                     
                     ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(identity);
 
-                    contextAccessor.HttpContext.SignInAsync(Cookies.AuthorizationCookie.Name, claimsPrincipal).GetAwaiter().GetResult();
+                    contextAccessor.HttpContext.SignInAsync(Cookies.AuthenticationCookie.Name, claimsPrincipal).GetAwaiter().GetResult();
                 }
             }
 
@@ -71,11 +71,11 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.DelegatingHandlers
 
                     var claims = ClaimsHelper.GetClaimsFromToken(authorizationHeaderValue);
 
-                    var identity = new ClaimsIdentity(claims, Cookies.AuthorizationCookie.Name);
+                    var identity = new ClaimsIdentity(claims, Cookies.AuthenticationCookie.Name);
                     
                     ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(identity);
 
-                    await contextAccessor.HttpContext.SignInAsync(Cookies.AuthorizationCookie.Name, claimsPrincipal);
+                    await contextAccessor.HttpContext.SignInAsync(Cookies.AuthenticationCookie.Name, claimsPrincipal);
                 }
             }
 
