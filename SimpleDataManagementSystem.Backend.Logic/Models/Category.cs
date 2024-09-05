@@ -10,10 +10,10 @@ namespace SimpleDataManagementSystem.Backend.Logic.Models
     {
         public int ID { get; set; }
 
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         public int Priority { get; set; }
 
-        public ICollection<Item> Items { get; }
+        public ICollection<Item>? Items { get; }
     }
 }
