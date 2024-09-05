@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SimpleDataManagementSystem.Frontend.Web.Razor</title>
+    <title>@ViewData["Title"] - SimpleDataManagementSystem</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SimpleDataManagementSystem.Frontend.Web.Razor.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body style="min-height: 100vh; display: flex; flex-direction: column;">
     <partial name="_Menu" model="null" />
     
     <div class="container">
@@ -17,9 +17,34 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    @* #region - snackbar *@
+    <div id="snackbar">
+        <em>
+            Placeholder
+        </em>
+    </div>
+    @* #endregion - snackbar *@
+
+    <footer style="margin-top: auto;" class="border-top">
         <div class="container">
-            &copy; 2024 - SimpleDataManagementSystem.Frontend.Web.Razor - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            <div class="row" style="padding:20px;">
+                <div class="col" style="text-align:center;">
+                    <div style="display: flex; justify-content: center; align-items: center; height:100%;">
+                        &copy; 2024 - Simple Data Management System</a>
+                    </div>
+                </div>
+                <div class="col" style="text-align:center;">
+                    <b>
+                        Attributions:
+                    </b>
+                    <br />
+                    <a href="https://www.flaticon.com/free-icons/performance" title="performance icons">Performance icons created by Design Circle - Flaticon</a>
+                    <br />
+                    <a href="https://www.flaticon.com/free-icons/image-placeholder" title="image placeholder icons">Image placeholder icons created by HideMaru - Flaticon</a>
+                    <br />
+                    <a href="https://www.pexels.com" title="pexels official website">Pexels.com</a>
+                </div>
+            </div>
         </div>
     </footer>
 
