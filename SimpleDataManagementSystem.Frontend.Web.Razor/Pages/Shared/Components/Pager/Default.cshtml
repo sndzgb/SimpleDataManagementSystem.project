@@ -1,0 +1,73 @@
+﻿@using Microsoft.AspNetCore.Http.Extensions
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
+@using System.Web
+@using System.Collections.Specialized
+
+@model Paged
+
+@{
+    NameValueCollection? queryStringParameters = null;
+    var left = Context.Request.Path.Value;
+    QueryString qs;
+
+    qs = Context.Request.QueryString;
+    queryStringParameters = HttpUtility.ParseQueryString(qs.ToString());
+
+    var final = string.Concat(left.ToLower(), "?");
+
+    // remove pagination; will be added later
+    queryStringParameters.Remove("take");
+    queryStringParameters.Remove("page");
+    
+    foreach (var q in queryStringParameters.AllKeys)
+    {
+        var key = q;
+        var value = queryStringParameters[q];
+        final = string.Concat(final, q, "=", Uri.EscapeDataString(value), "&");
+    }
+}
+
+
+@if (Model.PageInfo.EndPage > 0)
+{
+    <div class="modelTablePagination">
+        <ul>
+            @if (Model.PageInfo.Page > 1)
+            {
+                <li>
+                    <a href="@(final)take=@(Model.PageInfo.Take)&page=1">
+                        First
+                    </a>
+                </li>
+                <li>
+                    <a href="@(final)take=@(Model.PageInfo.Take)&page=@(Model.PageInfo.Page - 1)">
+                        Previous
+                    </a>
+                </li>
+            }
+
+            @for (var page = Model.PageInfo.StartPage; page <= Model.PageInfo.EndPage; page++)
+            {
+                <li class="@(page == Model.PageInfo.Page ? "active" : "")">
+                    <a href="@(final)take=@(Model.PageInfo.Take)&page=@(page)">
+                        @(page)
+                    </a>
+                </li>
+            }
+
+            @if (Model.PageInfo.Page < Model.PageInfo.TotalPages)
+            {
+                <li>
+                    <a href="@(final)take=@(Model.PageInfo.Take)&page=@(Model.PageInfo.Page + 1)">
+                        Next
+                    </a>
+                </li>
+                <li>
+                    <a href="@(final)take=@(Model.PageInfo.Take)&page=@(Model.PageInfo.TotalPages)">
+                        Last
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+}
