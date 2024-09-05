@@ -1,0 +1,131 @@
+﻿@page "/Users"
+
+@model UsersModel
+
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
+@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<h1>Users</h1>
+
+<br />
+
+<div>
+    <a href="/Users/Create"><button>Create</button></a>
+</div>
+
+<hr />
+
+<div>
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    ID
+                </th>
+                <th>
+                    Username
+                </th>
+                <th>
+                    Role
+                </th>
+                @if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin")
+                {
+                    <th>
+                        Management
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Users != null)
+            {
+                @foreach (var user in Model.Users.Users)
+                {
+                    <tr>
+                        <td>
+                            @user.ID
+                        </td>
+                        <td>
+                            @user.Username
+                        </td>
+                        <td>
+                            @user.RoleName
+                        </td>
+                        <td>
+                            <div class="options @user.ID">
+                                <a href="/Users/@user.ID/Edit"><button type="button">Edit</button></a>
+                                |
+                                <button class="delete" id="@user.ID">Delete</button>
+                            </div>
+
+                            <div class="confirm @user.ID" style="display:none;">
+                                Confirm:
+                                <form method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="button" onclick="confirmDelete(@user.ID)">Yes</button>
+                                </form>
+                                <button onclick="cancelDelete(@user.ID)">No</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<!-- #region Pagination -->
+@await Component.InvokeAsync(typeof(PagerViewComponent), Model.Users?.PageInfo)
+<!-- #endregion Pagination -->
+
+
+@section scripts
+{
+    <script>
+        function confirmDelete(userId) {
+            var user = { "UserId": userId };
+            var token = $('input[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                type: "POST",
+                url: "/Users/" + userId + "/Delete/?handler=DeleteUser",
+                data: {
+                    __RequestVerificationToken: token,
+                },
+                success: function (r) {
+                    $(".confirm." + userId).closest("tr").remove();
+                    showSnackbar("User deleted successfully");
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
+        }
+
+        function cancelDelete(userId) {
+            $(".options." + userId).css("display", "inline-block");
+            $(".confirm." + userId).css("display", "none");
+        }
+
+        $(document).ready(function () {
+            $(".delete").click(function (e) {
+                e.preventDefault();
+                var userId = $(this).attr("id");
+
+                var parent = $("#" + userId).parent();
+
+                parent.hide();
+
+                $(".confirm." + userId).css("display", "");
+            });
+        });
+    </script>
+}

@@ -1,0 +1,60 @@
+﻿@page "/Users/{UserId:int}/Edit"
+
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Constants
+@using SimpleDataManagementSystem.Shared.Common.Constants
+
+@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.EditUserModel
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<h1>Edit user</h1>
+
+<br />
+
+
+@await Component.InvokeAsync("InvalidModelState", ModelState)
+
+
+<div style="text-align:center; border:1px solid black; padding:20px;">
+    <form method="post">
+        <label>User ID:</label>
+        <br />
+        <input disabled value="@Model.User.ID" />
+        
+        <br />
+
+        <label>Username:</label>
+        <br />
+        <input name="username" value="@Model.User.Username" />
+        
+        <br />
+
+        <label for="roleId">Role:</label>
+        <br />
+        <select name="roleId" disabled="@(Model.User.RoleId == (int)Roles.Admin)">
+            @foreach (var r in Model.AvailableRoles)
+            {
+                <option name="roleId" selected="@(Model.User.RoleId == r.Id)" value="@r.Id">@r.Name</option>
+            }
+        </select>
+
+        <br />
+        <br />
+
+        <button type="submit">Update</button>
+    </form>
+</div>
+
+
+@section scripts {
+
+    <script>
+        $('form').submit(function(e) {
+            $(':disabled').each(function(e) {
+                $(this).removeAttr('disabled');
+            })
+        });
+    </script>
+}
