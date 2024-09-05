@@ -24,27 +24,20 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
         public async Task<int> AddNewRetailerAsync(NewRetailerViewModel newRetailerViewModel)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var content = new MultipartFormDataContent();
 
-            var fileContent = new StreamContent(newRetailerViewModel.LogoImage.OpenReadStream());
-            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(newRetailerViewModel.LogoImage.ContentType);
+            if (newRetailerViewModel.LogoImage != null)
+            {
+                var fileContent = new StreamContent(newRetailerViewModel.LogoImage.OpenReadStream());
+                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(newRetailerViewModel.LogoImage.ContentType);
 
-            content.Add(fileContent, "LogoImage", newRetailerViewModel.LogoImage.FileName);
-
-            //var jsonPayload = JsonSerializer.Serialize(newRetailerViewModel);
-            //var jsonBytes = Encoding.UTF8.GetBytes(jsonPayload);
-            //var jsonContent = new StreamContent(new MemoryStream(jsonBytes));
-            //jsonContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+                content.Add(fileContent, "LogoImage", newRetailerViewModel.LogoImage.FileName);
+            }
 
             content.Add(new StringContent(newRetailerViewModel.Name, Encoding.UTF8, MediaTypeNames.Text.Plain), "name");
             content.Add(new StringContent(Convert.ToString(newRetailerViewModel.Priority), Encoding.UTF8, MediaTypeNames.Text.Plain), "priority");
-
-            //content.Add(new StringContent(JsonSerializer.Serialize(newRetailerViewModel), Encoding.UTF8, "application/json"), "Json");
-
-            //content.Add(jsonContent, "payload", "metadata.json");
-            //content.Add(jsonContent);
 
             var response = await httpClient.PostAsync("api/retailers", content);
 
@@ -68,7 +61,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
         public async Task DeleteRetailerAsync(int retailerId)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var response = await httpClient.DeleteAsync($"/api/retailers/{retailerId}");
 
@@ -86,9 +79,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
         }
 
-        public async Task<List<RetailerViewModel>> GetAllRetailersAsync(int? take = 8, int? page = 1)
+        public async Task<RetailersViewModel> GetAllRetailersAsync(int? take = 8, int? page = 1)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var response = await httpClient.GetAsync($"/api/retailers?take={take}&page={page}");
 
@@ -103,14 +96,14 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             else
             {
                 var json = await response.Content.ReadAsStringAsync();
-                var responseContent = JsonSerializer.Deserialize<List<RetailerViewModel>>(json);
+                var responseContent = JsonSerializer.Deserialize<RetailersViewModel>(json);
                 return responseContent;
             }
         }
 
         public async Task<RetailerViewModel> GetRetailerByIdAsync(int retailerId)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var response = await httpClient.GetAsync($"/api/retailers/{retailerId}");
 
@@ -132,7 +125,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
         public async Task UpdateRetailerAsync(int retailerId, UpdateRetailerViewModel updateRetailerViewModel)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var content = new MultipartFormDataContent();
 
@@ -156,6 +149,25 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
                 throw new WebApiCallException(message);
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        public async Task UpdateRetailerPartialAsync(int retailerId)
+        {
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
+
+            var response = await httpClient.PatchAsync($"/api/retailers/{retailerId}", null);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var error = JsonSerializer.Deserialize<ErrorViewModel>(json);
+                throw new WebApiCallException(error);
+
             }
             else
             {

@@ -19,7 +19,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
         public async Task<List<RoleViewModel>> GetAllRolesAsync()
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var response = await httpClient.GetAsync("api/roles");
             

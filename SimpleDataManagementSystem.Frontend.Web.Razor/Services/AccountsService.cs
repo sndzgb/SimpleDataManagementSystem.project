@@ -17,9 +17,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
         }
 
 
-        public async Task<UserLogInResponseViewModel?> LogInAsync(string username, string password)
+        public async Task<string?> LogInAsync(string username, string password)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var content = new StringContent(
                 JsonSerializer.Serialize(new UserLogInRequestViewModel()
@@ -27,7 +27,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
                     Username = username,
                     Password = password
                 }), 
-                Encoding.UTF8, 
+                Encoding.UTF8,
                 "application/json"
             );
 
@@ -50,9 +50,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
                     return null;
                 }
 
-                var responseContent = JsonSerializer.Deserialize<UserLogInResponseViewModel>(json);
-
-                return responseContent;
+                return json;
             }
         }
     }

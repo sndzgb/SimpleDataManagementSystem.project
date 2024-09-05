@@ -19,7 +19,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
         public async Task<int> AddNewCategoryAsync(NewCategoryViewModel newCategoryViewModel)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var content = new StringContent(JsonSerializer.Serialize(newCategoryViewModel), Encoding.UTF8, "application/json");
 
@@ -45,7 +45,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
         public async Task DeleteCategoryAsync(int categoryId)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var response = await httpClient.DeleteAsync($"api/categories/{categoryId}");
 
@@ -63,9 +63,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
         }
 
-        public async Task<List<CategoryViewModel>> GetAllCategoriesAsync(int? take = 8, int? page = 1)
+        public async Task<CategoriesViewModel> GetAllCategoriesAsync(int? take = 8, int? page = 1)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var response = await httpClient.GetAsync($"/api/categories?take={take}&page={page}");
 
@@ -80,14 +80,14 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             else
             {
                 var json = await response.Content.ReadAsStringAsync();
-                var responseContent = JsonSerializer.Deserialize<List<CategoryViewModel>>(json);
+                var responseContent = JsonSerializer.Deserialize<CategoriesViewModel>(json);
                 return responseContent;
             }
         }
 
         public async Task<CategoryViewModel> GetCategoryByIdAsync(int categoryId)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var response = await httpClient.GetAsync($"/api/categories/{categoryId}");
 
@@ -109,7 +109,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
         public async Task UpdateCategoryAsync(int categoryId, UpdateCategoryViewModel updateCategoryViewModel)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var content = new StringContent(JsonSerializer.Serialize(updateCategoryViewModel), Encoding.UTF8, "application/json");
 

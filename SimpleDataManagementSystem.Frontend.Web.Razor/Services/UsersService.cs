@@ -20,20 +20,12 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
         public async Task<int> AddNewUserAsync(NewUserViewModel newUserViewModel)
         {
-            //try
-            //{
-                var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-                var content = new StringContent(JsonSerializer.Serialize(newUserViewModel), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonSerializer.Serialize(newUserViewModel), Encoding.UTF8, "application/json");
 
-                var response = await httpClient.PostAsync("api/users", content);
-            //    return 1;
-            //}
-            //catch (Exception e)
-            //{
-            //}
-            //return 1;
-
+            var response = await httpClient.PostAsync("api/users", content);
+            
             if (!response.IsSuccessStatusCode)
             {
                 using var contentStream = await response.Content.ReadAsStreamAsync();
@@ -56,7 +48,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
         public async Task DeleteUserAsync(int userId)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var response = await httpClient.DeleteAsync($"api/users/{userId}");
 
@@ -74,9 +66,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
         }
 
-        public async Task<List<UserViewModel>> GetAllUsersAsync(int? take = 8, int? page = 1)
+        public async Task<UsersViewModel> GetAllUsersAsync(int? take = 8, int? page = 1)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var response = await httpClient.GetAsync($"/api/users?take={take}&page={page}");
 
@@ -91,20 +83,14 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             else
             {
                 var json = await response.Content.ReadAsStringAsync();
-                var responseContent = JsonSerializer.Deserialize<List<UserViewModel>>(json);
+                var responseContent = JsonSerializer.Deserialize<UsersViewModel>(json);
                 return responseContent;
-
-                //using var contentStream = await response.Content.ReadAsStreamAsync();
-
-                //var responseContent = await JsonSerializer.DeserializeAsync<List<UserViewModel>>(contentStream);
-
-                //return responseContent;
             }
         }
 
         public async Task<UserViewModel> GetUserByIdAsync(int userId)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var response = await httpClient.GetAsync($"/api/users/{userId}");
 
@@ -126,7 +112,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
         public async Task UpdateUserAsync(int userId, UpdateUserViewModel updateUserViewModel)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var content = new StringContent(JsonSerializer.Serialize(updateUserViewModel), Encoding.UTF8, "application/json");
 

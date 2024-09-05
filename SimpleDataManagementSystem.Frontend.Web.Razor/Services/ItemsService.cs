@@ -5,6 +5,7 @@ using System.Net.Mime;
 using System.Text.Json;
 using System.Text;
 using System.Net.Http.Headers;
+using System.Net.Http;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 {
@@ -21,7 +22,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
         public async Task<string> AddNewItemAsync(NewItemViewModel newItemViewModel)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var content = new MultipartFormDataContent();
 
@@ -34,35 +35,32 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
 
             content.Add(new StringContent(newItemViewModel.Nazivproizvoda, Encoding.UTF8, MediaTypeNames.Text.Plain), "nazivproizvoda");
-            content.Add(new StringContent(newItemViewModel.Datumakcije, Encoding.UTF8, MediaTypeNames.Text.Plain), "datumakcije");
+            content.Add(new StringContent(newItemViewModel.Datumakcije ?? string.Empty, Encoding.UTF8, MediaTypeNames.Text.Plain), "datumakcije");
             content.Add(new StringContent(newItemViewModel.Cijena.ToString(), Encoding.UTF8, MediaTypeNames.Text.Plain), "cijena");
             content.Add(new StringContent(Convert.ToString(newItemViewModel.Kategorija), Encoding.UTF8, MediaTypeNames.Text.Plain), "kategorija");
-            content.Add(new StringContent(newItemViewModel.Nazivretailera, Encoding.UTF8, MediaTypeNames.Text.Plain), "nazivretailera");
+            content.Add(new StringContent(Convert.ToString(newItemViewModel.RetailerId), Encoding.UTF8, MediaTypeNames.Text.Plain), "retailerId");
             content.Add(new StringContent(newItemViewModel.Opis, Encoding.UTF8, MediaTypeNames.Text.Plain), "opis");
 
             var response = await httpClient.PostAsync("api/items", content);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
-
-                var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
-
+                var json = await response.Content.ReadAsStringAsync();
+                var message = JsonSerializer.Deserialize<ErrorViewModel>(json);
                 throw new WebApiCallException(message);
             }
             else
             {
-                var json = await response.Content.ReadAsStringAsync();
-                var responseContent = JsonSerializer.Deserialize<string>(json);
-                return responseContent;
+                var j = await response.Content.ReadAsStringAsync();
+                return j;
             }
         }
 
         public async Task DeleteItemAsync(string itemId)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var response = await httpClient.DeleteAsync($"/api/items/{itemId}");
+            var response = await httpClient.DeleteAsync($"/api/items/{Uri.EscapeDataString(itemId)}");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -78,9 +76,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
         }
 
-        public async Task<List<ItemViewModel>> GetAllItemsAsync(int? take = 8, int? page = 1)
+        public async Task<ItemsViewModel> GetAllItemsAsync(int? take = 8, int? page = 1)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var response = await httpClient.GetAsync($"/api/items?take={take}&page={page}");
 
@@ -95,24 +93,23 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             else
             {
                 var json = await response.Content.ReadAsStringAsync();
-                var responseContent = JsonSerializer.Deserialize<List<ItemViewModel>>(json);
+                var responseContent = JsonSerializer.Deserialize<ItemsViewModel>(json);
                 return responseContent;
             }
         }
 
         public async Task<ItemViewModel> GetItemByIdAsync(string itemId)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var response = await httpClient.GetAsync($"/api/items/{itemId}");
+            var response = await httpClient.GetAsync($"/api/items/{Uri.EscapeDataString(itemId)}");
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                var json = await response.Content.ReadAsStringAsync();
+                var error = JsonSerializer.Deserialize<ErrorViewModel>(json);
 
-                var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
-
-                throw new WebApiCallException(message);
+                throw new WebApiCallException(error);
             }
             else
             {
@@ -122,9 +119,28 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
         }
 
+        public async Task UpdateItemPartialAsync(string itemId)
+        {
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
+
+            var response = await httpClient.PatchAsync($"/api/items/{Uri.EscapeDataString(itemId)}", null);
+
+            if(!response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var error = JsonSerializer.Deserialize<ErrorViewModel>(json);
+                throw new WebApiCallException(error);
+
+            }
+            else
+            {
+                return;
+            }
+        }
+
         public async Task UpdateItemAsync(string itemId, UpdateItemViewModel updateItemViewModel)
         {
-            var httpClient = _httpClientFactory.CreateClient("SimpleDataManagementSystemHttpClient");
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var content = new MultipartFormDataContent();
 
@@ -136,14 +152,13 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
                 content.Add(fileContent, "URLdoslike", updateItemViewModel.URLdoslike.FileName);
             }
 
-            content.Add(new StringContent(updateItemViewModel.Nazivproizvoda, Encoding.UTF8, MediaTypeNames.Text.Plain), "nazivproizvoda");
             content.Add(new StringContent(updateItemViewModel.Datumakcije, Encoding.UTF8, MediaTypeNames.Text.Plain), "datumakcije");
             content.Add(new StringContent(updateItemViewModel.Cijena.ToString(), Encoding.UTF8, MediaTypeNames.Text.Plain), "cijena");
             content.Add(new StringContent(Convert.ToString(updateItemViewModel.Kategorija), Encoding.UTF8, MediaTypeNames.Text.Plain), "kategorija");
-            content.Add(new StringContent(updateItemViewModel.Nazivretailera, Encoding.UTF8, MediaTypeNames.Text.Plain), "nazivretailera");
+            content.Add(new StringContent(Convert.ToString(updateItemViewModel.RetailerId), Encoding.UTF8, MediaTypeNames.Text.Plain), "retailerId");
             content.Add(new StringContent(updateItemViewModel.Opis, Encoding.UTF8, MediaTypeNames.Text.Plain), "opis");
 
-            var response = await httpClient.PutAsync($"api/items/{itemId}", content);
+            var response = await httpClient.PutAsync($"api/items/{Uri.EscapeDataString(itemId)}", content);
 
             if (!response.IsSuccessStatusCode)
             {
