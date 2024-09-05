@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace SimpleDataManagementSystem.Backend.Database.Entities
 {
-    [Table(name: "Retailers", Schema = "dbo")]
     public class RetailerEntity
     {
         public RetailerEntity()
@@ -17,7 +16,6 @@ namespace SimpleDataManagementSystem.Backend.Database.Entities
         }
 
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
         public string Name { get; set; }
@@ -27,8 +25,6 @@ namespace SimpleDataManagementSystem.Backend.Database.Entities
         [Required(AllowEmptyStrings = true)]
         public string? LogoImageUrl { get; set; }
 
-
-        // new
         public virtual ICollection<ItemEntity> Items { get; set; }
     }
 }

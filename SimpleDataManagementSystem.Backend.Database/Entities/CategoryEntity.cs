@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace SimpleDataManagementSystem.Backend.Database.Entities
 {
-    [Table(name: "Categories", Schema = "dbo")]
     public class CategoryEntity
     {
         public CategoryEntity()
@@ -16,7 +15,6 @@ namespace SimpleDataManagementSystem.Backend.Database.Entities
         }
 
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
         public string Name { get; set; }

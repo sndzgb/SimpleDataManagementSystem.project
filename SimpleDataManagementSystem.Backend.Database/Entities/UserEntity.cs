@@ -8,16 +8,13 @@ using System.Threading.Tasks;
 
 namespace SimpleDataManagementSystem.Backend.Database.Entities
 {
-    [Table(name: "Users", Schema = "dbo")]
     public class UserEntity
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int? RoleId { get; set; }
         public int Id { get; set; }
 
-        [Required]
         public string Username { get; set; }
 
-        [Required]
         public string Password { get; set; }
 
         public virtual RoleEntity Role { get; set; }
