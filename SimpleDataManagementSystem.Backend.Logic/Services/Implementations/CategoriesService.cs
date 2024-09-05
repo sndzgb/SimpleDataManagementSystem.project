@@ -1,5 +1,6 @@
 ﻿using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
+using SimpleDataManagementSystem.Backend.Logic.Exceptions;
 using SimpleDataManagementSystem.Backend.Logic.Repositories.Abstractions;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
 using System;
@@ -23,6 +24,18 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
 
         public async Task<int> AddNewCategoryAsync(NewCategoryDTO newCategoryDTO)
         {
+            if (newCategoryDTO == null)
+            {
+                throw new ArgumentNullException(nameof(newCategoryDTO));
+            }
+
+            var category = await _categoriesRepository.GetCategoryByNameAsync(newCategoryDTO.Name);
+
+            if (category != null)
+            {
+                throw new RecordExistsException($"Category with name '{newCategoryDTO.Name}' already exists.");
+            }
+
             return await _categoriesRepository.AddNewCategoryAsync(newCategoryDTO);
         }
 
@@ -31,8 +44,18 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
             await _categoriesRepository.DeleteCategoryAsync(categoryId);
         }
 
-        public async Task<List<CategoryDTO>> GetAllCategoriesAsync(int? take = 8, int? page = 1)
+        public async Task<CategoriesDTO?> GetAllCategoriesAsync(int? take = 8, int? page = 1)
         {
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            if (take < 1)
+            {
+                take = 8;
+            }
+
             return await _categoriesRepository.GetAllCategoriesAsync(take, page);
         }
 
@@ -43,6 +66,11 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
 
         public async Task UpdateCategoryAsync(int categoryId, UpdateCategoryDTO updateCategoryDTO)
         {
+            if (updateCategoryDTO == null)
+            {
+                return;
+            }
+
             await _categoriesRepository.UpdateCategoryAsync(categoryId, updateCategoryDTO);
         }
     }

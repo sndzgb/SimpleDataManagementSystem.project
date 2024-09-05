@@ -20,7 +20,7 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
         }
 
 
-        public async Task<List<RoleDTO>> GetAllRolesAsync()
+        public async Task<List<RoleDTO>?> GetAllRolesAsync()
         {
             return await _rolesRepository.GetAllRolesAsync();
         }

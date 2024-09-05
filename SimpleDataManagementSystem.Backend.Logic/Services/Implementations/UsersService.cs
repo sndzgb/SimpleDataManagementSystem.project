@@ -1,9 +1,10 @@
-﻿using SimpleDataManagementSystem.Backend.Logic.Constants;
+﻿//using SimpleDataManagementSystem.Backend.Logic.Constants;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
 using SimpleDataManagementSystem.Backend.Logic.Exceptions;
 using SimpleDataManagementSystem.Backend.Logic.Repositories.Abstractions;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
+using SimpleDataManagementSystem.Shared.Common.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,11 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
 
         public async Task<int> AddNewUserAsync(NewUserDTO newUserDTO)
         {
+            if (newUserDTO == null)
+            {
+                throw new ArgumentNullException(nameof(newUserDTO));
+            }
+
             if (newUserDTO.RoleId == (int)Roles.Admin)
             {
                 throw new NotAllowedException("Creating new admin accounts is not allowed.");
@@ -33,8 +39,18 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
             return await _usersRepository.AddNewUserAsync(newUserDTO);
         }
 
-        public async Task<List<UserDTO>> GetAllUsersAsync(int? take = 8, int? page = 1)
+        public async Task<UsersDTO?> GetAllUsersAsync(int? take = 8, int? page = 1)
         {
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            if (take < 1)
+            {
+                take = 8;
+            }
+
             return await _usersRepository.GetAllUsersAsync(take, page);
         }
 
@@ -45,6 +61,11 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
 
         public async Task UpdateUserAsync(int userId, UpdateUserDTO updateUserDTO)
         {
+            if (updateUserDTO == null)
+            {
+                return;
+            }
+
             var user = await _usersRepository.GetUserByIdAsync(userId);
 
             if (user == null) 
@@ -79,6 +100,27 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
             await _usersRepository.DeleteUserAsync(userId);
 
             return;
+        }
+
+        public async Task<UserLogInResultDTO?> GetUserByLogInCredentialsAsync(string username, string password)
+        {
+            var user = await _usersRepository.GetUserByLogInCredentialsAsync(username, password);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            var userDTO = new UserLogInResultDTO()
+            {
+                Roles = new string[] {
+                    user.Role?.Name!
+                },
+                UserId = user.ID,
+                Username = user.Username
+            };
+
+            return userDTO;
         }
     }
 }

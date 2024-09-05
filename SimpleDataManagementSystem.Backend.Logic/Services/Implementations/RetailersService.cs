@@ -23,6 +23,11 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
 
         public async Task<int> AddNewRetailerAsync(NewRetailerDTO newRetailerDTO)
         {
+            if (newRetailerDTO == null)
+            {
+                throw new ArgumentNullException(nameof(newRetailerDTO));
+            }
+
             return await _retailersRepository.AddNewRetailerAsync(newRetailerDTO);
         }
 
@@ -31,9 +36,21 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
             await _retailersRepository.DeleteRetailerAsync(retailerId);
         }
 
-        public async Task<List<RetailerDTO>> GetAllRetailersAsync(int? take = 8, int? page = 1)
+        public async Task<RetailersDTO?> GetAllRetailersAsync(int? take = 8, int? page = 1)
         {
-            return await _retailersRepository.GetAllRetailersAsync(take, page);
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            if (take < 1)
+            {
+                take = 8;
+            }
+
+            var retailers = await _retailersRepository.GetAllRetailersAsync(take, page);
+
+            return retailers;
         }
 
         public async Task<RetailerDTO?> GetRetailerByIdAsync(int retailerId)
@@ -43,7 +60,17 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
 
         public async Task UpdateRetailerAsync(int retailerId, UpdateRetailerDTO updateRetailerDTO)
         {
+            if (updateRetailerDTO == null)
+            {
+                return;
+            }
+
             await _retailersRepository.UpdateRetailerAsync(retailerId, updateRetailerDTO);
+        }
+
+        public async Task UpdateRetailerPartialAsync(int retailerId)
+        {
+            await _retailersRepository.UpdateRetailerPartialAsync(retailerId);
         }
     }
 }

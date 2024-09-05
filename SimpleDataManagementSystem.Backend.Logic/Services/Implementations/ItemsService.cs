@@ -1,5 +1,6 @@
 ﻿using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
+using SimpleDataManagementSystem.Backend.Logic.Exceptions;
 using SimpleDataManagementSystem.Backend.Logic.Repositories.Abstractions;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
 using System;
@@ -13,16 +14,55 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
     public class ItemsService : IItemsService
     {
         private readonly IItemsRepository _itemsRepository;
+        private readonly IRetailersRepository _retailersRepository;
 
 
-        public ItemsService(IItemsRepository itemsRepository)
+        public ItemsService(IItemsRepository itemsRepository, IRetailersRepository retailersRepository)
         {
             _itemsRepository = itemsRepository;
+            _retailersRepository = retailersRepository;
         }
 
 
         public async Task<string> AddNewItemAsync(NewItemDTO newItemDTO)
         {
+            if (newItemDTO == null)
+            {
+                throw new ArgumentNullException(nameof(newItemDTO));
+            }
+
+            var items = await _itemsRepository.GetItemsByTitleAsync(newItemDTO.Nazivproizvoda);
+
+            if (items != null)
+            {
+                if (items.Any(x => x.Nazivproizvoda == newItemDTO.Nazivproizvoda || x.Retailer.ID == newItemDTO.RetailerId))
+                {
+                    throw new RecordExistsException($@"Item with name '{newItemDTO.Nazivproizvoda}' 
+                                                        on the specified retailer already exists.");
+                }
+            }
+
+            #region old - composite key
+            //if (items != null) 
+            //{
+            //    // check if item with "title" and "retailerId" already exist
+            //    foreach (var item in items)
+            //    {
+            //        if (item.Retailer.ID == newItemDTO.RetailerId)
+            //        {
+            //            throw new RecordExistsException($"Item with name '{newItemDTO.Nazivproizvoda}' already exists.");
+            //        }
+            //    }
+            //}
+            #endregion
+
+            var retailer = await _retailersRepository.GetRetailerByIdAsync(newItemDTO.RetailerId);
+
+            if (retailer == null)
+            {
+                throw new RequiredRecordNotFoundException("Retailer was not found.");
+            }
+
             return await _itemsRepository.AddNewItemAsync(newItemDTO);
         }
 
@@ -31,9 +71,21 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
             await _itemsRepository.DeleteItemAsync(itemId);
         }
 
-        public async Task<List<ItemDTO>> GetAllItemsAsync(int? take = 8, int? page = 1)
+        public async Task<ItemsDTO?> GetAllItemsAsync(int? take = 8, int? page = 1)
         {
-            return await _itemsRepository.GetAllItemsAsync(take, page);
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            if (take < 1)
+            {
+                take = 8;
+            }
+
+            var items = await _itemsRepository.GetAllItemsAsync(take, page);
+            
+            return items;
         }
 
         public async Task<ItemDTO?> GetItemByIdAsync(string itemId)
@@ -43,7 +95,17 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
 
         public async Task UpdateItemAsync(string itemId, UpdateItemDTO updateItemDTO)
         {
+            if (updateItemDTO == null)
+            {
+                return;
+            }
+
             await _itemsRepository.UpdateItemAsync(itemId, updateItemDTO);
+        }
+
+        public async Task UpdateItemPartialAsync(string itemId)
+        {
+            await _itemsRepository.UpdateItemPartialAsync(itemId);
         }
     }
 }
