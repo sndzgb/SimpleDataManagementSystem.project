@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
+using SimpleDataManagementSystem.Backend.Logic.Models;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
+using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
+using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Write;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 {
@@ -25,10 +28,15 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddNewCategory([FromBody] NewCategoryDTO newCategoryDTO)
+        public async Task<IActionResult> AddNewCategory([FromBody] NewCategoryWebApiModel newCategoryWebApiModel)
         {
-            var newCategoryId = await _categoriesService.AddNewCategoryAsync(newCategoryDTO);
+            var newCategoryId = await _categoriesService.AddNewCategoryAsync(new NewCategoryDTO()
+            {
+                Name = newCategoryWebApiModel.Name,
+                Priority = newCategoryWebApiModel.Priority
+            });
 
+            // TODO get newly created category from DB, and return it to the client
             return Created($"api/categories/{newCategoryId}", newCategoryId);
         }
 
@@ -37,13 +45,22 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         {
             var category = await _categoriesService.GetCategoryByIdAsync(categoryId);
 
+            if (category == null)
+            {
+                return NotFound(new ErrorWebApiModel(StatusCodes.Status404NotFound, "The requested resource was not found.", null));
+            }
+
             return Ok(category);
         }
 
         [HttpPut("{categoryId}")]
-        public async Task<IActionResult> UpdateCategory(int categoryId, UpdateCategoryDTO updateCategoryDTO)
+        public async Task<IActionResult> UpdateCategory(int categoryId, UpdateCategoryWebApiModel updateCategoryWebApiModel)
         {
-            await _categoriesService.UpdateCategoryAsync(categoryId, updateCategoryDTO);
+            await _categoriesService.UpdateCategoryAsync(categoryId, new UpdateCategoryDTO()
+            {
+                Name = updateCategoryWebApiModel.Name,
+                Priority = updateCategoryWebApiModel.Priority
+            });
 
             return Ok();
         }

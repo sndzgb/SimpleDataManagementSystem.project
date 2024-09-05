@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
+using SimpleDataManagementSystem.Backend.Logic.Models;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
 using SimpleDataManagementSystem.Backend.WebAPI.Constants;
 using SimpleDataManagementSystem.Backend.WebAPI.Services;
@@ -17,7 +19,10 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         private const string IMAGE_BASE_PATH = "Images\\Retailers";
 
         private readonly IRetailersService _retailersService;
-        //private readonly IFilesService _filesService; // TODO
+        // TODO
+        // private readonly IFilesService _filesService; 
+
+        // TODO move file upload/ delete to "FilesService" in service layer
 
 
         public RetailersController(IRetailersService retailersService)
@@ -29,7 +34,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> AddNewRetailer([FromForm] NewRetailerWebApiModel newRetailerWebApiModel)
         {
-            string imageUrlPath = null;
+            string? imageUrlPath = null;
 
             if (newRetailerWebApiModel.LogoImage != null)
             {
@@ -46,17 +51,10 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
             if (newRetailerWebApiModel.LogoImage != null)
             {
                 FilesService.Upload(imageUrlPath, newRetailerWebApiModel.LogoImage.OpenReadStream());
-
-                // demo only; "D:\repos\SimpleDataManagementSystem\SimpleDataManagementSystem.Backend.WebAPI\bin\Debug\net7.0"
-                //string assDirPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-
-                //using (var fileStream = System.IO.File.Create(Path.Combine(assDirPath, imageUrlPath)))
-                //{
-                //    newRetailerWebApiModel.LogoImage.CopyTo(fileStream);
-                //}
             }
 
-            return Created($"api/retailers/{newRetailerId}", newRetailerId); // TODO return "NewlyCreatedRetailerDTO"
+            // TODO get newly created retailer from DB, and return it to the client
+            return Created($"api/retailers/{newRetailerId}", newRetailerId); 
         }
 
         [HttpDelete("{retailerId}")]
@@ -106,12 +104,18 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         {
             var retailer = await _retailersService.GetRetailerByIdAsync(retailerId);
 
+            if (retailer == null)
+            {
+                return NotFound(new ErrorWebApiModel(StatusCodes.Status404NotFound, "The requested resource was not found.", null));
+            }
+
             var model = new RetailerWebApiModel()
             {
                 ID = retailer.ID,
                 Name = retailer.Name,
                 Priority = retailer.Priority,
-                LogoImageUri = Path.Combine(Paths.FILES_BASE_URL, retailer.LogoImageUrl)
+                LogoImageUri = string.IsNullOrEmpty(retailer.LogoImageUrl) ? null : Path.Combine(Paths.FILES_BASE_URL, retailer.LogoImageUrl)
+                //LogoImageUri = Path.Combine(Paths.FILES_BASE_URL, retailer.LogoImageUrl)
             };
 
             return Ok(model);
@@ -122,23 +126,44 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         {
             var retailers = await _retailersService.GetAllRetailersAsync(take, page);
 
-            var models = new List<RetailerWebApiModel>();
+            var model = new RetailersWebApiModel();
 
-            if (retailers != null)
+            model.PageInfo.Total = retailers.PageInfo.Total;
+            model.PageInfo.Take = retailers.PageInfo.Take;
+            model.PageInfo.Page = retailers.PageInfo.Page;
+
+            if (retailers.Retailers != null)
             {
-                foreach (var retailer in retailers)
+                foreach (var retailer in retailers.Retailers)
                 {
-                    models.Add(new RetailerWebApiModel()
+                    model.Retailers.Add(new RetailerWebApiModel()
                     {
                         ID = retailer.ID,
                         Name = retailer.Name,
                         Priority = retailer.Priority,
-                        LogoImageUri = Path.Combine(Paths.FILES_BASE_URL, retailer.LogoImageUrl)
+                        LogoImageUri = string.IsNullOrEmpty(retailer.LogoImageUrl) ? null : Path.Combine(Paths.FILES_BASE_URL, retailer.LogoImageUrl)
                     });
                 }
             }
 
-            return Ok(models);
+            return Ok(model);
+        }
+
+        [HttpPatch("{retailerId}")]
+        public async Task<IActionResult> PatchRetailer([FromRoute] int retailerId)
+        {
+            var retailer = await _retailersService.GetRetailerByIdAsync(retailerId);
+
+            if (retailer == null)
+            {
+                return BadRequest($"Retailer with ID '{retailerId}' was not found");
+            }
+
+            await _retailersService.UpdateRetailerPartialAsync(retailer.ID);
+
+            FilesService.Delete(retailer.LogoImageUrl);
+
+            return Ok();
         }
     }
 }

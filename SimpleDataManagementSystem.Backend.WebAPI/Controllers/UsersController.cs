@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
+using SimpleDataManagementSystem.Backend.Logic.Models;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
+using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Write;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class UsersController : ControllerBase
     {
         private readonly IUsersService _usersService;
@@ -28,7 +32,6 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> AddNewUser([FromBody] NewUserWebApiModel newUserWebApiModel)
         {
-            // TODO get newly created user from DB, and return it to the client
             var newUserId = await _usersService.AddNewUserAsync(new NewUserDTO()
             {
                 Password = newUserWebApiModel.Password,
@@ -36,7 +39,8 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
                 Username = newUserWebApiModel.Username
             });
 
-            return Created($"api/users/{newUserId}", newUserId); //"NewlyCreatedUserDTO"
+            // TODO get newly created user from DB, and return it to the client
+            return Created($"api/users/{newUserId}", newUserId);
         }
 
         [HttpGet("{userId}")]
@@ -44,13 +48,22 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         {
             var user = await _usersService.GetUserByIdAsync(userId);
 
+            if (user == null)
+            {
+                return NotFound(new ErrorWebApiModel(StatusCodes.Status404NotFound, "The requested resource was not found.", null));
+            }
+
             return Ok(user);
         }
 
         [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateUser(int userId, UpdateUserDTO updateUserDTO)
+        public async Task<IActionResult> UpdateUser(int userId, UpdateUserWebApiModel updateUserWebApiModel)
         {
-            await _usersService.UpdateUserAsync(userId, updateUserDTO);
+            await _usersService.UpdateUserAsync(userId, new UpdateUserDTO()
+            {
+                RoleId = updateUserWebApiModel.RoleId,
+                Username = updateUserWebApiModel.Username
+            });
 
             return Ok();
         }
