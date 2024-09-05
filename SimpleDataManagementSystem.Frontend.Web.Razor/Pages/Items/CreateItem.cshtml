@@ -13,6 +13,25 @@
 
 <br />
 
+
+@await Component.InvokeAsync("InvalidModelState", ModelState)
+
+
+@* TODO error display *@
+@if (Model.Error != null)
+{
+    <div style="text-align:center;">
+        <label style="color:red;">
+            <b>
+                @Model.Error.Error.Message
+            </b>
+        </label>
+    </div>
+
+    <br />
+}
+
+
 <div style="border:1px solid black; margin:auto;width:70%; text-align:center;padding:20px;">
     <form method="post" enctype="multipart/form-data">
         <label for="nazivproizvoda">Naziv proizvoda:</label>
@@ -33,9 +52,18 @@
         
         <br />
 
-        <label for="nazivretailera">Naziv retailera:</label>
+        @* retailer *@
+        <label for="retailerId">Retailer</label>
         <br />
-        <input name="nazivretailera" />
+        <select name="retailerId">
+            @if (Model.AvailableRetailers != null)
+            {
+                @foreach (var r in Model.AvailableRetailers.Retailers)
+                {
+                    <option name="retailerId" value="@r.ID">@r.Name</option>
+                }
+            }
+        </select>
 
         <br />
 
@@ -51,7 +79,7 @@
         <select name="kategorija">
             @if (Model.AvailableCategories != null)
             {
-                @foreach (var r in Model.AvailableCategories)
+                @foreach (var r in Model.AvailableCategories.Categories)
                 {
                     <option name="kategorija" value="@r.ID">@r.Name</option>
                 }
@@ -62,8 +90,17 @@
         <br />
 
         <label for="URLdoslike">Thumbnail:</label>
+        
         <br />
-        <input type="file" name="URLdoslike" />
+
+        <div style="display: none;">
+            <img id="thumbnail" style="width:300px; height:300px; max-width:300px; max-height:300px;" />
+            <br />
+        </div>
+        
+        <br />
+
+        <input type="file" name="URLdoslike" onchange="loadThumbnail(event)" />
 
         <br />
         <br />
@@ -71,3 +108,25 @@
         <button type="submit">Create</button>
     </form>
 </div>
+
+@section scripts {
+    
+    @*
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    *@
+
+    <script>
+        var loadThumbnail = function (event) {
+            var output = document.getElementById('thumbnail');
+
+            output.parentElement.style.display = '';
+
+            output.src = URL.createObjectURL(event.target.files[0]);
+            output.onload = function () {
+                URL.revokeObjectURL(output.src) // free memory
+            }
+        };
+    </script>
+}

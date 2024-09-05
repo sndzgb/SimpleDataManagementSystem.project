@@ -1,5 +1,6 @@
 ﻿@page "/Items/{ItemId}/Edit"
 
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 @using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
 @using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 
@@ -10,19 +11,33 @@
 }
 
 <h1>Edit Item</h1>
+
 <br />
+
+
+@await Component.InvokeAsync("InvalidModelState", ModelState)
+
+
+<!-- #region ModelStateValidationErrors -->
+@await Component.InvokeAsync(typeof(InvalidModelStateViewComponent), ModelState)
+<!-- #endregion ModelStateValidationErrors -->
+
 
 <div style="text-align:center; border:1px solid black; padding:20px;">
     <form method="post" enctype="multipart/form-data">
+        
+        @Html.AntiForgeryToken()
+        
         <label for="name">Naziv proizvoda:</label>
         <br />
-        <input value="@Model.Item.Nazivproizvoda" name="nazivproizvoda" />
+        <input disabled value="@Model.Item.Nazivproizvoda" name="nazivproizvoda" />
 
         <br />
         
         <label for="name">Opis:</label>
         <br />
         <textarea type="text" cols="40" rows="5" name="opis">@Model.Item.Opis</textarea>
+        @* <span asp-validation-for="@Model.Item.Opis"></span> *@
 
         <br />
         
@@ -32,9 +47,17 @@
 
         <br />
         
-        <label for="name">Naziv retailera:</label>
+        <label for="retailerId">Retailer</label>
         <br />
-        <input value="@Model.Item.Nazivretailera" name="nazivretailera" />
+        <select name="retailerId">
+            @if (Model.AvailableRetailers.Retailers != null)
+            {
+                @foreach (var r in Model.AvailableRetailers.Retailers)
+                {
+                    <option name="retailerId" value="@r.ID" selected="@(Model.Item.RetailerId == r.ID)">@r.Name</option>
+                }
+            }
+        </select>
 
         <br />
         
@@ -44,7 +67,12 @@
         <select name="kategorija">
             @if (Model.AvailableCategories != null)
             {
-                @foreach (var r in Model.AvailableCategories)
+                @if (Model.Item.Kategorija == null)
+                {
+                    <option name="kategorija" selected>-- Select new category --</option>
+                }
+
+                @foreach (var r in Model.AvailableCategories.Categories)
                 {
                     <option name="kategorija" value="@r.ID" selected="@(Model.Item.Kategorija == r.ID)">@r.Name</option>
                 }
@@ -62,14 +90,30 @@
 
         <label>Slika:</label>
         <br />
-        <img id="thumbnail" src="@Model.Item.URLdoslikeUri"  style="max-width:300px; max-height:300px;" />
+        
+        <div id="thumbnailPlaceholder" style="position:relative; max-width:300px; max-height:300px; margin:auto;">
+            @if (Model.Item.URLdoslikeUri != null)
+            {
+                <img id="thumbnail" src="@Model.Item.URLdoslikeUri" style="width:300px; height:300px; max-width:300px; max-height:300px;" />
+                <button onclick="deleteImage('@Model.ItemId')" id="thumbnailDeleteControl" type="button" style="position:absolute; top:5px; right: 5px;">
+                    &#x2715;
+                </button>
+            }
+            else
+            {
+                <div id="thumbnailNotAvailable">
+                    <img style="width:300px; height:300px; max-width:300px; max-height:300px;" src="/Resources/image_not_available.png" alt="image not available" />
+                </div>
+            }
+        </div>
+        
+        <br />
+
+        <label for="URLdoslike" id="thumbnailAddOrUpdate">Dodaj novu sliku:</label>
         
         <br />
         <br />
-
-        <label for="URLdoslike">Dodaj novu sliku:</label>
-        <br />
-        <br />
+        
         <input id="thumbnailUpload" type="file" name="URLdoslike" onchange="loadThumbnail(event)" />
         <br />
 
@@ -81,9 +125,56 @@
 </div>
 
 @section scripts {
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function deleteImage(itemId) {
+            var token = $('input[name="__RequestVerificationToken"]').val();
+
+            var encUri = encodeURIComponent(itemId);
+
+            $.ajax({
+                type: "POST",
+                url: "/Items/" + encUri + "/Edit/?handler=DeleteImage",
+                data: {
+                    __RequestVerificationToken: token,
+                },
+                success: function (r) {
+                    $("#thumbnail").remove();
+                    $("#thumbnailDeleteControl").remove();
+                    $("#thumbnailPlaceholder").append(`<div id="thumbnailNotAvailable">
+                            <img style="width:300px; height:300px; max-width:300px; max-height:300px;" src="/Resources/image_not_available.png" alt="image not available" />
+                        </div>`
+                    );
+
+                    showSnackbar("Image deleted successfully");
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
+        }
+    </script>
+
+    @* TODO put in .JS *@
     <script>
         var loadThumbnail = function(event) {
             var output = document.getElementById('thumbnail');
+
+            if (typeof (output) == 'undefined' || output == null) {
+                $("#thumbnailNotAvailable").remove();
+                $("#thumbnailPlaceholder").append(`<img id="thumbnail" style="width:300px; height:300px; max-width:300px; max-height:300px;" />`);
+                output = document.getElementById('thumbnail');
+            }
+
+            $("#thumbnailDeleteControl").remove();
+            $("#thumbnailAddOrUpdate").after(`<label id="thumbnailUploadOk" style="color:white; padding:1px;">&#x2714;</label>`);
+
             output.src = URL.createObjectURL(event.target.files[0]);
             output.onload = function() {
                 URL.revokeObjectURL(output.src) // free memory

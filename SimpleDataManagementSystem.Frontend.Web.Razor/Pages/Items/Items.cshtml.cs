@@ -17,19 +17,13 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
         }
 
 
-        [BindProperty(Name = "pagenr", SupportsGet = true)]
-        public int PageNr { get; set; } = 1;
-
-        [BindProperty(Name = "ipp", SupportsGet = true)]
-        public int ItemsPerPage { get; set; } = 8;
-
-        public List<ItemViewModel> Items { get; set; }
+        public ItemsViewModel Items { get; set; }
 
 
-        public async Task OnGet()
+        public async Task OnGet([FromQuery] int take = 8, [FromQuery] int page = 1)
         {
-            Items = await _itemsService.GetAllItemsAsync(ItemsPerPage, PageNr);
-            
+            Items = await _itemsService.GetAllItemsAsync(take, page);
+
             return;
         }
     }

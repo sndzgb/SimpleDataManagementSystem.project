@@ -2,6 +2,10 @@
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.ItemsModel
 
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
+@using System.Web
+@using System.Security.Claims
+
 @{
     ViewData["Title"] = "Items";
 }
@@ -10,12 +14,13 @@
 
 <br />
 
-@if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+
+@if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
    ||
-   User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+    User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
    )
 {
-    <div>
+    <div style="display:flex; justify-content:space-between;">
         <a href="/Items/Create"><button>Create</button></a>
     </div>
 
@@ -44,9 +49,12 @@
                 <th>
                     Thumbnail
                 </th>
-                @if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+                <th>
+                    Category ID
+                </th>
+                @if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
                     ||
-                    User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+                    User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
                     )
                 {
                     <th>
@@ -58,10 +66,13 @@
         <tbody>
             @if (Model.Items != null)
             {
-                @foreach (var item in Model.Items)
+                @foreach (var item in Model.Items.Items)
                 {
                     <tr>
                         <td>
+                            @* TODO details page: 
+                                <a href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda)/Details">@item.Nazivproizvoda</a>
+                            *@
                             @item.Nazivproizvoda
                         </td>
                         <td>
@@ -76,26 +87,40 @@
                         <td>
                             @item.Cijena
                         </td>
+                        @if (string.IsNullOrEmpty(item.URLdoslikeUri))
+                        {
+                            <td>
+                                <img height=64 width=64 src="/Resources/image_not_available.png" alt="image not available" />
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                <img height=64 width=64 src="@item.URLdoslikeUri" alt="@System.IO.Path.GetFileNameWithoutExtension(@item.URLdoslikeUri)" />
+                            </td>
+                        }
                         <td>
-                            <img height=64 width=64 src="@item.URLdoslikeUri" />
+                            @(item.Kategorija == null ? "-" : item.Kategorija)
                         </td>
-                        @if (User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Admin"
+                        @if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
                            ||
-                           User?.Claims?.Where(x => x.Type == "Role")?.FirstOrDefault()?.Value == "Employee"
+                            User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
                            )
                         {
                             <td>
                                 <div class="options @item.Nazivproizvoda">
-                                    <a href="/Items/@item.Nazivproizvoda/Edit"><button type="button">Edit</button></a>
+                                    <a href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda)/Edit"><button type="button">Edit</button></a>
                                     |
                                     <button class="delete" id="@item.Nazivproizvoda" onclick="deleteItem(this);">Delete</button>
                                 </div>
 
                                 <div class="confirm @item.Nazivproizvoda" style="display:none;">
                                     Confirm:
-                                    <button onclick="confirmDelete('@item.Nazivproizvoda');">Yes</button>
+                                    <form method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="button" onclick="confirmDelete('@item.Nazivproizvoda');">Yes</button>
+                                    </form>
                                     <button onclick="cancelDelete(this);">No</button>
-                                    @* <button onclick="cancelDelete(@item.Nazivproizvoda)">No</button> *@
                                 </div>
                             </td>
                         }
@@ -106,27 +131,11 @@
     </table>
 </div>
 
-<div style="text-align:center; width:50%; margin: auto;">
-    
-    <form method="get">
-        <div style="padding:20px; display:inline-block;">
-            <label>Page: </label>
-            <input name="pagenr" size="4" value="@Model.PageNr" />
-        </div>
 
-        <div style="padding:20px; display: inline-block;">
-            <label>Items per page: </label>
-            <input name="ipp" size="4" value="@Model.ItemsPerPage" />
-        </div>
+<!-- #region Pagination -->
+@await Component.InvokeAsync(typeof(PagerViewComponent), Model.Items?.PageInfo)
+<!-- #endregion Pagination -->
 
-        <br />
-
-        <div>
-            <button type="submit">Search</button>
-        </div>
-    </form>
-
-</div>
 
 @section scripts {
     <script>
@@ -138,16 +147,23 @@
         }
 
         function confirmDelete(itemId) {
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            
+            var encUri = encodeURIComponent(itemId);
+
             $.ajax({
                 type: "POST",
-                url: "/Items/" + itemId + "/Delete/?handler=DeleteItem",
-
+                url: "/Items/" + encUri + "/Delete/?handler=DeleteItem",
+                data: {
+                    __RequestVerificationToken: token,
+                },
                 success: function (r) {
                     var el = document.getElementById(itemId);
                     $(el).closest("tr").remove();
+                    showSnackbar("Item deleted successfully");
                 },
                 error: function (xhr, status, error) {
-                    // TODO display error on screen
+                    // TODO display error on screen - TOAST
                     console.log(xhr.responseText);
                     console.log(status);
                     console.log(error);
