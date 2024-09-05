@@ -6,14 +6,17 @@
     ViewData["Title"] = "Home page";
 }
 
-@if (!User.Identity.IsAuthenticated)
+@if (User.Identity.IsAuthenticated == false)
 {
     <h1>Login</h1>
 
     <br />
 
     <div style="border:1px solid black; margin:auto;width:70%; text-align:center;padding:10px;">
-        <form method="post" asp-page="/Account" asp-page-handler="LogIn">
+        <form method="post" asp-page="/Account/Account" asp-page-handler="LogIn">
+            
+            @Html.AntiForgeryToken()
+
             <label asp-for="Credential.Username"></label>
             <br />
             <input asp-for="Credential.Username" id="username" name="username" type="text" />
