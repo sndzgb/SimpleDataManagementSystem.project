@@ -3,10 +3,12 @@ using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
 using SimpleDataManagementSystem.Backend.WebAPI.Constants;
+using SimpleDataManagementSystem.Backend.WebAPI.Helpers;
 using SimpleDataManagementSystem.Backend.WebAPI.Services;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Write;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
@@ -43,30 +45,31 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
                 Nazivproizvoda = newItemWebApiModel.Nazivproizvoda,
                 Kategorija = newItemWebApiModel.Kategorija,
                 Datumakcije = newItemWebApiModel.Datumakcije,
-                Nazivretailera = newItemWebApiModel.Nazivretailera,
-                Cijena = decimal.Parse(newItemWebApiModel.Cijena, CultureInfo.InvariantCulture),
+                RetailerId = newItemWebApiModel.RetailerId,
+                Cijena = DecimalHelpers.GetDecimalFromString(newItemWebApiModel.Cijena),
                 Opis = newItemWebApiModel.Opis
             });
 
             if (newItemWebApiModel.URLdoslike != null)
             {
                 FilesService.Upload(imageUrlPath, newItemWebApiModel.URLdoslike.OpenReadStream());
-
-                // demo only; eg.: "D:\repos\SimpleDataManagementSystem\SimpleDataManagementSystem.Backend.WebAPI\bin\Debug\net7.0"
-                //string assDirPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-
-                //using (var fileStream = System.IO.File.Create(Path.Combine(assDirPath, imageUrlPath)))
-                //{
-                //    newItemWebApiModel.URLdoslike.CopyTo(fileStream);
-                //}
             }
 
-            return Created($"api/items/{newItemId}", newItemId); //"NewlyCreatedRetailerDTO"
+            // TODO get newly created item from DB, and return it to the client
+            return Created($"api/items/{newItemId}", newItemId);
         }
 
         [HttpDelete("{itemId}")]
         public async Task<IActionResult> DeleteItem([FromRoute] string itemId)
         {
+            if (itemId == null)
+            {
+                return BadRequest(new ErrorWebApiModel(StatusCodes.Status400BadRequest, "Item ID is required", null));
+            }
+
+            itemId = Uri.UnescapeDataString(itemId);
+
+            // get item so we can get image path
             var item = await _itemsService.GetItemByIdAsync(itemId);
 
             await _itemsService.DeleteItemAsync(itemId);
@@ -79,38 +82,26 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
             return Ok();
         }
 
-        private bool CheckInvalidInput(string stringToCheck, IEnumerable<char> allowedChars)
-        {
-            return stringToCheck.All(allowedChars.Contains);
-        }
-
         [HttpPut("{itemId}")]
         public async Task<IActionResult> UpdateItem([FromRoute] string itemId, [FromForm] UpdateItemWebApiModel updateItemWebApiModel)
         {
+            itemId = Uri.UnescapeDataString(itemId);
+
             // check if null, delete image & null DB path
-            string imageUrlPath = string.Empty;
+            string? imageUrlPath = null;
 
             if (updateItemWebApiModel.URLdoslike != null)
             {
                 imageUrlPath = Path.Combine(IMAGE_BASE_PATH, Guid.NewGuid() + "_" + updateItemWebApiModel.URLdoslike.FileName);
             }
 
-            // check if '.' and replace with ','
-            // OPTIONAL: check if exists - '.' or ',' and append
-            var allowedCharacters = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', '.' };
-            var valid = CheckInvalidInput(updateItemWebApiModel.Cijena, allowedCharacters);
-
-
             await _itemsService.UpdateItemAsync(itemId, new UpdateItemDTO()
             {
                 Opis = updateItemWebApiModel.Opis,
-                Nazivretailera = updateItemWebApiModel.Nazivretailera,
-                Cijena = decimal.Parse(updateItemWebApiModel.Cijena),
-                //Cijena = decimal.Parse(updateItemWebApiModel.Cijena, CultureInfo.InvariantCulture),
-                //Cijena = updateItemWebApiModel.Cijena,
+                Cijena = DecimalHelpers.GetDecimalFromString(updateItemWebApiModel.Cijena),
+                RetailerId = updateItemWebApiModel.RetailerId,
                 Datumakcije = updateItemWebApiModel.Datumakcije,
                 Kategorija = updateItemWebApiModel.Kategorija,
-                Nazivproizvoda = updateItemWebApiModel.Nazivproizvoda,
                 URLdoslike = imageUrlPath
             });
 
@@ -126,17 +117,25 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpGet("{itemId}")]
         public async Task<IActionResult> GetItemById([FromRoute] string itemId)
         {
+            itemId = Uri.UnescapeDataString(itemId);
+
             var item = await _itemsService.GetItemByIdAsync(itemId);
+
+            if (item == null)
+            {
+                return NotFound(new ErrorWebApiModel(StatusCodes.Status404NotFound, "The requested resource was not found.", null));
+            }
 
             var model = new ItemWebApiModel()
             {
+                RetailerId = item.RetailerId,
                 Cijena = item.Cijena,
                 Datumakcije = item.Datumakcije,
                 Kategorija = item.Kategorija,
                 Nazivproizvoda = item.Nazivproizvoda,
                 Nazivretailera = item.Nazivretailera,
                 Opis = item.Opis,
-                URLdoslikeUri = Path.Combine(Paths.FILES_BASE_URL, item.URLdoslike)
+                URLdoslikeUri = string.IsNullOrEmpty(item.URLdoslike) ? null : Path.Combine(Paths.FILES_BASE_URL, item.URLdoslike)
             };
 
             return Ok(model);
@@ -147,13 +146,17 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         {
             var items = await _itemsService.GetAllItemsAsync(take, page);
 
-            var models = new List<ItemWebApiModel>();
+            var model = new ItemsWebApiModel();
 
-            if (items != null)
+            model.PageInfo.Total = items.PageInfo.Total;
+            model.PageInfo.Take = items.PageInfo.Take;
+            model.PageInfo.Page = items.PageInfo.Page;
+
+            if (items.Items != null)
             {
-                foreach (var item in items)
+                foreach (var item in items.Items)
                 {
-                    models.Add(new ItemWebApiModel()
+                    model.Items.Add(new ItemWebApiModel()
                     {
                         Cijena = item.Cijena,
                         Datumakcije = item.Datumakcije,
@@ -161,12 +164,31 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
                         Nazivproizvoda = item.Nazivproizvoda,
                         Nazivretailera = item.Nazivretailera,
                         Opis = item.Opis,
-                        URLdoslikeUri = Path.Combine(Paths.FILES_BASE_URL, item.URLdoslike)
+                        URLdoslikeUri = string.IsNullOrEmpty(item.URLdoslike) ? null : Path.Combine(Paths.FILES_BASE_URL, item.URLdoslike)
                     });
                 }
             }
 
-            return Ok(models);
+            return Ok(model);
+        }
+
+        [HttpPatch("{itemId}")]
+        public async Task<IActionResult> PatchItem([FromRoute] string itemId)
+        {
+            itemId = Uri.UnescapeDataString(itemId);
+
+            var item = await _itemsService.GetItemByIdAsync(itemId);
+
+            if (item == null) 
+            {
+                return BadRequest($"Item with ID '{itemId}' was not found");
+            }
+
+            await _itemsService.UpdateItemPartialAsync(item.Nazivproizvoda);
+
+            FilesService.Delete(item.URLdoslike);
+
+            return Ok();
         }
     }
 }
