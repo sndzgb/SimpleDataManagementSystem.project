@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleDataManagementSystem.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleDataManagementSystem.Backend.Database", "SimpleDataManagementSystem.Backend.Database\SimpleDataManagementSystem.Backend.Database.csproj", "{0B897D68-0BEE-4B80-859A-5747D5590960}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleDataManagementSystem.Shared", "SimpleDataManagementSystem.Shared\SimpleDataManagementSystem.Shared.csproj", "{9FF1D629-2D4F-4169-99AB-21F142F1D3A5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{0B897D68-0BEE-4B80-859A-5747D5590960}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B897D68-0BEE-4B80-859A-5747D5590960}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B897D68-0BEE-4B80-859A-5747D5590960}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FF1D629-2D4F-4169-99AB-21F142F1D3A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FF1D629-2D4F-4169-99AB-21F142F1D3A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FF1D629-2D4F-4169-99AB-21F142F1D3A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FF1D629-2D4F-4169-99AB-21F142F1D3A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
