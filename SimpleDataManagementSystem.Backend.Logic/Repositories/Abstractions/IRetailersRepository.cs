@@ -13,7 +13,8 @@ namespace SimpleDataManagementSystem.Backend.Logic.Repositories.Abstractions
         Task DeleteRetailerAsync(int retailerId);
         Task<int> AddNewRetailerAsync(NewRetailerDTO newRetailerDTO);
         Task UpdateRetailerAsync(int retailerId, UpdateRetailerDTO updateRetailerDTO);
-        Task<List<RetailerDTO>> GetAllRetailersAsync(int? take = 8, int? page = 1);
+        Task<RetailersDTO?> GetAllRetailersAsync(int? take = 8, int? page = 1);
         Task<RetailerDTO?> GetRetailerByIdAsync(int retailerId);
+        Task UpdateRetailerPartialAsync(int retailerId);
     }
 }
