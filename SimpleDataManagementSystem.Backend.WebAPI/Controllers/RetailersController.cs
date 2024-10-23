@@ -8,6 +8,8 @@ using SimpleDataManagementSystem.Backend.WebAPI.Constants;
 using SimpleDataManagementSystem.Backend.WebAPI.Services;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Write;
+using SimpleDataManagementSystem.Shared.Common.Constants;
+using System.Data;
 using System.Reflection;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
@@ -19,21 +21,37 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         private const string IMAGE_BASE_PATH = "Images\\Retailers";
 
         private readonly IRetailersService _retailersService;
+        private readonly IAuthorizationService _authorizationService;
+
         // TODO
         // private readonly IFilesService _filesService; 
 
         // TODO move file upload/ delete to "FilesService" in service layer
 
 
-        public RetailersController(IRetailersService retailersService)
+        public RetailersController(IRetailersService retailersService, IAuthorizationService authorizationService)
         {
             _retailersService = retailersService;
+            _authorizationService = authorizationService;
         }
 
 
         [HttpPost]
         public async Task<IActionResult> AddNewRetailer([FromForm] NewRetailerWebApiModel newRetailerWebApiModel)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             string? imageUrlPath = null;
 
             if (newRetailerWebApiModel.LogoImage != null)
@@ -60,6 +78,19 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpDelete("{retailerId}")]
         public async Task<IActionResult> DeleteRetailer([FromRoute] int retailerId)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             var retailer = await _retailersService.GetRetailerByIdAsync(retailerId);
 
             await _retailersService.DeleteRetailerAsync(retailerId);
@@ -75,6 +106,19 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpPut("{retailerId}")]
         public async Task<IActionResult> UpdateRetailer([FromRoute] int retailerId, [FromForm] UpdateRetailerWebApiModel updateRetailerWebApiModel)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             // check if null, delete image & null DB path
             string imageUrlPath = string.Empty;
 
@@ -102,6 +146,19 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpGet("{retailerId}")]
         public async Task<IActionResult> GetRetailerById([FromRoute] int retailerId)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             var retailer = await _retailersService.GetRetailerByIdAsync(retailerId);
 
             if (retailer == null)
@@ -152,6 +209,19 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpPatch("{retailerId}")]
         public async Task<IActionResult> PatchRetailer([FromRoute] int retailerId)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             var retailer = await _retailersService.GetRetailerByIdAsync(retailerId);
 
             if (retailer == null)

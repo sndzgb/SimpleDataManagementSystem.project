@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
@@ -7,6 +8,7 @@ using SimpleDataManagementSystem.Backend.WebAPI.Helpers;
 using SimpleDataManagementSystem.Backend.WebAPI.Services;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Write;
+using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -20,18 +22,50 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         private const string IMAGE_BASE_PATH = "Images\\Items";
 
         private readonly IItemsService _itemsService;
+        private readonly IAuthorizationService _authorizationService;
         //private readonly IFilesService _filesService; // TODO
 
 
-        public ItemsController(IItemsService itemsService)
+        public ItemsController(IItemsService itemsService, IAuthorizationService authorizationService)
         {
             _itemsService = itemsService;
+            _authorizationService = authorizationService;
         }
 
 
         [HttpPost]
-        public async Task<IActionResult> AddNewItem([FromForm] NewItemWebApiModel newItemWebApiModel)
+        public async Task<IActionResult> AddNewItem(
+                //IFormFile URLdoslike, IFormCollection formCollection
+                [FromForm] NewItemWebApiModel newItemWebApiModel
+            //NewItemWebApiModel newItemWebApiModel,
+            //IFormFile URLdoslike
+            )
         {
+            //var formCollection = await Request.ReadFormAsync();
+            //var file = formCollection.Files.First();
+
+            //var f = Request.Form.Files;
+            //var file = Request.Form.Files[0];
+
+            // TEST
+            //return BadRequest(new ErrorWebApiModel(400, "Invalid model.", new List<string>()
+            //{
+            //    "Item 1", "Item 2"
+            //}));
+
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             string? imageUrlPath = null; // string.Empty;
 
             if (newItemWebApiModel.URLdoslike != null)
@@ -62,6 +96,19 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpDelete("{itemId}")]
         public async Task<IActionResult> DeleteItem([FromRoute] string itemId)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             if (itemId == null)
             {
                 return BadRequest(new ErrorWebApiModel(StatusCodes.Status400BadRequest, "Item ID is required", null));
@@ -85,6 +132,19 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpPut("{itemId}")]
         public async Task<IActionResult> UpdateItem([FromRoute] string itemId, [FromForm] UpdateItemWebApiModel updateItemWebApiModel)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             itemId = Uri.UnescapeDataString(itemId);
 
             // check if null, delete image & null DB path
@@ -117,6 +177,21 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpGet("{itemId}")]
         public async Task<IActionResult> GetItemById([FromRoute] string itemId)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            //await Task.Delay(2000);
+
             itemId = Uri.UnescapeDataString(itemId);
 
             var item = await _itemsService.GetItemByIdAsync(itemId);
@@ -144,6 +219,21 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllItems([FromQuery] int? take = 8, [FromQuery] int? page = 1)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            //await Task.Delay(1500);
+
             var items = await _itemsService.GetAllItemsAsync(take, page);
 
             var model = new ItemsWebApiModel();
@@ -175,11 +265,24 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpPatch("{itemId}")]
         public async Task<IActionResult> PatchItem([FromRoute] string itemId)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             itemId = Uri.UnescapeDataString(itemId);
 
             var item = await _itemsService.GetItemByIdAsync(itemId);
 
-            if (item == null) 
+            if (item == null)
             {
                 return BadRequest($"Item with ID '{itemId}' was not found");
             }

@@ -1,9 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
 using SimpleDataManagementSystem.Backend.Logic.Models;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
+using SimpleDataManagementSystem.Backend.WebAPI.Helpers;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Write;
+using SimpleDataManagementSystem.Shared.Common.Constants;
+using System.Data;
+using System.Security.Claims;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 {
@@ -12,15 +17,19 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoriesService _categoriesService;
+        private readonly IAuthorizationService _authorizationService;
 
 
-        public CategoriesController(ICategoriesService categoriesService)
+        public CategoriesController(ICategoriesService categoriesService, IAuthorizationService authorizationService)
         {
             _categoriesService = categoriesService;
+            _authorizationService = authorizationService;
         }
 
 
         [HttpGet]
+        //[AllowAnonymous]
+        //[Authorize(policy: "UserIsResourceOwner")]
         public async Task<IActionResult> GetAllCategories(int? take = 8, int? page = 1)
         {
             var categories = await _categoriesService.GetAllCategoriesAsync(take, page);
@@ -30,6 +39,19 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> AddNewCategory([FromBody] NewCategoryWebApiModel newCategoryWebApiModel)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             var newCategoryId = await _categoriesService.AddNewCategoryAsync(new NewCategoryDTO()
             {
                 Name = newCategoryWebApiModel.Name,
@@ -43,6 +65,19 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpGet("{categoryId}")]
         public async Task<IActionResult> GetCategoryById(int categoryId)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             var category = await _categoriesService.GetCategoryByIdAsync(categoryId);
 
             if (category == null)
@@ -56,6 +91,19 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpPut("{categoryId}")]
         public async Task<IActionResult> UpdateCategory(int categoryId, UpdateCategoryWebApiModel updateCategoryWebApiModel)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             await _categoriesService.UpdateCategoryAsync(categoryId, new UpdateCategoryDTO()
             {
                 Name = updateCategoryWebApiModel.Name,
@@ -68,6 +116,18 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpDelete("{categoryId}")]
         public async Task<IActionResult> DeleteCategory(int categoryId)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             await _categoriesService.DeleteCategoryAsync(categoryId);
 
             return Ok();

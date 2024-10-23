@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using System.Reflection;
@@ -19,6 +20,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 
 
         [HttpGet("images/{category}/{image}")]
+        [AllowAnonymous]
         public IActionResult GetImage(string category, string image) 
         {
             var extension = Path.GetExtension(image);
