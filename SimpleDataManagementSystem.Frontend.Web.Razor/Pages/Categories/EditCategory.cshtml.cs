@@ -5,7 +5,6 @@ using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
 {
