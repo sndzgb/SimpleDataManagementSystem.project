@@ -58,8 +58,10 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Services.Implementations
         {
             var claims = new ClaimsIdentity();
 
+            claims.AddClaim(new Claim(ClaimTypes.Name, user.UserId.ToString()));
             claims.AddClaim(new Claim(ExtendedClaims.Type.UserId, user.UserId.ToString()));
             claims.AddClaim(new Claim(ExtendedClaims.Type.Username, user.Username));
+            claims.AddClaim(new Claim(ExtendedClaims.Type.IsPasswordChangeRequired, user.IsPasswordChangeRequired.ToString()));
             
             foreach (var role in user.Roles)
             {
