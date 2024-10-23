@@ -41,7 +41,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
 
         public RetailersViewModel AvailableRetailers { get; set; }
         
-        public WebApiCallException Error { get; set; }
+        public ErrorViewModel Error { get; set; }
 
 
         public async Task<IActionResult> OnGet()
@@ -72,7 +72,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
             }
             catch (WebApiCallException wace)
             {
-                Error = wace; // set error on model
+                Error = new ErrorViewModel(wace.Error.StatusCode, wace.Error.Message, wace.Error.Errors); // set error on model
                 return await OnGet();
             }
         }

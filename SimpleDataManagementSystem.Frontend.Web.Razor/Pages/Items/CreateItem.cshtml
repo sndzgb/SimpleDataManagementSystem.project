@@ -1,6 +1,7 @@
 ﻿@page "/Items/Create"
 
 @using Microsoft.AspNetCore.Mvc.ModelBinding
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 @using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.CreateItemModel
@@ -14,22 +15,25 @@
 <br />
 
 
-@await Component.InvokeAsync("InvalidModelState", ModelState)
+@await Component.InvokeAsync(nameof(Shared.Components.InvalidModelState), ModelState)
+<!-- #region DisplayError -->
+@await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
+<!-- #endregion DisplayError -->
 
 
 @* TODO error display *@
-@if (Model.Error != null)
+@* @if (Model.Error != null)
 {
     <div style="text-align:center;">
         <label style="color:red;">
             <b>
-                @Model.Error.Error.Message
+                @Model.Error.Message
             </b>
         </label>
     </div>
 
     <br />
-}
+} *@
 
 
 <div style="border:1px solid black; margin:auto;width:70%; text-align:center;padding:20px;">
