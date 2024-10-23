@@ -1,7 +1,45 @@
-﻿@page "/Account"
+﻿@page "/Account/Login"
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Account.AccountModel
 
 @{
+    ViewData["Title"] = "Login";
 }
 
+
+<h1>Login</h1>
+
+<br />
+
+@* CREATE VIEW COMPONENT *@
+@* @if (Model.Error != null)
+{
+    <p>@Model.Error.Message</p>
+} *@
+
+<!-- #region DisplayError -->
+@await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model.Error)
+<!-- #endregion DisplayError -->
+
+<br />
+
+<div style="border:1px solid black; margin:auto;width:70%; text-align:center;padding:10px;">
+    <form method="post" asp-page="/Account/Account">
+        @* asp-page-handler="Login" *@
+        @* asp-page-handler="LogIn" *@
+
+        @Html.AntiForgeryToken()
+
+        <label asp-for="Credential.Username"></label>
+        <br />
+        <input asp-for="Credential.Username" id="username" name="username" type="text" />
+        <br />
+        <label asp-for="Credential.Username">Password:</label>
+        <br />
+        <input asp-for="Credential.Password" id="password" name="password" type="password" />
+        <br />
+        <br />
+        <button type="submit">Login</button>
+    </form>
+</div>
