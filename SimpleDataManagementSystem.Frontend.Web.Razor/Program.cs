@@ -65,6 +65,12 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor
                 options.Cookie.MaxAge = TimeSpan.FromMinutes(1440);
 
                 options.EventsType = typeof(CookieAuthEvents);
+
+                //options.Events.OnRedirectToAccessDenied = c =>
+                //{
+                //    c.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                //    return Task.FromResult<object>(null);
+                //};
             });
 
             builder.Services.AddAuthorization(options =>
@@ -111,6 +117,8 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            //app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

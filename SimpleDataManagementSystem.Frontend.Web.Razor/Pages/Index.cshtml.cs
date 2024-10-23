@@ -23,9 +23,15 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
         public CredentialViewModel Credential { get; set; }
 
 
-        public void OnGet()
+        public async Task<IActionResult> OnGet()
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                // rename to Account/Login
+                return RedirectToPage("/Account/Account");
+            }
 
+            return null;
         }
     }
 }

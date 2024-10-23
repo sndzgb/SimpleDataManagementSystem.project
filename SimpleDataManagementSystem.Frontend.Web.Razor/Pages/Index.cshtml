@@ -4,7 +4,21 @@
 
 @{
     ViewData["Title"] = "Home page";
+    // var e = ViewData["Error"];
+    
+    // var error = HttpContext.Items["Error"];
+    // string helloWorld = "Hello World";
 }
+
+@* @if (ViewData["Error"] != null)
+{
+    <p style="color:red;">Not empty</p>
+    <p>@ViewData["Error"]</p>
+}
+else
+{
+    <p style="color:green;">Empty</p>
+} *@
 
 @if (User.Identity.IsAuthenticated == false)
 {
