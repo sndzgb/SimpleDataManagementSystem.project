@@ -14,6 +14,7 @@ namespace SimpleDataManagementSystem.Shared.Common.Constants
             public const string Role = "Role";
             public const string Username = "Username";
             public const string Jwt = "Jwt";
+            public const string IsPasswordChangeRequired = "IsPasswordChangeRequired";
         }
     }
 }
