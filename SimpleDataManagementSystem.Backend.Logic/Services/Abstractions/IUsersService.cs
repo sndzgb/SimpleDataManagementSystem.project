@@ -20,6 +20,7 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Abstractions
         Task<UsersDTO?> GetAllUsersAsync(int? take = 8, int? page = 1);
         Task<UserDTO?> GetUserByIdAsync(int userId);
         Task UpdateUserAsync(int userId, UpdateUserDTO updateUserDTO);
+        Task UpdatePasswordAsync(int userId, UpdatePasswordDTO updatePasswordDTO);
         Task DeleteUserAsync(int userId);
         Task<UserLogInResultDTO?> GetUserByLogInCredentialsAsync(string username, string password);
     }

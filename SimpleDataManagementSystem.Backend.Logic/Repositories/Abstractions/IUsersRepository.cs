@@ -13,8 +13,12 @@ namespace SimpleDataManagementSystem.Backend.Logic.Repositories.Abstractions
     {
         Task<int> AddNewUserAsync(NewUserDTO newUserDTO);
         Task<UsersDTO?> GetAllUsersAsync(int? take = 8, int? page = 1);
-        Task<UserDTO?> GetUserByIdAsync(int userId);
+        Task<User?> GetUserByIdAsync(int userId);
         Task UpdateUserAsync(int userId, UpdateUserDTO updateUserDTO);
+        //Task UpdateUserAsync(int userId, User user);
+        Task UpdatePasswordAsync(int userId, UpdatePasswordDTO updatePasswordDTO);
+        //Task UpdateUserRole(int userId, int newRoleId);
+        //Task UpdateUsername(int userId, string newUsername);
         Task DeleteUserAsync(int userId);
         Task<User?> GetUserByLogInCredentialsAsync(string username, string password);
     }

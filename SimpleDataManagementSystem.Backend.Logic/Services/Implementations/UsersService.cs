@@ -2,6 +2,7 @@
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
 using SimpleDataManagementSystem.Backend.Logic.Exceptions;
+using SimpleDataManagementSystem.Backend.Logic.Models;
 using SimpleDataManagementSystem.Backend.Logic.Repositories.Abstractions;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
 using SimpleDataManagementSystem.Shared.Common.Constants;
@@ -56,7 +57,23 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
 
         public async Task<UserDTO?> GetUserByIdAsync(int userId)
         {
-            return await _usersRepository.GetUserByIdAsync(userId);
+            var user = await _usersRepository.GetUserByIdAsync(userId);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            var userDTO = new UserDTO()
+            {
+                ID = userId,
+                RoleId = user.Role?.ID,
+                RoleName = user.Role?.Name,
+                Username = user.Username,
+                IsPasswordChangeRequired = user.IsPasswordChangeRequired
+            };
+
+            return userDTO;
         }
 
         public async Task UpdateUserAsync(int userId, UpdateUserDTO updateUserDTO)
@@ -73,14 +90,28 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
                 return;
             }
 
-            if ((updateUserDTO.RoleId == (int)Roles.Admin) && (user.RoleId != (int)Roles.Admin)) // not allowed to add new admin roles
+            if ((updateUserDTO.RoleId == (int)Roles.Admin) && (user.Role?.ID != (int)Roles.Admin)) // not allowed to add new admin roles
             {
                 return;
             }
 
             await _usersRepository.UpdateUserAsync(userId, updateUserDTO);
-            
+            //await _usersRepository.UpdateUserAsync(userId, new User()
+            //{
+            //    Role = new Role()
+            //    {
+            //        ID = updateUserDTO.RoleId
+            //    },
+            //    Username = updateUserDTO.Username,
+            //    IsPasswordChangeRequired = updateUserDTO.IsPasswordChangeRequired // admin CAN set manually
+            //});
+
             return;
+        }
+
+        public async Task UpdatePassword(int userId, UpdatePasswordDTO updatePasswordDTO)
+        {
+            await _usersRepository.UpdatePasswordAsync(userId, updatePasswordDTO);
         }
 
         public async Task DeleteUserAsync(int userId)
@@ -92,7 +123,7 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
                 return;
             }
 
-            if (user.RoleId == (int)Roles.Admin) // not allowed to delete "admin" account
+            if (user.Role?.ID == (int)Roles.Admin) // not allowed to delete "admin" account
             {
                 return;
             }
@@ -102,6 +133,7 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
             return;
         }
 
+        // TODO move to accountsService
         public async Task<UserLogInResultDTO?> GetUserByLogInCredentialsAsync(string username, string password)
         {
             var user = await _usersRepository.GetUserByLogInCredentialsAsync(username, password);
@@ -117,10 +149,41 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
                     user.Role?.Name!
                 },
                 UserId = user.ID,
-                Username = user.Username
+                Username = user.Username,
+                IsPasswordChangeRequired = user.IsPasswordChangeRequired
             };
 
             return userDTO;
+        }
+
+        public async Task UpdatePasswordAsync(int userId, UpdatePasswordDTO updatePasswordDTO)
+        {
+            if (updatePasswordDTO == null)
+            {
+                throw new NotAllowedException("The provided values are not valid.");
+            }
+
+            var user = await _usersRepository.GetUserByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new RequiredRecordNotFoundException("The requested user was not found.");
+            }
+
+            await _usersRepository.UpdatePasswordAsync(userId, updatePasswordDTO);
+
+            await _usersRepository.UpdateUserAsync(userId, new UpdateUserDTO()
+            {
+                IsPasswordChangeRequired = false,
+                RoleId = user.Role?.ID,
+                Username = user.Username
+            });
+
+            //user.IsPasswordChangeRequired = false;
+            //await _usersRepository.UpdateUserAsync(userId, new User()
+            //{
+                
+            //});
         }
     }
 }

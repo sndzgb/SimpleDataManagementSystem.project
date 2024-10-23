@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace SimpleDataManagementSystem.Backend.Logic.DTOs.Write
 {
-    public class UpdateUserDTO
+    public class UpdatePasswordDTO
     {
-        public int? RoleId { get; set; }
-        public string? Username { get; set; }
-        public bool IsPasswordChangeRequired { get; set; }
+        public string OldPassword { get; set; }
+        public string NewPassword { get; set; }
     }
 }
