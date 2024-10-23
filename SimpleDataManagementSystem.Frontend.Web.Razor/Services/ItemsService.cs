@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text;
 using System.Net.Http.Headers;
 using System.Net.Http;
+using SimpleDataManagementSystem.Frontend.Web.Razor.Extensions;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 {
@@ -43,17 +44,28 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
             var response = await httpClient.PostAsync("api/items", content);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-                var message = JsonSerializer.Deserialize<ErrorViewModel>(json);
-                throw new WebApiCallException(message);
-            }
-            else
-            {
-                var j = await response.Content.ReadAsStringAsync();
-                return j;
-            }
+
+            // TODO finish error handling!
+            //var r = await response.HandleResponseAsync<string>();
+            
+            return await response.HandleResponseAsync<string>();
+
+            //await response.HandleIfInvalidResponseAsync();
+
+            //var j = await response.Content.ReadAsStringAsync();
+            //return j;
+
+            //if (!response.IsSuccessStatusCode)
+            //{
+            //    var json = await response.Content.ReadAsStringAsync();
+            //    var message = JsonSerializer.Deserialize<ErrorViewModel>(json);
+            //    throw new WebApiCallException(message);
+            //}
+            //else
+            //{
+            //    var j = await response.Content.ReadAsStringAsync();
+            //    return j;
+            //}
         }
 
         public async Task DeleteItemAsync(string itemId)
