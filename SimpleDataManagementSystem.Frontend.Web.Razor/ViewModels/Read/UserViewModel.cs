@@ -15,5 +15,8 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 
         [JsonPropertyName("roleId")]
         public int RoleId { get; set; }
+
+        [JsonPropertyName("isPasswordChangeRequired")]
+        public bool IsPasswordChangeRequired { get; set; }
     }
 }
