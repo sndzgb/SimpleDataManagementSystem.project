@@ -8,7 +8,7 @@ using System.Net;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
 {
-    // TODO rename into "UnhandledErrorModel"
+    // TODO rename into "UnhandledErrorModel" - handles uncaught/ unhandled exceptions
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     [IgnoreAntiforgeryToken]
@@ -23,7 +23,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
         public ErrorViewModel? Error { get; set; }
 
 
-        public void OnGet()
+        public IActionResult OnGet()
         {
             var exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
 
@@ -43,20 +43,68 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
 
                 //ViewData["Error"] = "Test error";
                 //return RedirectToPage("/Items/Create/1");
-                return;
+                return Page();
             }
 
             // TODO handle other errors...
 
-            return;
+            return Page();
             //return new ObjectResult(null) { StatusCode = StatusCodes.Status500InternalServerError };
         }
 
-        public void OnPost()
+        public IActionResult OnPost()
         {
             var exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
 
             var exception = exceptionHandlerPathFeature.Error;
+
+            var type = exception.GetType();
+
+            var request = HttpContext.Request;
+
+            //if (request)
+            //{
+            //    base.LocalRedirect();
+            //}
+
+
+            if (type == typeof(UnauthorizedException)) // login
+            {
+                return base.RedirectToPage("/Account/Account");
+            }
+
+            if (type == typeof(ForbiddenException)) // not allowed
+            {
+                Error = new ErrorViewModel(403, "Forbidden.", null);
+                return null;
+                //return OnGet();
+            }
+
+
+            // default
+            Error = new ErrorViewModel(500, "Unknown error occured while processing your request.");
+            return null;
+            //return OnGet();
+
+
+            //if (type == typeof(HttpRequestException))
+            //{
+            //    if (HttpContext.Response.StatusCode == StatusCodes.Status401Unauthorized)
+            //    {
+            //        //HttpContext.Items.Add("Error", "Invalid login attempt.");
+            //        //HttpContext.Response.Redirect("/Unauthorized", true);
+                    
+            //        //return Forbid();
+            //        return base.RedirectToPage("/Error"); // default
+            //    }
+                
+            //    //HttpContext.Items.Add("Error", "Invalid login attempt.");
+            //    //ViewData["Error"] = "Invalid login attempt";
+            //    return base.RedirectToPage("/Index");
+            //    //return base.RedirectToPagePermanent("/Index");
+            //}
+
+
 
 
             //var pc = PageContext;
@@ -71,13 +119,16 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
                     apiException.Error.Message,
                     apiException.Error.Errors
                 );
-
-                return;
+                
+                //return;
             }
 
             // TODO handle other errors... - server unavailable, serialization/ deserialization errors, ...
 
-            return;
+            //return;
+
+            return OnGet();
+            //return BadRequest();
         }
     }
 }
