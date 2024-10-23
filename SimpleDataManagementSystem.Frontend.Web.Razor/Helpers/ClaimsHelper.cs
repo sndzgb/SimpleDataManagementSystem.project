@@ -22,6 +22,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Helpers
             claims.Add(new Claim(ClaimTypes.NameIdentifier, jwt.Claims.Where(x => x.Type == ExtendedClaims.Type.UserId).Single().Value));
             claims.Add(new Claim(ClaimTypes.Role, jwt.Claims.Where(x => x.Type == ClaimTypes.Role).Single().Value));
             claims.Add(new Claim(ExtendedClaims.Type.Jwt, token));
+            claims.Add(new Claim(ExtendedClaims.Type.IsPasswordChangeRequired, jwt.Claims.Where(x => x.Type == ExtendedClaims.Type.IsPasswordChangeRequired).Single().Value));
 
             return claims;
         }
