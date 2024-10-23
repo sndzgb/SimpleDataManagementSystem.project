@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting.Internal;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SimpleDataManagementSystem.Backend.Database;
 using SimpleDataManagementSystem.Backend.Database.Entities;
@@ -16,6 +18,7 @@ using SimpleDataManagementSystem.Backend.WebAPI.DbInit;
 using SimpleDataManagementSystem.Backend.WebAPI.Filters;
 using SimpleDataManagementSystem.Backend.WebAPI.Middlewares;
 using SimpleDataManagementSystem.Backend.WebAPI.Options;
+using SimpleDataManagementSystem.Backend.WebAPI.Policies;
 using SimpleDataManagementSystem.Backend.WebAPI.Services.Abstractions;
 using SimpleDataManagementSystem.Backend.WebAPI.Services.Implementations;
 using System;
@@ -53,6 +56,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
                         builder
                             .AllowAnyOrigin()
                             .AllowAnyHeader()
+                            .AllowAnyMethod()
                             .WithExposedHeaders("Set-Authorization");
                     });
             });
@@ -79,10 +83,23 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
                 };
             });
 
-            //builder.Services.AddAuthorization(x =>
-            //{
-            //    x.AddPolicy("AdminOnly", p => p.RequireClaim("", ""));
-            //});
+            builder.Services.AddAuthorization(options =>
+            {
+                //options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                //    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                //    .RequireAuthenticatedUser()
+                //    .Build();
+
+                //x.AddPolicy("AdminOnly", p => p.RequireClaim("", ""));
+                options.AddPolicy(
+                    "UserIsResourceOwnerPolicy", 
+                    policy => policy.Requirements.Add(new UserIsResourceOwnerAuthorizationRequirement())
+                );
+                options.AddPolicy(
+                    "UserIsInRolePolicy",
+                    policy => policy.Requirements.Add(new UserIsInRoleAuthorizationRequirement())
+                );
+            });
 
             builder.Services.AddControllers(options =>
             {
@@ -122,6 +139,12 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
             //});
 
 
+            //builder.Services.AddHttpContextAccessor();
+
+
+            builder.Services.AddSingleton<IAuthorizationHandler, UserIsResourceOwnerAuthorizationHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, UserIsInRoleAuthorizationHandler>();
+
             builder.Services.AddScoped<IItemsService, ItemsService>();
             builder.Services.AddScoped<IItemsRepository, ItemsRepository>();
             builder.Services.AddScoped<IUsersService, UsersService>();
@@ -149,6 +172,9 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<AllowOnlyAuthenticatedMiddleware>();
+            app.UseMiddleware<PasswordChangeRequiredCheckMiddleware>();
 
             app.MapControllers();
 
