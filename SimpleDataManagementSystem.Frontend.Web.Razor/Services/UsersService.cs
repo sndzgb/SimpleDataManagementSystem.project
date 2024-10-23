@@ -110,6 +110,28 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
         }
 
+        public async Task UpdatePasswordAsync(int userId, UpdatePasswordViewModel updatePasswordViewModel)
+        {
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
+
+            var content = new StringContent(JsonSerializer.Serialize(updatePasswordViewModel), Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PutAsync($"api/users/{userId}/password", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                using var contentStream = await response.Content.ReadAsStreamAsync();
+
+                var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
+
+                throw new WebApiCallException(message);
+            }
+            else
+            {
+                await Task.CompletedTask;
+            }
+        }
+
         public async Task UpdateUserAsync(int userId, UpdateUserViewModel updateUserViewModel)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);

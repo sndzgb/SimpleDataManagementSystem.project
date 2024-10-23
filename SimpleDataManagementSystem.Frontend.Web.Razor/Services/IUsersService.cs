@@ -10,5 +10,6 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
         Task<UserViewModel> GetUserByIdAsync(int userId);
         Task UpdateUserAsync(int userId, UpdateUserViewModel updateUserViewModel);
         Task DeleteUserAsync(int userId);
+        Task UpdatePasswordAsync(int userId, UpdatePasswordViewModel updatePasswordViewModel);
     }
 }
