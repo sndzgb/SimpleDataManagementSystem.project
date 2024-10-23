@@ -1,0 +1,28 @@
+﻿@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
+
+@model ErrorViewModel
+
+@{
+
+}
+
+@if (Model != null)
+{
+    <div style="text-align:center; color:red; font-weight: bold;">
+        <p>@Model.Message</p>
+        
+        @if (Model.Errors != null)
+        {
+            @foreach (var e in Model.Errors)
+            {
+                <em>
+                    <label>@e</label>
+                </em>
+
+                <br />
+            }
+        }
+    </div>
+
+    <br />
+}
