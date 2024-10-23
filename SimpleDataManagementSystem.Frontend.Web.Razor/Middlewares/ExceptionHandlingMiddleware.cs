@@ -35,6 +35,23 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Middlewares
         {
             var type = ex.GetType();
 
+            if (type == typeof(HttpRequestException))
+            {
+                if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
+                {
+                    context.Items.Add("Error", "Invalid login attempt.");
+                    context.Response.Redirect("/Unauthorized", true);
+                    return;
+                }
+
+                //context.Items.Add("Error", "Invalid login attempt.");
+                //context.Response.Redirect("/Error", true);
+                //return;
+            }
+            
+            
+
+
             if (type == typeof(WebApiCallException))
             {
                 context.Items.Add("error", ex.Message);
