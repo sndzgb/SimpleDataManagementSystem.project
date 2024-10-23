@@ -2,6 +2,7 @@
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Records;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Middlewares
@@ -48,9 +49,10 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Middlewares
                                 {
                                     var jwtToken = await tokenGeneratorService.GenerateTokenAsync(
                                         new AuthenticatedUser(
-                                            Convert.ToInt32(token.Claims.Where(x => x.Type == ExtendedClaims.Type.UserId).FirstOrDefault().Value),
+                                            Convert.ToInt32(token.Claims.Where(x => x.Type == ExtendedClaims.Type.UserId).FirstOrDefault()?.Value),
                                             token.Claims.Where(x => x.Type == ExtendedClaims.Type.Username).First().Value,
-                                            token.Claims.Where(x => x.Type == ClaimTypes.Role).ToList().Select(x => x.Value).ToArray()
+                                            token.Claims.Where(x => x.Type == ClaimTypes.Role).ToList().Select(x => x.Value).ToArray(),
+                                            Convert.ToBoolean(token.Claims.Where(x => x.Type == ExtendedClaims.Type.IsPasswordChangeRequired).FirstOrDefault()?.Value)
                                         )
                                     );
 
