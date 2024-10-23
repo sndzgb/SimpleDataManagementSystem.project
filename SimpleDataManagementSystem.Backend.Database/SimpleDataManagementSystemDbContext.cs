@@ -55,6 +55,11 @@ namespace SimpleDataManagementSystem.Backend.Database
                 .IsUnique(false);
 
             modelBuilder.Entity<UserEntity>()
+                .Property(x => x.IsPasswordChangeRequired)
+                .IsRequired(true)
+                .HasDefaultValue(1);
+
+            modelBuilder.Entity<UserEntity>()
                 .Property(p => p.Username)
                 .HasMaxLength(16);
 

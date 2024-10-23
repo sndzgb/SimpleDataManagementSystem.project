@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SimpleDataManagementSystem.Backend.Database.Entities;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
+using SimpleDataManagementSystem.Backend.Logic.Exceptions;
 using SimpleDataManagementSystem.Backend.Logic.Models;
 using SimpleDataManagementSystem.Backend.Logic.Repositories.Abstractions;
 using System;
@@ -86,7 +87,8 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
                             ID = s.Id,
                             Username = s.Username,
                             RoleId = s.Role == null ? null : s.Role.Id,
-                            RoleName = s.Role == null ? null : s.Role.Name
+                            RoleName = s.Role == null ? null : s.Role.Name,
+                            IsPasswordChangeRequired = s.IsPasswordChangeRequired
                         })
                         .ToListAsync()
                 );
@@ -95,7 +97,7 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
             return users;
         }
 
-        public async Task<UserDTO?> GetUserByIdAsync(int userId)
+        public async Task<User?> GetUserByIdAsync(int userId)
         {
             var userEntity = await _dbContext.Users.Where(x => x.Id == userId).Include(x => x.Role).FirstOrDefaultAsync();
 
@@ -104,15 +106,24 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
                 return null;
             }
 
-            var userDTO = new UserDTO()
+            var user = new User()
             {
                 ID = userId,
                 Username = userEntity.Username,
-                RoleId = userEntity.Role?.Id,
-                RoleName = userEntity.Role?.Name
+                IsPasswordChangeRequired = userEntity.IsPasswordChangeRequired,
+                PasswordHash = userEntity.PasswordHash,
             };
 
-            return userDTO;
+            if (userEntity.Role != null) 
+            {
+                user.Role = new Role()
+                {
+                    ID = userEntity.Role!.Id,
+                    Name = userEntity.Role!.Name
+                };
+        }
+
+            return user;
         }
 
         public async Task<User?> GetUserByLogInCredentialsAsync(string username, string password)
@@ -125,7 +136,7 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
             var userEntity = await _dbContext.Users
                 .Include(x => x.Role)
                 .Where(x => x.Username == username)
-                .SingleAsync();
+                .FirstOrDefaultAsync();
 
             if (userEntity == null)
             {
@@ -143,8 +154,9 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
             var user = new User()
             {
                 ID = userEntity.Id,
-                Password = userEntity.PasswordHash,
-                Username = userEntity.Username
+                PasswordHash = userEntity.PasswordHash,
+                Username = userEntity.Username,
+                IsPasswordChangeRequired = userEntity.IsPasswordChangeRequired
             };
 
             if (userEntity.Role != null)
@@ -157,6 +169,34 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
             }
 
             return user;
+        }
+
+        public async Task UpdatePasswordAsync(int userId, UpdatePasswordDTO updatePasswordDTO)
+        {
+            if (updatePasswordDTO == null)
+            {
+                return;
+            }
+
+            var userEntity = await _dbContext.Users.Where(x => x.Id == userId).FirstOrDefaultAsync();
+
+            if (userEntity == null)
+            {
+                throw new RequiredRecordNotFoundException("User was not found.");
+            }
+
+            PasswordHasher<UserEntity> passwordHasher = new PasswordHasher<UserEntity>();
+            var match = passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, updatePasswordDTO.OldPassword);
+
+            if (match == PasswordVerificationResult.Failed)
+            {
+                throw new NotAllowedException("Invalid password.");
+            }
+
+            userEntity.PasswordHash = passwordHasher.HashPassword(userEntity, updatePasswordDTO.NewPassword);
+            //userEntity.IsPasswordChangeRequired = false;
+
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task UpdateUserAsync(int userId, UpdateUserDTO updateUserDTO)
@@ -178,6 +218,7 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
 
             user.Username = updateUserDTO.Username;
             user.RoleId = updateUserDTO.RoleId;
+            user.IsPasswordChangeRequired = updateUserDTO.IsPasswordChangeRequired;
 
             await _dbContext.SaveChangesAsync();
         }

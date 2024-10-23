@@ -15,6 +15,7 @@ namespace SimpleDataManagementSystem.Backend.Database.Entities
         public RoleEntity? Role { get; set; }
 
 
+        public bool IsPasswordChangeRequired { get; set; }
         public string PasswordHash { get; set; }
 
         public DateTime CreatedUTC { get; set; }

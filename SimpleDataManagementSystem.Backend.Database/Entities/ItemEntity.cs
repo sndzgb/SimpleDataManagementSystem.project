@@ -12,7 +12,7 @@ namespace SimpleDataManagementSystem.Backend.Database.Entities
     {
         public string Nazivproizvoda { get; set; }
         public string? Opis { get; set; }
-        public string Datumakcije { get; set; }
+        public string? Datumakcije { get; set; } // TODO discountDate
         public string? Nazivretailera { get; set; }
 
         [Required(AllowEmptyStrings = true)]
