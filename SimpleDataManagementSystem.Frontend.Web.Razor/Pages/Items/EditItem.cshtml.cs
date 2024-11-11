@@ -4,54 +4,38 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
+using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Diagnostics;
 using System.Net;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
 {
-    [Authorize(Roles = "Admin,Employee")]
     [ValidateAntiForgeryToken]
-    public class EditItemModel : PageModel
+    public class EditItemModel : BasePageModel<UpdateItemViewModel>
     {
-        // TODO pageModel error handling
-        // TRY-CATCH exception in "PageFilter"
-        // base WebApiCallException property and populate in "PageFilter"
-        // ViewComponent @await ... - modelState & error
-
-        //public override void OnPageHandlerExecuting(PageHandlerExecutingContext context)
-        //{
-        //    var isPost = context.HandlerMethod.HttpMethod.ToLower() == "post";
-
-        //    if (isPost)
-        //    {
-        //        if (!context.ModelState.IsValid)
-        //        {
-        //            context.Result = new ObjectResult(null)
-        //            {
-        //                StatusCode = StatusCodes.Status400BadRequest
-        //            };
-
-        //            //context.HttpContext.Response.Redirect("/Items/123/Edit");
-        //        }
-        //    }
-        //}
-
-
         private readonly IItemsService _itemsService;
         private readonly ICategoriesService _categoriesService;
         private readonly IRetailersService _retailersService;
+        private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<EditItemModel> _logger;
 
 
-        public EditItemModel(IItemsService itemsService, ICategoriesService categoriesService, IRetailersService retailersService, ILogger<EditItemModel> logger)
+        public EditItemModel(
+            IItemsService itemsService, 
+            ICategoriesService categoriesService, 
+            IRetailersService retailersService, 
+            IAuthorizationService authorizationService,
+            ILogger<EditItemModel> logger)
         {
             _itemsService = itemsService;
             _categoriesService = categoriesService;
             _retailersService = retailersService;
+            _authorizationService = authorizationService;
             _logger = logger;
         }
 
@@ -73,14 +57,29 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
 
         public ItemViewModel Item { get; set; }
 
-        [BindProperty]
-        public UpdateItemViewModel UpdatedItem { get; set; }
-
         public CategoriesViewModel AvailableCategories { get; set; }
 
         public RetailersViewModel AvailableRetailers { get; set; }
 
-        public WebApiCallException Error { get; set; }
+
+        public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
+        {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                HttpContext.User,
+                new { roles },
+                Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                context.Result = Forbid();
+                return;
+            }
+
+            base.OnPageHandlerExecuting(context);
+        }
 
 
         public async Task<IActionResult> OnGet()
@@ -93,27 +92,14 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
 
             await Task.WhenAll(tasks);
 
-            return null;
+            return Page();
         }
 
         public async Task<IActionResult> OnPost()
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return await OnGet();
-                }
+            await _itemsService.UpdateItemAsync(ItemId, Model);
 
-                await _itemsService.UpdateItemAsync(ItemId, UpdatedItem);
-
-                return RedirectToPage("/Items/Items");
-            }
-            catch (WebApiCallException wace)
-            {
-                Error = wace; // set error on model
-                return await OnGet();
-            }
+            return RedirectToPage("/Items/Items");
         }
 
         public async Task<IActionResult> OnPostDeleteImage()

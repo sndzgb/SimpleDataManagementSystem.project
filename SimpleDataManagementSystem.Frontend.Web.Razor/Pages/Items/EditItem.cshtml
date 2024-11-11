@@ -7,134 +7,187 @@
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.EditItemModel
 
 @{
-    ViewData["Title"] = "Edit Item";
+    ViewData["Title"] = "Edit item - '" + (Model?.Item?.Nazivproizvoda ?? "-") + "'";
 }
 
-<h1>Edit Item</h1>
-
-<br />
-
-
-@await Component.InvokeAsync("InvalidModelState", ModelState)
-
-
-<!-- #region ModelStateValidationErrors -->
-@await Component.InvokeAsync(typeof(InvalidModelStateViewComponent), ModelState)
-<!-- #endregion ModelStateValidationErrors -->
-
-
-<div style="text-align:center; border:1px solid black; padding:20px;">
-    <form method="post" enctype="multipart/form-data">
-        
-        @Html.AntiForgeryToken()
-        
-        <label for="name">Naziv proizvoda:</label>
-        <br />
-        <input disabled value="@Model.Item.Nazivproizvoda" name="nazivproizvoda" />
-
-        <br />
-        
-        <label for="name">Opis:</label>
-        <br />
-        <textarea type="text" cols="40" rows="5" name="opis">@Model.Item.Opis</textarea>
-        @* <span asp-validation-for="@Model.Item.Opis"></span> *@
-
-        <br />
-        
-        <label for="name">Datum akcije:</label>
-        <br />
-        <input value="@Model.Item.Datumakcije" name="datumakcije" />
-
-        <br />
-        
-        <label for="retailerId">Retailer</label>
-        <br />
-        <select name="retailerId">
-            @if (Model.AvailableRetailers.Retailers != null)
-            {
-                @foreach (var r in Model.AvailableRetailers.Retailers)
-                {
-                    <option name="retailerId" value="@r.ID" selected="@(Model.Item.RetailerId == r.ID)">@r.Name</option>
-                }
-            }
-        </select>
-
-        <br />
-        
-
-        <label for="kategorija">Kategorija</label>
-        <br />
-        <select name="kategorija">
-            @if (Model.AvailableCategories != null)
-            {
-                @if (Model.Item.Kategorija == null)
-                {
-                    <option name="kategorija" selected>-- Select new category --</option>
-                }
-
-                @foreach (var r in Model.AvailableCategories.Categories)
-                {
-                    <option name="kategorija" value="@r.ID" selected="@(Model.Item.Kategorija == r.ID)">@r.Name</option>
-                }
-            }
-        </select>
-
-
-        <br />
-
-        <label for="cijena">Cijena:</label>
-        <br />
-        <input value="@Model.Item.Cijena" name="cijena" />
-
-        <br />
-
-        <label>Slika:</label>
-        <br />
-        
-        <div id="thumbnailPlaceholder" style="position:relative; max-width:300px; max-height:300px; margin:auto;">
-            @if (Model.Item.URLdoslikeUri != null)
-            {
-                <img id="thumbnail" src="@Model.Item.URLdoslikeUri" style="width:300px; height:300px; max-width:300px; max-height:300px;" />
-                <button onclick="deleteImage('@Model.ItemId')" id="thumbnailDeleteControl" type="button" style="position:absolute; top:5px; right: 5px;">
-                    &#x2715;
-                </button>
-            }
-            else
-            {
-                <div id="thumbnailNotAvailable">
-                    <img style="width:300px; height:300px; max-width:300px; max-height:300px;" src="/Resources/image_not_available.png" alt="image not available" />
-                </div>
-            }
-        </div>
-        
-        <br />
-
-        <label for="URLdoslike" id="thumbnailAddOrUpdate">Dodaj novu sliku:</label>
-        
-        <br />
-        <br />
-        
-        <input id="thumbnailUpload" type="file" name="URLdoslike" onchange="loadThumbnail(event)" />
-        <br />
-
-        <br />
-        <br />
-
-        <button type="submit">Update</button>
-    </form>
+<div class="header">
+    <h1>Edit item - '<b>@Model?.Item?.Nazivproizvoda</b>'</h1>
 </div>
 
-@section scripts {
 
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+<br>
+
+
+<div class="content-container">
+
+    <!-- #region DisplayError -->
+    @await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
+    <!-- #endregion DisplayError -->
+
+    <!-- #region ModelStateValidationErrors -->
+    @await Component.InvokeAsync(typeof(InvalidModelStateViewComponent), ModelState)
+    <!-- #endregion ModelStateValidationErrors -->
+
+    <br>
+
+    @if (Model?.Item != null)
+    {
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-controls-container">
+                <div class="form-controls">
+
+                    <div class="port-side">
+                        <div class="input-control single-per-line">
+                            <div>
+                                <label for="opis">Opis:</label>
+                            </div>
+                            <div>
+                                <textarea name="opis"
+                                          style="display:block;"
+                                          type="text"
+                                          id="opis"
+                                          spellcheck="false">@Model.Item.Opis</textarea>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="input-control single-per-line">
+                            <div>
+                                <label for="datumakcije">Datum akcije:</label>
+                            </div>
+                            <div>
+                                <input name="datumakcije" type="text" id="datumakcije" value="@Model.Item.Datumakcije" />
+                            </div>
+                        </div>
+                        
+                        <br>
+
+                        <div class="input-control single-per-line">
+                            <div class="required">
+                                <label for="cijena">Cijena:</label>
+                            </div>
+                            <div>
+                                <input 
+                                    name="cijena" type="number" id="cijena" 
+                                    value="@Model.Item.Cijena.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" 
+                                />
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="input-control single-per-line">
+                            <div class="required">
+                                <label for="retailer">Retailer:</label>
+                            </div>
+                            <div>
+                                <select id="retailer" name="retailerId">
+                                    @foreach (var r in Model.AvailableRetailers.Retailers)
+                                    {
+                                        <option value="@r.ID" selected="@(r.ID == Model.Item.RetailerId)">@r.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="input-control single-per-line">
+                            <div class="required">
+                                <label for="kategorija">Category:</label>
+                            </div>
+                            <div>
+                                <select id="kategorija" name="kategorija">
+                                    @foreach (var c in Model.AvailableCategories.Categories)
+                                    {
+                                        <option value="@c.ID" selected="@(c.ID == Model.Item.Kategorija)">@c.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="starboard-side">
+                        <div class="image-control">
+                            <div>
+                                <label>Thumbnail:</label>
+                            </div>
+                            <div id="thumbnail">
+                                <div style="position: relative">
+                                    <div class="thumbnail-preview-container">
+                                        <img 
+                                            height="300" 
+                                            width="300" 
+                                            id="thumbnailPreview"
+                                            src="@(Model.Item.URLdoslikeUri == null ? 
+                                                        "/Resources/image_not_available.png" 
+                                                        : 
+                                                        Model.Item.URLdoslikeUri)" />
+                                    </div>
+
+                                    @* visibility: @(Model.Item.URLdoslikeUri ?? "hidden;") *@
+                                    <div class="thumbnail-preview-delete-control @(Model.Item.URLdoslikeUri ?? " element-invisible-no-space ")"
+                                         style="position:absolute; top:5px; right: 5px;">
+                                        <button type="button" style="border:none;
+                                                cursor:default;
+                                                background-color: transparent;
+                                                background-repeat: no-repeat;
+                                                border: none;
+                                                overflow: hidden;
+                                                outline: none;">
+                                            <i @(Model.Item.URLdoslikeUri != null ? 
+                                                    $"onclick=deleteImage('{Model.ItemId}')" 
+                                                    :
+                                                    $"onclick=removePreview(event)")
+                                                style="cursor: pointer;" 
+                                                class="fa-solid fa-circle-xmark fa-lg"
+                                            >
+                                            </i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                @* style="visibility: @(Model.Item.URLdoslikeUri != null ? "hidden" : "")" *@
+                                <div class="thumbnail-upload-control @(Model.Item.URLdoslikeUri != null ? " element-invisible-no-space " : "")">
+                                    <div>
+                                        <label id="thumbnailAddOrUpdate">Add new thumbnail:</label>
+                                    </div>
+                                    <div>
+                                        <input id="thumbnailUpload" type="file" name="URLdoslike" onchange="loadThumbnailPreview(event)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br />
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div class="flex-justify-center">
+                    <button class="button-default" type="submit">
+                        Edit
+                    </button>
+                </div>
+            </div>
+        </form>
     }
+</div>
+
+
+@section scripts {
 
     <script>
         function deleteImage(itemId) {
             var token = $('input[name="__RequestVerificationToken"]').val();
 
             var encUri = encodeURIComponent(itemId);
+
+            // console.log(encUri);
 
             $.ajax({
                 type: "POST",
@@ -143,17 +196,17 @@
                     __RequestVerificationToken: token,
                 },
                 success: function (r) {
-                    $("#thumbnail").remove();
-                    $("#thumbnailDeleteControl").remove();
-                    $("#thumbnailPlaceholder").append(`<div id="thumbnailNotAvailable">
-                            <img style="width:300px; height:300px; max-width:300px; max-height:300px;" src="/Resources/image_not_available.png" alt="image not available" />
-                        </div>`
-                    );
-
-                    showSnackbar("Image deleted successfully");
+                    removePreview(null);
+                    showSnackbar("Image deleted successfully", snackbarType.INFO);
+                    location.reload();
                 },
                 error: function (xhr, status, error) {
+                    // TODO display error
+                    let response = JSON.parse(xhr.responseText);
+                    showSnackbar(response.message, snackbarType.INFO);
+
                     console.log(xhr.responseText);
+                    console.log(xhr.responseText.message);
                     console.log(status);
                     console.log(error);
                 }
@@ -161,20 +214,37 @@
         }
     </script>
 
+    <script>
+        function removePreview(event) {
+            var img = document.getElementById('thumbnailPreview');
+            img.removeAttribute('src');
+            img.src = "/Resources/image_not_available.png";
+
+            var input = document.getElementById('thumbnailUpload').value = "";
+
+            // TODO toggle this control (function)
+            var thumbnailUploadControl = document.getElementsByClassName('thumbnail-upload-control')[0];
+            thumbnailUploadControl.classList.remove('element-invisible-no-space');
+
+            // TODO toggle this control (function)
+            var thumbnailPreviewDeleteControl = document.getElementsByClassName('thumbnail-preview-delete-control')[0];
+            thumbnailPreviewDeleteControl.classList.add('element-invisible-no-space');
+        }
+    </script>
+
     @* TODO put in .JS *@
     <script>
-        var loadThumbnail = function(event) {
-            var output = document.getElementById('thumbnail');
+        var loadThumbnailPreview = function (event) {
+            
+            // TODO toggle this control (function)
+            var thumbnailUploadControl = document.getElementsByClassName('thumbnail-upload-control')[0];
+            thumbnailUploadControl.classList.add('element-invisible-no-space');
 
-            if (typeof (output) == 'undefined' || output == null) {
-                $("#thumbnailNotAvailable").remove();
-                $("#thumbnailPlaceholder").append(`<img id="thumbnail" style="width:300px; height:300px; max-width:300px; max-height:300px;" />`);
-                output = document.getElementById('thumbnail');
-            }
+            // TODO toggle this control (function)
+            var thumbnailPreviewDeleteControl = document.getElementsByClassName('thumbnail-preview-delete-control')[0];
+            thumbnailPreviewDeleteControl.classList.remove('element-invisible-no-space');
 
-            $("#thumbnailDeleteControl").remove();
-            $("#thumbnailAddOrUpdate").after(`<label id="thumbnailUploadOk" style="color:white; padding:1px;">&#x2714;</label>`);
-
+            var output = document.getElementById('thumbnailPreview');
             output.src = URL.createObjectURL(event.target.files[0]);
             output.onload = function() {
                 URL.revokeObjectURL(output.src) // free memory
