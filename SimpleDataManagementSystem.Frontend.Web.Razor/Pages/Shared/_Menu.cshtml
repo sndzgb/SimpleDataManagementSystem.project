@@ -1,49 +1,87 @@
 ﻿@page
 
 @using System.Security.Claims
+@using SimpleDataManagementSystem.Shared.Common.Constants
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Shared._MenuModel
 
 @{
 }
 
-<header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container">
-            <a class="navbar-brand" asp-area="" asp-page="/Index">
-                <img src="~/Resources/logo.png" style="height:32px; width:32px;" />
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            @if(User!.Identity!.IsAuthenticated)
+<div class="container" style="margin-top: 10px; margin-bottom:10px;">
+    <a href="/" class="logo navbarItem">
+        <img src="/favicon.ico" alt="logo" />
+    </a>
+
+    <div class="hamb">
+        <button type="button" onclick="onHambToggle(this)">
+            <span>&equiv;</span>
+        </button>
+    </div>
+
+        <div class="links collapsed not-collapsed" id="navBarLinks">
+    @if (User.Identity.IsAuthenticated)
+    {
+            @if (
+                PermissionsHelper.IsInRole
+                (
+                    Roles.Admin,
+                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                )
+                ||
+                PermissionsHelper.IsInRole
+                (
+                    Roles.Employee,
+                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                )
+            )
             {
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Retailers/Retailers">Retailers</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Categories/Categories">Categories</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Items/Items">Items</a>
-                        </li>
-                        @if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin")
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Users/Users">Users</a>
-                            </li>
-                        }
-                    </ul>
-                    <form method="post" asp-page="/Account/Account" asp-page-handler="Logout">
-                        <button type="submit" style="width:auto" class="nav-link btn btn-link py-0">
-                            Logout, <b><em>@User?.Identity?.Name</em></b>
-                        </button>
+                <a href="/Items" class="navbarItem @Html.ActiveClass("/Items")">
+                    Items
+                </a>
+            }
+            @* TODO active link *@
+            <a href="/Categories" class="navbarItem @Html.ActiveClass("/Categories")">Categories</a>
+            <a href="/Retailers" class="navbarItem @Html.ActiveClass("/Retailers")">Retailers</a>
+            @if (
+                PermissionsHelper.IsInRole
+                (
+                    Roles.Admin,
+                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                )
+            )
+            {
+                <a href="/Users" class="navbarItem @Html.ActiveClass("/Users")">
+                    Users
+                </a>
+            }
+
+            <a href="/Account/Details" class="navbarItem @Html.ActiveClass("/Account")">Account</a>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="logout" style="margin-left: auto;">
+                    @* TODO form POST *@
+                    <form method="post" name="form-logout" asp-page="/Account/Logout" asp-area="">
+                        <a onclick="onLogoutClicked(event)" href="/Account/Logout" style="margin:5px; text-decoration: none;">
+                            Logout, 
+                            <b>
+                                <i>
+                                    @ClaimsHelper.GetValueFromClaimsByKey(User.Claims.AsEnumerable(), ExtendedClaims.Type.Username)
+                                </i>
+                            </b>
+                        </a>
                     </form>
                 </div>
             }
+
+    }
+            @if (!User.Identity.IsAuthenticated)
+            {
+                <a class="login" href="/Account/Login">
+                    Login
+                </a>
+            }
         </div>
-    </nav>
-</header>
+
+</div>

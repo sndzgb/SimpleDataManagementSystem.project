@@ -1,0 +1,142 @@
+﻿.container a {
+    margin: 5px;
+    text-decoration: none;
+}
+
+
+@media (min-width:601px) {
+    .container {
+        display: flex;
+        align-items: center;
+    }
+
+        .container .search {
+            margin-left: auto;
+        }
+
+    .hamb {
+        display: none;
+    }
+
+    /* .container .logout {
+        margin-left: auto;
+    } */
+
+    .container .account {
+        margin-left: auto;
+    }
+
+    .container .links {
+        display: flex;
+        width: 100%;
+    }
+
+        .container .links .logout {
+            margin-left: auto;
+            /* justify-content: space-between; */
+        }
+
+        .container .links .login {
+            margin-left: auto;
+        }
+
+    .logout {
+        margin-top: 5px;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        margin-left: auto;
+    }
+
+    .not-collapsed {
+        display: block;
+    }
+
+}
+/*
+.collapsed {
+    display: none;
+}
+*/
+@media only screen and (max-width: 600px) {
+
+    .container {
+        display: flex;
+        flex-wrap: wrap;
+        /* flex-direction: column;
+        flex-wrap: wrap; */
+        justify-content: space-between;
+    }
+
+        .container .links {
+            /* flex-wrap: 1; */
+            /* flex-direction: column; */
+            /* flex-wrap: wrap; */
+            flex-basis: 100%;
+            height: fit-content;
+            /* display: none; */
+        }
+
+            .container .links a {
+                display: flex;
+                /* color:yellow; */
+                flex-direction: column;
+                flex-wrap: wrap;
+            }
+
+    /* .container .links a {
+        color: yellow;
+        flex-direction: column;
+        flex-wrap: wrap;
+    } */
+
+    .hamb {
+        margin: 5px;
+    }
+
+        .hamb button {
+            border: none;
+            background-color: white;
+        }
+
+    .logo {
+        display: inline;
+        width: fit-content;
+        flex-wrap: 1;
+    }
+
+    /* .logo::after {
+        content: "";
+    } */
+
+    .logout {
+        margin-top: 5px;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        margin-left: auto;
+        /* border-top: 1px solid gainsboro; */
+    }
+
+    .collapsed {
+        display: none;
+    }
+
+    /*.links {
+        display:none;
+    }*/
+}
+
+
+.active-navbar-link {
+    color: red !important;
+    text-decoration: underline;
+}
+
+
+
+.active {
+    color: red;
+}
+
+/* .logout {
+    cursor: pointer;
+} */
