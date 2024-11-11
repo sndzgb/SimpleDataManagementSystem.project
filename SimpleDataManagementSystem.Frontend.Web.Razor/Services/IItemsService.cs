@@ -11,5 +11,6 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
         Task UpdateItemAsync(string itemId, UpdateItemViewModel updateItemViewModel);
         Task DeleteItemAsync(string itemId);
         Task UpdateItemPartialAsync(string itemId);
+        Task<ItemsSearchResponseViewModel> SearchItemsAsync(ItemsSearchRequestViewModel itemsSearchRequestViewModel);
     }
 }

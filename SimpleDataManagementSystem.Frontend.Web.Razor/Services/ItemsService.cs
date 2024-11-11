@@ -7,6 +7,7 @@ using System.Text;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Extensions;
+using System.Web;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 {
@@ -183,6 +184,34 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             else
             {
                 return;
+            }
+        }
+
+        public async Task<ItemsSearchResponseViewModel> SearchItemsAsync(ItemsSearchRequestViewModel itemsSearchRequestViewModel)
+        {
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
+
+            var properties = from p in itemsSearchRequestViewModel.GetType().GetProperties()
+                             where p.GetValue(itemsSearchRequestViewModel, null) != null
+                             select p.Name + "=" + HttpUtility.UrlEncode(p.GetValue(itemsSearchRequestViewModel, null)?.ToString());
+
+            string queryString = String.Join("&", properties.ToArray());
+
+            var response = await httpClient.GetAsync($"/api/items/search" + $"?{queryString}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                using var contentStream = await response.Content.ReadAsStreamAsync();
+
+                var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
+
+                throw new WebApiCallException(message);
+            }
+            else
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var responseContent = JsonSerializer.Deserialize<ItemsSearchResponseViewModel>(json);
+                return responseContent!;
             }
         }
     }
