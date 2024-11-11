@@ -42,6 +42,14 @@ tr:nth-child(even) {
 
 
 
+
+.element-invisible-no-space {
+    max-height: 0px;
+    visibility: hidden;
+}
+
+
+
 /*custom css - START*/
 .modelTablePagination {
     text-align:center;
@@ -92,8 +100,24 @@ input:disabled {
     visibility: visible; /* Show the snackbar */
     /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
     However, delay the fade out process for 2.5 seconds */
-    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    /*-webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;*/
+}
+
+#snackbar.info {
+    color: white;
+    border:1px solid #3c85e0;
+    background-color: #00bfff;
+}
+#snackbar.warning {
+    color: white;
+    border: 1px solid #ffad00;
+    background-color: #fa8d30;
+}
+#snackbar.danger {
+    color: white;
+    border:1px solid #8a0a0a;
+    background-color: red;
 }
 
 /* Animations to fade the snackbar in and out */
@@ -148,3 +172,368 @@ input:disabled {
 
 
 /*custom css - END*/
+
+
+
+.options a {
+    text-decoration: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* You can add global styles to this file, and also import other style files */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css');
+
+body {
+    padding: 0px;
+    margin: 0px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* spinner */
+/* spinner {
+    position: fixed;
+    margin: 0 auto;
+    width: 100%;
+    height: 100%;
+    top:0;
+    background: #fff;
+    opacity: 0.5;
+} */
+
+/* div.controlContainer {
+    width: 50%;
+} */
+
+/* input, select, textarea { */
+/* min-width: 300px; */
+/* } */
+
+table, th, td {
+    border: 1px solid gainsboro;
+    border-collapse: collapse;
+}
+
+
+button {
+    /* min-width: 100px; */
+    background-color: white;
+}
+
+
+.table-default {
+    margin: auto;
+    text-align: center;
+}
+
+.button-default {
+    border: 2px solid gainsboro;
+    padding: 3px;
+    border-radius: 5px;
+    /* background-color: white; */
+    color: black;
+}
+
+    .button-default:hover:enabled {
+        color: white;
+        background-color: #00bfff;
+        cursor: pointer;
+    }
+
+.button-danger {
+    border: 2px solid gainsboro;
+    padding: 3px;
+    border-radius: 5px;
+    /* background-color: white; */
+    color: black;
+}
+
+    .button-danger:hover:enabled {
+        color: white;
+        background-color: #ff0000;
+        cursor: pointer;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* forms */
+input.ng-pending {
+    border-bottom: 1px solid yellow;
+}
+
+input.ng-invalid.ng-touched {
+    border-bottom: 1px solid red;
+}
+
+select.ng-invalid.ng-touched {
+    border-bottom: 1px solid red;
+}
+
+/* textarea, input, select {
+    min-width: 250px;
+} */
+
+textarea {
+    min-height: 2em;
+    /* max-height: 100vh; */
+}
+
+
+
+/* .inputsWrapper {
+
+}
+@media only screen and (max-width: 600px) {
+    .fileWrapper {
+        flex:1;
+    }
+} */
+
+
+
+
+/* button {
+    border:2px solid gainsboro;
+    padding:5px;
+    border-radius: 5px;
+    background-color: white;
+}
+button:hover {
+    color:white;
+    background-color: #00bfff;
+} */
+
+@media only screen and (max-width: 1024px) {
+    input, textarea, select {
+        /* min-width: unset; */
+    }
+}
+
+input, textarea, select {
+    /* min-width: 400px; */
+    /* width: 400px; */
+    text-align: center;
+}
+
+textarea {
+    outline: none;
+    border: none;
+    /* border-top: 1px solid gainsboro; */
+    border-bottom: 1px solid gainsboro;
+    height: fit-content;
+}
+
+    textarea:focus {
+        border-bottom: 1px solid rgb(19, 75, 180);
+    }
+
+input[type="file"] {
+    border: none;
+}
+
+input {
+    outline: none;
+    border: none;
+    border-bottom: 1px solid gainsboro;
+}
+
+    input:focus {
+        border-bottom: 1px solid rgb(19, 75, 180);
+    }
+
+select {
+    outline: none;
+    border: none;
+    border-bottom: 1px solid gainsboro;
+    background-color: white;
+}
+
+    select:focus {
+        border-bottom: 1px solid rgb(19, 75, 180);
+    }
+
+option {
+    /* color:red;
+    background-color: white; */
+}
+
+.required:after {
+    content: " *";
+    color: red;
+}
+
+
+
+
+.indent-small {
+    text-indent: 5px;
+}
+
+
+
+/* .form-controls-container,
+.readonly-form-controls-container {
+    border:1px solid gainsboro;
+    border-radius: 5px;
+    padding:20px;
+} */
+
+.form-controls,
+.readonly-form-controls {
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.disabled {
+    background-color: gainsboro;
+    color: grey;
+    pointer-events: none;
+}
+
+input:disabled {
+    background-color: gainsboro;
+}
+
+.single-per-line {
+    flex: 1 1 100%;
+}
+
+.input-control,
+.readonly-control {
+    text-align: center;
+    /* new */
+    margin: 5px;
+    font-weight: bold;
+    /* background-color: cornflowerblue; */
+}
+
+.image-control {
+    text-align: center;
+    /* background-color: cornflowerblue; */
+    margin: 10px 50px;
+}
+
+.image-readonly-control {
+    background-color: cornflowerblue;
+    padding: 20px;
+}
+
+    .image-readonly-control img {
+        border-radius: 10px;
+        width: 128px;
+        height: 128px;
+    }
+
+.flex-justify-center {
+    display: flex;
+    justify-content: center;
+}
+
+
+.entity-management-options {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+    .entity-management-options button {
+        margin: 5px;
+    }
+
+
+
+/* TODO */
+/* .port-side {
+    max-width:initial;
+    width:initial;
+}
+.input-control select, input, textarea {
+    width:100%;
+} */
+
+
+
+
+.no-data {
+    /* text-align: center; */
+    font-weight: bold;
+    padding: 50px;
+    display: flex;
+    font-style: italic;
+    justify-content: center;
+    /* border: 1px solid gainsboro; */
+    border-style: solid;
+    border-color: gainsboro;
+    border-width: 0 1px 1px 1px;
+    /* column-span:all; */
+    /* flex: 0 0 100%; */
+}
+
+.table-data {
+    /* column-span: all; */
+}
+
+
+
+
+
+.test {
+    pointer-events: none;
+    background-color: gainsboro;
+    color: black;
+}
+
+
+.menu {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* .menu div {
+    margin: 0px 10px;
+} */
+
+.content-container {
+    padding: 50px;
+    border: 1px solid gainsboro;
+    text-align: center;
+}
+
+/* .content-container-border {
+    border:1px solid gainsboro; 
+} */
+
+.header {
+    margin-top: 10px;
+    border-bottom: 1px solid gainsboro;
+    width: fit-content;
+}
