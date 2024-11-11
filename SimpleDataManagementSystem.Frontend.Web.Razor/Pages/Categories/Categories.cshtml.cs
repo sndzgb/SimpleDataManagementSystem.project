@@ -1,33 +1,51 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
+using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
 {
-    public class CategoriesModel : PageModel
+    public class CategoriesModel : BasePageModel<CategoriesViewModel>
     {
         private readonly ICategoriesService _categoriesService;
+        private readonly IAuthorizationService _authorizationService;
 
 
-        public CategoriesModel(ICategoriesService categoriesService)
+        public CategoriesModel(ICategoriesService categoriesService, IAuthorizationService authorizationService)
         {
             _categoriesService = categoriesService;
+            _authorizationService = authorizationService;
         }
 
 
-        public CategoriesViewModel Categories { get; set; }
-
-
-        public async Task OnGet([FromQuery] int take = 8, [FromQuery] int page = 1)
+        public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
         {
-            Categories = await _categoriesService.GetAllCategoriesAsync(take, page);
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee, (int)Roles.User };
 
-            return;
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                HttpContext.User,
+                new { roles },
+                Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                context.Result = Forbid();
+                return;
+            }
+
+            base.OnPageHandlerExecuting(context);
         }
 
-        public void OnPost() 
+        public async Task<IActionResult> OnGet([FromQuery] int take = 8, [FromQuery] int page = 1)
         {
+            Model = await _categoriesService.GetAllCategoriesAsync(take, page);
+
+            return Page();
         }
     }
 }

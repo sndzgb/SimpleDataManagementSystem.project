@@ -1,5 +1,7 @@
 ﻿@page "/Categories"
 @using System.Security.Claims
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
+@using SimpleDataManagementSystem.Shared.Common.Constants
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories.CategoriesModel
 
@@ -7,82 +9,111 @@
     ViewData["Title"] = "Categories";
 }
 
-<h1>Categories</h1>
+<div class="header">
+    <h1>Categories</h1>
+</div>
 
-<br />
 
-@if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
-       ||
-      User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
-      )
-{
+<br>
+
+
+<div class="menu">
     <div>
-        <a href="/Categories/Create"><button>Create</button></a>
+        @if (
+            PermissionsHelper.IsInRole
+            (
+                Roles.Admin,
+                User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+            )
+        ||
+            PermissionsHelper.IsInRole
+            (
+                Roles.Employee,
+                User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+            )
+        )
+        {
+            <a href="/Categories/Create"><button class="button-default" type="button">Create</button></a>
+        }
     </div>
 
-    <hr />    
-}
+    @* <div class="spacer">
+    </div> *@
 
-<div>
-    <table>
+    @* <div style="display: flex; flex-direction: row;">
+        <form method="get" asp-page="/Items/Search">
+            <input name="searchQuery"
+                   style="outline: none; flex-grow: 2; border: none; border-bottom: 1px solid gainsboro;" />
+            <button type="submit" style="border: none; border-bottom: 1px solid gainsboro; background-color: white;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </form>
+    </div> *@
+</div>
+
+
+<br>
+
+<div class="table-default">
+    <table style="table-layout: fixed; width: 100%;">
         <thead>
             <tr>
-                <th>
-                    ID
-                </th>
-                <th>
-                    Name
-                </th>
-                <th>
-                    Priority
-                </th>
-                @if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
-                    ||
-                    User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
+                <th>ID</th>
+                <th>Name</th>
+                @if (
+                    PermissionsHelper.IsInRole
+                    (
+                        Roles.Admin,
+                        User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
                     )
+                    ||
+                    PermissionsHelper.IsInRole
+                    (
+                        Roles.Employee,
+                        User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                    )
+                )
                 {
-                    <th>
-                        Management
-                    </th>
+                    <th>Management</th>
                 }
             </tr>
         </thead>
         <tbody>
-            @if (Model.Categories != null)
+            @if (Model?.Model?.Categories != null)
             {
-                @foreach (var category in Model.Categories.Categories)
+                @foreach (var c in Model.Model.Categories)
                 {
-                    <tr>
-                        <td>
-                            @category.ID
-                        </td>
-                        <td>
-                            @category.Name
-                        </td>
-                        <td>
-                            @category.Priority
-                        </td>
-                        @if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
-                           ||
-                            User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
-                          )
+                    <tr style="max-height: 70px; height:70px;" *ngFor="let c of categories?.categories">
+                        <td>@c.ID</td>
+                        <td>@c.Name</td>
+                        @if (
+                            PermissionsHelper.IsInRole
+                            (
+                                Roles.Admin,
+                                User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                            )
+                            ||
+                            PermissionsHelper.IsInRole
+                            (
+                                Roles.Employee,
+                                User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                            )
+                        )
                         {
-                            <td>
-                                <div class="options @category.ID">
-                                    <a href="/Categories/@category.ID/Edit"><button type="button">Edit</button></a>
-                                    |
-                                    <button class="delete" id="@category.ID">Delete</button>
-                                </div>
-
-                                <div class="confirm @category.ID" style="display:none;">
-                                    Confirm:
-                                    <form method="post">
-                                        @Html.AntiForgeryToken()
-                                        <button type="button" onclick="confirmDelete('@category.ID')">Yes</button>
-                                    </form>
-
-                                    <button onclick="cancelDelete(@category.ID)">No</button>
-                                </div>
+                            <td class="options">
+                                <a href="/Categories/@c.ID)/Details">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                </a>
+                                <span>&nbsp;</span>
+                                <span>&nbsp;</span>
+                                <a href="/Categories/@c.ID/Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <span>&nbsp;</span>
+                                <span>&nbsp;</span>
+                                <a href="/Categories/@c.ID/Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
                             </td>
                         }
                     </tr>
@@ -90,53 +121,15 @@
             }
         </tbody>
     </table>
+
+    @if (Model?.Model?.Categories?.Count == 0)
+    {
+        <div class="no-data">
+            No data to show.
+        </div>
+    }
 </div>
 
-
-@await Component.InvokeAsync("Pager", Model.Categories.PageInfo)
-
-
-@section scripts {
-    <script>
-        function confirmDelete(categoryId) {
-            var token = $('input[name="__RequestVerificationToken"]').val();
-
-            $.ajax({
-                type: "POST",
-                url: "/Categories/" + categoryId + "/Delete/?handler=DeleteCategory",
-                data: {
-                    __RequestVerificationToken: token,
-                },
-                success: function (r) {
-                    $(".confirm." + categoryId).closest("tr").remove();
-
-                    // TODO get from server
-                    showSnackbar("Category deleted successfully.");
-                },
-                error: function (xhr, status, error) {
-                    console.log(xhr.responseText);
-                    console.log(status);
-                    console.log(error);
-                }
-            });
-        }
-
-        function cancelDelete(categoryId) {
-            $(".options." + categoryId).css("display", "inline-block");
-            $(".confirm." + categoryId).css("display", "none");
-        }
-
-        $(document).ready(function () {
-            $(".delete").click(function (e) {
-                e.preventDefault();
-                var categoryId = $(this).attr("id");
-
-                var parent = $("#" + categoryId).parent();
-
-                parent.hide();
-
-                $(".confirm." + categoryId).css("display", "");
-            });
-        });
-    </script>
-}
+<!-- #region Pagination -->
+@await Component.InvokeAsync(typeof(PagerViewComponent), Model?.Model?.PageInfo)
+<!-- #endregion Pagination -->
