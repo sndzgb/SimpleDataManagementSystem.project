@@ -34,6 +34,24 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+            builder.Services.AddMvc((options) =>
+            {
+                options.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor((x, y) =>
+                    $"The value '{x}' is not valid for '{y.SplitCamelCase()}'."
+                );
+                options.ModelBindingMessageProvider.SetNonPropertyAttemptedValueIsInvalidAccessor(x =>
+                    $"The value for '{x.SplitCamelCase()}' is not valid."
+                );
+            });
+            //builder.Services.AddRazorPages((options) =>
+            //{
+            //    options.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor((x, y) =>
+            //        $"The value '{x}' is not valid for {y.SplitCamelCase()}."
+            //    );
+            //    options.ModelBindingMessageProvider.SetNonPropertyAttemptedValueIsInvalidAccessor(x =>
+            //        $"The value for '{x.SplitCamelCase()}' is not valid."
+            //    );
+            //});
 
             builder.Services.AddHttpContextAccessor();
 
