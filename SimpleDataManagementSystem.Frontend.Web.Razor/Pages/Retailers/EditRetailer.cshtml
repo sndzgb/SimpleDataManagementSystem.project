@@ -2,69 +2,130 @@
 
 @model EditRetailerModel
 
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 @using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
 @using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 
 @{
-    ViewData["Title"] = "Edit Retailer";
+    ViewData["Title"] = "Edit retailer - '" + (Model?.Retailer?.Name ?? "-") + "'";
 }
 
-<h1>Edit Retailer</h1>
-
-<br />
-
-
-@await Component.InvokeAsync("InvalidModelState", ModelState)
-
-
-<div style="text-align:center; border:1px solid black; padding:20px;">
-    <form method="post" enctype="multipart/form-data">
-        <label for="name">Retailer Name:</label>
-        <br />
-        <input value="@Model.Retailer.Name" name="name" />
-
-        <br />
-
-        <label for="priority">Priority:</label>
-        <br />
-        <input value="@Model.Retailer.Priority" name="priority" />
-
-        <br />
-
-        <label for="logoImage">Logo:</label>
-        <br />
-        <div id="thumbnailPlaceholder" style="position:relative; max-width:300px; max-height:300px; margin:auto;">
-            @if (Model.Retailer.LogoImageUri != null)
-            {
-                <img id="thumbnail" style="width:300px; height:300px; max-width:300px; max-height:300px;" src="@Model.Retailer.LogoImageUri" />
-                <button onclick="deleteImage('@Model.Retailer.ID')" id="thumbnailDeleteControl" type="button" style="position:absolute; top:5px; right: 5px;">
-                    &#x2715;
-                </button>
-            }
-            else
-            {
-                <div id="thumbnailNotAvailable">
-                    <img style="width:300px; height:300px; max-width:300px; max-height:300px;" src="/Resources/image_not_available.png" alt="image not available" />
-                </div>
-            }
-        </div>
-        
-        <br />
-
-        <label for="logoImage" id="thumbnailAddOrUpdate">Add new logo:</label>
-
-        <br />
-        <br />
-
-        <input id="thumbnailUpload" type="file" name="logoImage" onchange="loadThumbnail(event)" />
-        <br />
-
-        <br />
-        <br />
-
-        <button type="submit">Update</button>
-    </form>
+<div class="header">
+    <h1>Edit retailer - '<b>@Model?.Retailer?.Name</b>'</h1>
 </div>
+
+
+<br>
+
+
+<div class="content-container">
+    
+    <!-- #region DisplayError -->
+    @await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
+    <!-- #endregion DisplayError -->
+
+    <!-- #region ModelStateValidationErrors -->
+    @await Component.InvokeAsync(typeof(InvalidModelStateViewComponent), ModelState)
+    <!-- #endregion ModelStateValidationErrors -->
+
+    <br>
+
+    @if (Model?.Retailer != null)
+    {
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-controls-container">
+                <div class="form-controls">
+
+                    <div class="port-side">
+                        <div class="input-control single-per-line">
+                            <div class="required">
+                                <label>Name:</label>
+                            </div>
+                            <div>
+                                <input type="text" name="name" value="@Model.Retailer.Name" />
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="input-control">
+                            <div class="required">
+                                <label>Priority:</label>
+                            </div>
+                            <div>
+                                <input type="number" name="priority" value="@Model.Retailer.Priority" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="starboard-side">
+                        <div class="image-control">
+                            <div>
+                                <label>Thumbnail:</label>
+                            </div>
+                            <div id="thumbnail">
+                                <div style="position: relative">
+                                    <div class="thumbnail-preview-container">
+                                        <img height="300"
+                                             width="300"
+                                             id="thumbnailPreview"
+                                             src="@(Model.Retailer.LogoImageUri == null ?
+                                                        "/Resources/image_not_available.png"
+                                                        :
+                                                        Model.Retailer.LogoImageUri)" />
+                                    </div>
+
+                                    <div class="thumbnail-preview-delete-control @(Model.Retailer.LogoImageUri ?? " element-invisible-no-space ")"
+                                         style="position:absolute; top:5px; right: 5px;">
+                                        <button type="button" style="border:none;
+                                                cursor:default;
+                                                background-color: transparent;
+                                                background-repeat: no-repeat;
+                                                border: none;
+                                                overflow: hidden;
+                                                outline: none;">
+                                            <i @(Model.Retailer.LogoImageUri != null ?
+                                                $"onclick=deleteImage('{Model.Retailer.ID}')"
+                                                :
+                                                $"onclick=removePreview(event)")
+                                               style="cursor: pointer;"
+                                               class="fa-solid fa-circle-xmark fa-lg">
+                                            </i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                @* style="visibility: @(Model.Item.URLdoslikeUri != null ? "hidden" : "")" *@
+                                <div class="thumbnail-upload-control @(Model.Retailer.LogoImageUri != null ? " element-invisible-no-space " : "")">
+                                    <div>
+                                        <label id="thumbnailAddOrUpdate">Add new thumbnail:</label>
+                                    </div>
+                                    <div>
+                                        <input id="thumbnailUpload" type="file" name="logoImage" onchange="loadThumbnailPreview(event)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br />
+
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="flex-justify-center">
+                    <button class="button-default" type="submit">
+                        Edit
+                    </button>
+                </div>
+            </div>
+        </form>
+    }
+
+</div>
+
 
 @section scripts {
 
@@ -79,15 +140,11 @@
                     __RequestVerificationToken: token,
                 },
                 success: function (r) {
-                    $("#thumbnail").remove();
-                    $("#thumbnailDeleteControl").remove();
-                    $("#thumbnailPlaceholder").append(`<div id="thumbnailNotAvailable">
-                                    <img style="width:300px; height:300px; max-width:300px; max-height:300px;" src="/Resources/image_not_available.png" alt="image not available" />
-                        </div>`);
-
-                    showSnackbar("Image deleted successfully");
+                    removePreview(null);
+                    location.reload();
                 },
                 error: function (xhr, status, error) {
+                    // TODO display error
                     console.log(xhr.responseText);
                     console.log(status);
                     console.log(error);
@@ -97,18 +154,35 @@
     </script>
 
     <script>
-        var loadThumbnail = function (event) {
-            var output = document.getElementById('thumbnail');
+        function removePreview(event) {
+            var img = document.getElementById('thumbnailPreview');
+            img.removeAttribute('src');
+            img.src = "/Resources/image_not_available.png";
 
-            if (typeof (output) == 'undefined' || output == null) {
-                $("#thumbnailNotAvailable").remove();
-                $("#thumbnailPlaceholder").append(`<img id="thumbnail" style="width:300px; height:300px; max-width:300px; max-height:300px;" />`);
-                output = document.getElementById('thumbnail');
-            }
+            var input = document.getElementById('thumbnailUpload').value = "";
 
-            $("#thumbnailDeleteControl").remove();
-            $("#thumbnailAddOrUpdate").after(`<label id="thumbnailUploadOk" style="color:white; padding:1px;">&#x2714;</label>`);
+            // TODO toggle this control (function)
+            var thumbnailUploadControl = document.getElementsByClassName('thumbnail-upload-control')[0];
+            thumbnailUploadControl.classList.remove('element-invisible-no-space');
+            
+            // TODO toggle this control (function)
+            var thumbnailPreviewDeleteControl = document.getElementsByClassName('thumbnail-preview-delete-control')[0];
+            thumbnailPreviewDeleteControl.classList.add('element-invisible-no-space');
+        }
+    </script>
 
+    @* TODO put in .JS *@
+    <script>
+        var loadThumbnailPreview = function (event) {
+            // TODO toggle this control (function)
+            var thumbnailUploadControl = document.getElementsByClassName('thumbnail-upload-control')[0];
+            thumbnailUploadControl.classList.add('element-invisible-no-space');
+
+            // TODO toggle this control (function)
+            var thumbnailPreviewDeleteControl = document.getElementsByClassName('thumbnail-preview-delete-control')[0];
+            thumbnailPreviewDeleteControl.classList.remove('element-invisible-no-space');
+            
+            var output = document.getElementById('thumbnailPreview');
             output.src = URL.createObjectURL(event.target.files[0]);
             output.onload = function () {
                 URL.revokeObjectURL(output.src) // free memory
