@@ -18,9 +18,9 @@ using SimpleDataManagementSystem.Backend.WebAPI.DbInit;
 using SimpleDataManagementSystem.Backend.WebAPI.Filters;
 using SimpleDataManagementSystem.Backend.WebAPI.Middlewares;
 using SimpleDataManagementSystem.Backend.WebAPI.Options;
-using SimpleDataManagementSystem.Backend.WebAPI.Policies;
 using SimpleDataManagementSystem.Backend.WebAPI.Services.Abstractions;
 using SimpleDataManagementSystem.Backend.WebAPI.Services.Implementations;
+using SimpleDataManagementSystem.Shared.Extensions;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
@@ -74,7 +74,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
                     ValidIssuer = config["JwtOptions:Issuer"],
                     ValidAudience = config["JwtOptions:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(config["JwtOptions:Key"]!) // TODO get key from secure location: valut, ...
+                        Encoding.UTF8.GetBytes(config["JwtOptions:Key"]!) // TODO get key from secure location: key vault, secrets, ...
                     ),
                     ValidateIssuer = true,
                     ValidateAudience = true,
@@ -90,19 +90,28 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
                 //    .RequireAuthenticatedUser()
                 //    .Build();
 
+                options.AddDefaultPolicies();
+
                 //x.AddPolicy("AdminOnly", p => p.RequireClaim("", ""));
-                options.AddPolicy(
-                    "UserIsResourceOwnerPolicy", 
-                    policy => policy.Requirements.Add(new UserIsResourceOwnerAuthorizationRequirement())
-                );
-                options.AddPolicy(
-                    "UserIsInRolePolicy",
-                    policy => policy.Requirements.Add(new UserIsInRoleAuthorizationRequirement())
-                );
-            });
+                //options.AddPolicy(
+                //    "UserIsResourceOwnerPolicy",
+                //    policy => policy.Requirements.Add(new UserIsResourceOwnerAuthorizationRequirement())
+                //);
+                //options.AddPolicy(
+                //    "UserIsInRolePolicy",
+                //    policy => policy.Requirements.Add(new UserIsInRoleAuthorizationRequirement())
+                //);
+            }).AddServicesForDefaultPolicies();
 
             builder.Services.AddControllers(options =>
             {
+                options.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor((x, y) => 
+                    $"The value '{x}' is not valid for {y.SplitCamelCase()}."
+                );
+                options.ModelBindingMessageProvider.SetNonPropertyAttemptedValueIsInvalidAccessor(x => 
+                    $"The value for '{x.SplitCamelCase()}' is not valid."
+                );
+
                 options.Filters.Add(new ValidateModelActionFilter());
             }).AddJsonOptions(x =>
             {
@@ -140,10 +149,6 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
 
 
             //builder.Services.AddHttpContextAccessor();
-
-
-            builder.Services.AddSingleton<IAuthorizationHandler, UserIsResourceOwnerAuthorizationHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, UserIsInRoleAuthorizationHandler>();
 
             builder.Services.AddScoped<IItemsService, ItemsService>();
             builder.Services.AddScoped<IItemsRepository, ItemsRepository>();
