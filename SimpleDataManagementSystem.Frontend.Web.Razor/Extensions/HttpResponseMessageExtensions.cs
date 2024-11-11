@@ -33,6 +33,12 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Extensions
             if (httpResponseMessage.IsSuccessStatusCode)
             {
                 var json = await httpResponseMessage.Content.ReadAsStringAsync();
+
+                if (string.IsNullOrEmpty(json))
+                {
+                    return default(T?);
+                }
+
                 var model = JsonSerializer.Deserialize<T>(json);
 
                 return await Task.FromResult(model);
