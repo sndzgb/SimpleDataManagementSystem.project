@@ -107,5 +107,41 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Implementations
         {
             await _itemsRepository.UpdateItemPartialAsync(itemId);
         }
+
+        public async Task<ItemSearchResponseDTO> SearchItemsAsync(ItemSearchRequestDTO request, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(request.SearchQuery))
+            {
+                return new ItemSearchResponseDTO()
+                {
+                    Request = request
+                };
+            }
+
+            var results = await _itemsRepository.SearchItemsAsync(request, cancellationToken);
+
+            var dto = new ItemSearchResponseDTO()
+            {
+                PageInfo = new PagedDTO()
+                {
+                    Page = request.Page,
+                    Take = request.Take,
+                    Total = results.Item2,
+                },
+                Request = request
+            };
+
+            if (results.Item1 != null)
+            {
+                dto.Items = results.Item1.Select(x => new ItemDTO()
+                {
+                    Cijena = x.Cijena,
+                    Nazivproizvoda = x.Nazivproizvoda,
+                    URLdoslike = x.URLdoslike
+                }).ToList();
+            }
+
+            return dto;
+        }
     }
 }

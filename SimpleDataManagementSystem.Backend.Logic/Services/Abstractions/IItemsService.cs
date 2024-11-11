@@ -22,5 +22,6 @@ namespace SimpleDataManagementSystem.Backend.Logic.Services.Abstractions
         Task UpdateItemAsync(string itemId, UpdateItemDTO updateItemDTO);
         Task DeleteItemAsync(string itemId);
         Task UpdateItemPartialAsync(string itemId);
+        Task<ItemSearchResponseDTO> SearchItemsAsync(ItemSearchRequestDTO request, CancellationToken cancellationToken);
     }
 }
