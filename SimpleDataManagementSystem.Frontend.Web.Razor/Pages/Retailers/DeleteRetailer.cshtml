@@ -1,7 +1,84 @@
 ﻿@page "/Retailers/{RetailerId}/Delete"
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers.DeleteRetailerModel
 
 @{
-    ViewData["Title"] = "Delete Retailer";
+    ViewData["Title"] = "Delete retailer - '" + (Model?.Model?.Name ?? "-") + "'";
 }
+
+<div class="header">
+    <h1>Delete retailer - '<b>@Model?.Model?.Name</b>'</h1>
+</div>
+
+
+<br>
+
+
+<div class="content-container">
+
+    <!-- #region DisplayError -->
+    @await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
+    <!-- #endregion DisplayError -->
+
+    <br>
+
+    @if (Model?.Model != null)
+    {
+        <form method="post">
+            <div class="readonly-form-controls-container">
+                <div class="readonly-form-controls">
+
+                    <div class="port-side">
+                        <div class="readonly-control">
+                            <div>
+                                <label>Name:</label>
+                            </div>
+                            <div>
+                                <em>
+                                    <label>@Model.Model.Name</label>
+                                </em>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="readonly-control">
+                            <div>
+                                <label>Priority:</label>
+                            </div>
+                            <div>
+                                <em>
+                                    <label>@Model.Model.Priority</label>
+                                </em>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="starboard-side">
+                        <div class="image-readonly-control">
+                            <img height="300"
+                                 width="300"
+                                 id="thumbnailPreview"
+                                 src="@(Model.Model.LogoImageUri == null ?
+                                        "/Resources/image_not_available.png"
+                                        :
+                                        Model.Model.LogoImageUri)" />
+                        </div>
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div class="flex-justify-center">
+                    <button class="button-danger" type="submit">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </form>
+    }
+</div>
+
+
