@@ -7,111 +7,176 @@
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.CreateItemModel
 
 @{
-    ViewData["Title"] = "Create Item";
+    ViewData["Title"] = "Create new item";
 }
 
-<h1>Create Item</h1>
-
-<br />
-
-
-@await Component.InvokeAsync(nameof(Shared.Components.InvalidModelState), ModelState)
-<!-- #region DisplayError -->
-@await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
-<!-- #endregion DisplayError -->
+<div class="header">
+    <h1>Create new item</h1>
+</div>
 
 
-@* TODO error display *@
-@* @if (Model.Error != null)
-{
-    <div style="text-align:center;">
-        <label style="color:red;">
-            <b>
-                @Model.Error.Message
-            </b>
-        </label>
-    </div>
-
-    <br />
-} *@
+<br>
 
 
-<div style="border:1px solid black; margin:auto;width:70%; text-align:center;padding:20px;">
+<div class="content-container">
+    
+    <!-- #region DisplayError -->
+    @await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
+    <!-- #endregion DisplayError -->
+
+    <!-- #region ModelStateValidationErrors -->
+    @await Component.InvokeAsync(typeof(InvalidModelStateViewComponent), ModelState)
+    <!-- #endregion ModelStateValidationErrors -->
+
+    <br>
+
     <form method="post" enctype="multipart/form-data">
-        <label for="nazivproizvoda">Naziv proizvoda:</label>
-        <br />
-        <input name="nazivproizvoda" />
+        <div class="form-controls-container">
+            <div class="form-controls">
+                <div class="port-side">
 
-        <br />
-        
-        <label for="opis">Opis:</label>
-        <br />
-        <input name="opis" />
+                    <div class="input-control">
+                        <div class="required">
+                            <label>
+                                <label for="nazivproizvoda">Naziv proizvoda:</label>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <input name="nazivproizvoda" type="text" id="nazivproizvoda" value="@Model?.Model?.Nazivproizvoda" />
+                        @* <input name="nazivproizvoda" type="text" id="nazivproizvoda" value="@Model?.NewItem?.Nazivproizvoda" /> *@
+                    </div>
 
-        <br />
-        
-        <label for="datumakcije">Datum akcije:</label>
-        <br />
-        <input name="datumakcije" />
-        
-        <br />
+                    <br>
 
-        @* retailer *@
-        <label for="retailerId">Retailer</label>
-        <br />
-        <select name="retailerId">
-            @if (Model.AvailableRetailers != null)
-            {
-                @foreach (var r in Model.AvailableRetailers.Retailers)
-                {
-                    <option name="retailerId" value="@r.ID">@r.Name</option>
-                }
-            }
-        </select>
+                    <div class="input-control">
+                        <div>
+                            <label for="opis">Opis:</label>
+                        </div>
+                        <div>
+                            <textarea name="opis" rows="2" id="opis" spellcheck="false">@Model?.Model?.Opis</textarea>
+                        </div>
+                    </div>
 
-        <br />
+                    <br>
 
-        <label for="cijena">Cijena:</label>
-        <br />
-        <input type="number" name="cijena" step=".01" />
+                    <div class="input-control">
+                        <div>
+                            <label for="datumakcije">Datum akcije:</label>
+                        </div>
+                        <div>
+                            <input name="datumakcije" type="text" id="datumakcije" value="@Model?.Model?.Datumakcije" />
+                        </div>
+                    </div>
 
-        <br />
+                    <br>
 
-        @* kategorija *@
-        <label for="kategorija">Kategorija</label>
-        <br />
-        <select name="kategorija">
-            @if (Model.AvailableCategories != null)
-            {
-                @foreach (var r in Model.AvailableCategories.Categories)
-                {
-                    <option name="kategorija" value="@r.ID">@r.Name</option>
-                }
-            }
-        </select>
+                    <div class="input-control">
+                        <div class="required">
+                            <label for="cijena">Cijena:</label>
+                        </div>
+                        <div>
+                            <input name="cijena" type="number" id="cijena" value="@Model?.Model?.Cijena" />
+                        </div>
+                    </div>
 
-        <br />
-        <br />
+                    <br>
 
-        <label for="URLdoslike">Thumbnail:</label>
-        
-        <br />
+                    <div class="input-control">
+                        <div class="required">
+                            <label for="retailer">Retailer:</label>
+                        </div>
+                        <div>
+                            <select id="retailer" name="retailerId">
+                                @if (Model?.AvailableRetailers?.Retailers != null)
+                                {
+                                    @foreach (var r in Model.AvailableRetailers.Retailers)
+                                    {
+                                        <option value="@r.ID" selected="@(Model?.Model?.RetailerId == r.ID)">@r.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
 
-        <div style="display: none;">
-            <img id="thumbnail" style="width:300px; height:300px; max-width:300px; max-height:300px;" />
-            <br />
+                    <br>
+
+                    <div class="input-control">
+                        <div class="required">
+                            <label for="kategorija">Category:</label>
+                        </div>
+                        <div>
+                            <select *ngLoading="categories" id="kategorija" name="kategorija">
+                                @if (Model?.AvailableCategories?.Categories != null)
+                                {
+                                    @foreach (var c in Model.AvailableCategories.Categories)
+                                    {
+                                        <option value="@c.ID" selected="@(Model?.Model?.Kategorija == c.ID )">@c.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="starboard-side">
+                    <div class="image-control">
+                        <div>
+                            <label>Thumbnail:</label>
+                        </div>
+                        <div id="thumbnail">
+                            <div style="position: relative">
+                                <div class="thumbnail-preview-container">
+                                    <img height="300"
+                                         width="300"
+                                         id="thumbnailPreview"
+                                         src="@(Model?.Model?.URLdoslike == null ? "/Resources/image_not_available.png" : Model.Model.URLdoslike)" />
+                                </div>
+
+                                <div class="thumbnail-preview-delete-control element-invisible-no-space"
+                                     style="position:absolute; top:5px; right: 5px;">
+                                    <button type="button" style="border:none;
+                                                cursor:default;
+                                                background-color: transparent;
+                                                background-repeat: no-repeat;
+                                                border: none;
+                                                overflow: hidden;
+                                                outline: none;">
+                                        <i onclick="removePreview(event)" style="cursor: pointer;" class="fa-solid fa-circle-xmark fa-lg">
+                                        </i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="thumbnail-upload-control">
+                                <div>
+                                    <label id="thumbnailAddOrUpdate">Add new thumbnail:</label>
+                                </div>
+                                <div>
+                                    <input id="thumbnailUpload" value="@Model?.Model?.URLdoslike" type="file" name="URLdoslike" onchange="loadThumbnailPreview(event)" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <br />
+
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="flex-justify-center">
+                <button class="button-default" type="submit">
+                    Create
+                </button>
+            </div>
+
         </div>
-        
-        <br />
-
-        <input type="file" name="URLdoslike" onchange="loadThumbnail(event)" />
-
-        <br />
-        <br />
-
-        <button type="submit">Create</button>
     </form>
 </div>
+
 
 @section scripts {
     
@@ -120,13 +185,35 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     *@
+    <script>
+        function removePreview(event) {
+            var img = document.getElementById('thumbnailPreview');
+            img.removeAttribute('src');
+            img.src = "/Resources/image_not_available.png";
+
+            var input = document.getElementById('thumbnailUpload').value = "";
+
+            // TODO toggle this control (function)
+            var thumbnailUploadControl = document.getElementsByClassName('thumbnail-upload-control')[0];
+            thumbnailUploadControl.classList.remove('element-invisible-no-space');
+            
+            // TODO toggle this control (function)
+            var thumbnailPreviewDeleteControl = document.getElementsByClassName('thumbnail-preview-delete-control')[0];
+            thumbnailPreviewDeleteControl.classList.add('element-invisible-no-space');
+        }
+    </script>
 
     <script>
-        var loadThumbnail = function (event) {
-            var output = document.getElementById('thumbnail');
-
-            output.parentElement.style.display = '';
-
+        var loadThumbnailPreview = function (event) {
+            // TODO toggle this control (function)
+            var thumbnailUploadControl = document.getElementsByClassName('thumbnail-upload-control')[0];
+            thumbnailUploadControl.classList.add('element-invisible-no-space');
+            
+            // TODO toggle this control (function)
+            var thumbnailPreviewDeleteControl = document.getElementsByClassName('thumbnail-preview-delete-control')[0];
+            thumbnailPreviewDeleteControl.classList.remove('element-invisible-no-space');
+            
+            var output = document.getElementById('thumbnailPreview');
             output.src = URL.createObjectURL(event.target.files[0]);
             output.onload = function () {
                 URL.revokeObjectURL(output.src) // free memory

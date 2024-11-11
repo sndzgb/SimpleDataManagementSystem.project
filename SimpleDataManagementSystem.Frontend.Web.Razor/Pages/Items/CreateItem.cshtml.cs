@@ -3,45 +3,63 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
-//using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
+using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Globalization;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
 {
-    [Authorize(Roles = "Admin,Employee")]
-    public class CreateItemModel : PageModel //SimpleDataManagementSystemPageModelBase
+    public class CreateItemModel : BasePageModel<NewItemViewModel>
     {
         private readonly IItemsService _itemsService;
         private readonly ICategoriesService _categoriesService;
         private readonly IRetailersService _retailersService;
+        private readonly IAuthorizationService _authorizationService;
 
 
-        //public override void OnPageHandlerExecuted(PageHandlerExecutedContext context)
-        //{
-        //    var exception = context.Exception;
-        //}
-
-
-        public CreateItemModel(IItemsService itemsService, ICategoriesService categoriesService, IRetailersService retailersService)
+        public CreateItemModel(
+                IItemsService itemsService, 
+                ICategoriesService categoriesService, 
+                IRetailersService retailersService,
+                IAuthorizationService authorizationService
+            )
         {
             _itemsService = itemsService;
             _categoriesService = categoriesService;
             _retailersService = retailersService;
+            _authorizationService = authorizationService;
         }
 
 
-        //[FromBody]
-        [BindProperty]
-        public NewItemViewModel NewItem { get; set; }
+        [FromQuery(Name = "test")]
+        public string? Test { get; set; }
 
         public CategoriesViewModel AvailableCategories { get; set; }
 
         public RetailersViewModel AvailableRetailers { get; set; }
-        
-        public ErrorViewModel Error { get; set; }
+
+
+        public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
+        {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                HttpContext.User,
+                new { roles },
+                Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                context.Result = Forbid();
+                return;
+            }
+
+            base.OnPageHandlerExecuting(context);
+        }
 
 
         public async Task<IActionResult> OnGet()
@@ -53,28 +71,14 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
 
             await Task.WhenAll(tasks);
 
-            return null;
+            return Page();
         }
-
 
         public async Task<IActionResult> OnPost(NewItemViewModel newItemViewModel)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return await OnGet();
-                }
+            var newItemId = await _itemsService.AddNewItemAsync(newItemViewModel);
 
-                var newItemId = await _itemsService.AddNewItemAsync(newItemViewModel);
-
-                return RedirectToPage("/Items/Items");
-            }
-            catch (WebApiCallException wace)
-            {
-                Error = new ErrorViewModel(wace.Error.StatusCode, wace.Error.Message, wace.Error.Errors); // set error on model
-                return await OnGet();
-            }
+            return RedirectToPage("/Items/Items");
         }
     }
 }
