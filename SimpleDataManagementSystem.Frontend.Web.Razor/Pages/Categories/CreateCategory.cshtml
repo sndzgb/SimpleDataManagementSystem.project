@@ -1,37 +1,71 @@
 ﻿@page "/Categories/Create"
 
 @using Microsoft.AspNetCore.Mvc.ModelBinding
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 @using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories.CreateCategoryModel
 
 @{
-    ViewData["Title"] = "Create Category";
+    ViewData["Title"] = "Create new category";
 }
 
-<h1>Create Category</h1>
-
-<br />
-
-
-@await Component.InvokeAsync("InvalidModelState", ModelState)
+<div class="header">
+    <h1>Create new category</h1>
+</div>
 
 
-<div id="createNewCategoryForm" style="border:1px solid black; margin:auto;width:70%; text-align:center;padding:20px;">
+<br>
+
+
+<div class="content-container">
+
+    <!-- #region DisplayError -->
+    @await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
+    <!-- #endregion DisplayError -->
+
+    <!-- #region ModelStateValidationErrors -->
+    @await Component.InvokeAsync(typeof(InvalidModelStateViewComponent), ModelState)
+    <!-- #endregion ModelStateValidationErrors -->
+
+    <br>
+
     <form method="post">
-        <label asp-for="NewCategory.Name"></label>
-        <br />
-        <input asp-for="NewCategory.Name" id="name" name="name" type="text" />
-        
-        <br />
+        <div class="form-controls-container">
+            <div class="form-controls">
 
-        <label asp-for="NewCategory.Priority">Priority:</label>
-        <br />
-        <input asp-for="NewCategory.Priority" id="priority" name="priority" type="text" />
-        
-        <br />
-        <br />
+                <div class="input-control single-per-line">
+                    <div class="required">
+                        <label>Name</label>
+                    </div>
+                    <div>
+                        <input name="name" type="text" value="@Model?.Model?.Name" />
+                    </div>
+                </div>
 
-        <button type="submit">Create</button>
+                <br>
+
+                <div class="input-control single-per-line">
+                    <div class="required">
+                        <label>Priority</label>
+                    </div>
+                    <div>
+                        <input name="priority" type="number" value="@Model?.Model?.Priority" />
+                    </div>
+                </div>
+
+            </div>
+
+            <br>
+
+            <div class="flex-justify-center">
+                <button class="button-default" type="submit">
+                    Create
+                </button>
+            </div>
+
+        </div>
     </form>
 </div>
+
+
