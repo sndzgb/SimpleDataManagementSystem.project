@@ -12,7 +12,8 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Write
         [StringLength(16, ErrorMessage = "Invalid password character length", MinimumLength = 4)]
         public string Password { get; set; }
 
-        [Range(1, Int32.MaxValue, ErrorMessage = "Invalid role ID.")]
+        [Required]
+        [Range(0, 255, ErrorMessage = "Invalid role ID.")]
         public int RoleId { get; set; }
     }
 }
