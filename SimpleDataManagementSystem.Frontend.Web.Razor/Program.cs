@@ -121,7 +121,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor
             .AddHttpMessageHandler<RefreshAuthorizationHeaderDelegatingHandler>();
 
             var app = builder.Build();
-
+            
             app.UseCors(myCorsPolicy);
 
             // Configure the HTTP request pipeline.
