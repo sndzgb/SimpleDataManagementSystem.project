@@ -2,130 +2,121 @@
 
 @model UsersModel
 
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Helpers
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 @using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 @using System.Security.Claims
+@using SimpleDataManagementSystem.Shared.Common.Constants
 
 @{
     ViewData["Title"] = "Users";
 }
 
-<h1>Users</h1>
+
+<div class="header">
+    <h1>Users</h1>
+</div>
+
+<br>
+
+<div class="menu">
+    <div>
+        @if (
+                PermissionsHelper.IsInRole
+                (
+                    Roles.Admin,
+                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                )
+        )
+        {
+            <a href="/Users/Create"><button class="button-default" type="button">Create</button></a>
+        }
+    </div>
+
+    <div class="spacer">
+    </div>
+
+    @* <div style="display: flex; flex-direction: row;">
+        <input style="outline: none; flex-grow: 2; border: none; border-bottom: 1px solid gainsboro;" />
+        <button type="button" style="border: none; border-bottom: 1px solid gainsboro; background-color: white;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+    </div> *@
+</div>
 
 <br />
 
-<div>
-    <a href="/Users/Create"><button>Create</button></a>
-</div>
-
-<hr />
-
-<div>
-    <table>
+<div class="table-default">
+    <table style="table-layout: fixed; width: 100%;">
         <thead>
             <tr>
-                <th>
-                    ID
-                </th>
-                <th>
-                    Username
-                </th>
-                <th>
-                    Role
-                </th>
-                @if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin")
+                <th>ID</th>
+                <th>Username</th>
+                <th>Role name</th>
+                <th>Password change required</th>
+                @if (
+                        PermissionsHelper.IsInRole
+                        (
+                            Roles.Admin,
+                            User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                        )
+                )
                 {
-                    <th>
-                        Management
-                    </th>
+                    <th>Management</th>
                 }
             </tr>
         </thead>
         <tbody>
-            @if (Model.Users != null)
+            @if (Model.Users.Users != null)
             {
-                @foreach (var user in Model.Users.Users)
+                @foreach (var u in Model!.Users!.Users)
                 {
-                    <tr>
-                        <td>
-                            @user.ID
+                    <tr style="max-height: 70px; height:70px;">
+                        <td>@u.ID</td>
+                        <td>@u.Username</td>
+                        <td>@u.RoleName</td>
+                        <td class="@(u.IsPasswordChangeRequired ? "text-danger" : "")">
+                            @(u.IsPasswordChangeRequired ? "Yes" : "No")
                         </td>
-                        <td>
-                            @user.Username
-                        </td>
-                        <td>
-                            @user.RoleName
-                        </td>
-                        <td>
-                            <div class="options @user.ID">
-                                <a href="/Users/@user.ID/Edit"><button type="button">Edit</button></a>
-                                |
-                                <button class="delete" id="@user.ID">Delete</button>
-                            </div>
-
-                            <div class="confirm @user.ID" style="display:none;">
-                                Confirm:
-                                <form method="post">
-                                    @Html.AntiForgeryToken()
-                                    <button type="button" onclick="confirmDelete(@user.ID)">Yes</button>
-                                </form>
-                                <button onclick="cancelDelete(@user.ID)">No</button>
-                            </div>
-                        </td>
+                        @if (
+                                PermissionsHelper.IsInRole(
+                                    Roles.Admin,
+                                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                            )
+                        )
+                        {
+                            <td class="options">
+                                <a href="/Users/@(u.ID)/Details">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                </a>
+                                <span>&nbsp;</span>
+                                <span>&nbsp;</span>
+                                <a href="/Users/@(u.ID)/Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <span>&nbsp;</span>
+                                <span>&nbsp;</span>
+                                <a href="/Users/@(u.ID)/Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </td>
+                        }
                     </tr>
                 }
             }
         </tbody>
     </table>
+
+    @if ((Model == null) || (Model?.Users?.Users?.Count == 0) || (Model?.Users == null))
+    {
+        <div class="no-data">
+            No data to show.
+        </div>
+    }
 </div>
 
 
 <!-- #region Pagination -->
-@await Component.InvokeAsync(typeof(PagerViewComponent), Model.Users?.PageInfo)
+@await Component.InvokeAsync(typeof(PagerViewComponent), Model?.Users?.PageInfo)
 <!-- #endregion Pagination -->
 
-
-@section scripts
-{
-    <script>
-        function confirmDelete(userId) {
-            var user = { "UserId": userId };
-            var token = $('input[name="__RequestVerificationToken"]').val();
-
-            $.ajax({
-                type: "POST",
-                url: "/Users/" + userId + "/Delete/?handler=DeleteUser",
-                data: {
-                    __RequestVerificationToken: token,
-                },
-                success: function (r) {
-                    $(".confirm." + userId).closest("tr").remove();
-                    showSnackbar("User deleted successfully");
-                },
-                error: function (xhr, status, error) {
-                    console.log(xhr.responseText);
-                    console.log(status);
-                    console.log(error);
-                }
-            });
-        }
-
-        function cancelDelete(userId) {
-            $(".options." + userId).css("display", "inline-block");
-            $(".confirm." + userId).css("display", "none");
-        }
-
-        $(document).ready(function () {
-            $(".delete").click(function (e) {
-                e.preventDefault();
-                var userId = $(this).attr("id");
-
-                var parent = $("#" + userId).parent();
-
-                parent.hide();
-
-                $(".confirm." + userId).css("display", "");
-            });
-        });
-    </script>
-}
