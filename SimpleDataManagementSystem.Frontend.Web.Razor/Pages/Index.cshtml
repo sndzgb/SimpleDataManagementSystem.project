@@ -3,50 +3,9 @@
 @model IndexModel
 
 @{
-    ViewData["Title"] = "Home page";
-    // var e = ViewData["Error"];
-    
-    // var error = HttpContext.Items["Error"];
-    // string helloWorld = "Hello World";
+    ViewData["Title"] = "Simple Data Management System";
 }
 
-@* @if (ViewData["Error"] != null)
-{
-    <p style="color:red;">Not empty</p>
-    <p>@ViewData["Error"]</p>
-}
-else
-{
-    <p style="color:green;">Empty</p>
-} *@
-
-@if (User.Identity.IsAuthenticated == false)
-{
-    <h1>Login</h1>
-
-    <br />
-
-    <div style="border:1px solid black; margin:auto;width:70%; text-align:center;padding:10px;">
-        <form method="post" asp-page="/Account/Account" asp-page-handler="LogIn">
-            
-            @Html.AntiForgeryToken()
-
-            <label asp-for="Credential.Username"></label>
-            <br />
-            <input asp-for="Credential.Username" id="username" name="username" type="text" />
-            <br />
-            <label asp-for="Credential.Username">Password:</label>
-            <br />
-            <input asp-for="Credential.Password" id="password" name="password" type="password" />
-            <br />
-            <br />
-            <button type="submit">Login</button>
-        </form>
-    </div>
-}
-else
-{
-    <div style="text-align:center; border:1px solid black; margin:auto;width:70%; ">
-        <h1>Welcome</h1>
-    </div>
-}
+<div style="display:flex; justify-content:center;">
+    <h1>Welcome to Simple Data Management System.</h1>
+</div>

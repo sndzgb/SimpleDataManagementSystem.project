@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +9,7 @@ using System.Security.Claims;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
 {
-    public class IndexModel : PageModel
+    public class IndexModel : BasePageModel<object>
     {
         private readonly ILogger<IndexModel> _logger;
 
@@ -19,19 +20,14 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
         }
 
 
-        [BindProperty]
-        public CredentialViewModel Credential { get; set; }
-
-
         public async Task<IActionResult> OnGet()
         {
             if (!User.Identity.IsAuthenticated)
             {
-                // rename to Account/Login
-                return RedirectToPage("/Account/Account");
+                return RedirectToPage("/Account/Login");
             }
 
-            return null;
+            return Page();
         }
     }
 }
