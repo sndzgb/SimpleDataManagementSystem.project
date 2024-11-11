@@ -1,7 +1,124 @@
 ﻿@page "/Items/{ItemId}/Delete"
 
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
+
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.DeleteItemModel
 
 @{
-    ViewData["Title"] = "Delete Item";
+    ViewData["Title"] = "Delete item - '" + (Model?.Model?.Nazivproizvoda ?? "-") + "'";
 }
+
+<div class="header">
+    <h1>Delete item - '<b>@Model?.ItemId</b>'</h1>
+</div>
+
+
+<br />
+
+
+<div class="content-container">
+
+    <!-- #region DisplayError -->
+    @await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
+    <!-- #endregion DisplayError -->
+
+    <br>
+
+    @if (Model?.Model != null)
+    {
+        <form method="post">
+            <div class="readonly-form-controls-container">
+                <div class="readonly-form-controls">
+
+                    <div class="port-side">
+                        <div class="readonly-control single-per-line">
+                            <div>
+                                <label>Naziv proizvoda:</label>
+                            </div>
+                            <div>
+                                <em>
+                                    <label>@Model?.Model?.Nazivproizvoda</label>
+                                </em>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="readonly-control single-per-line">
+                            <div>
+                                <label>Opis:</label>
+                            </div>
+                            <div>
+                                <em>
+                                    <label>@Model?.Model?.Opis</label>
+                                </em>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="readonly-control single-per-line">
+                            <div>
+                                <label>Cijena:</label>
+                            </div>
+                            <div>
+                                <em>
+                                    <label>@Model?.Model?.Cijena.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)</label>
+                                </em>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="readonly-control single-per-line">
+                            <div>
+                                <label>Datum akcije:</label>
+                            </div>
+                            <div>
+                                <em>
+                                    <label>@Model?.Model?.Datumakcije</label>
+                                </em>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="readonly-control single-per-line">
+                            <div>
+                                <label>Kategorija:</label>
+                            </div>
+                            <div>
+                                <em>
+                                    <label>@Model?.Model?.Kategorija</label>
+                                </em>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="starboard-side">
+                        <div class="image-readonly-control">
+                            <img height="300"
+                                 width="300"
+                                 id="thumbnailPreview"
+                                 src="@(Model?.Model?.URLdoslikeUri == null ?
+                                        "/Resources/image_not_available.png"
+                                        :
+                                        Model.Model.URLdoslikeUri)" />
+                        </div>
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div class="flex-justify-center">
+                    <button class="button-danger" type="submit">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </form>
+    }
+</div>
