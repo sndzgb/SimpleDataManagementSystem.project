@@ -1,17 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using SimpleDataManagementSystem.Backend.Database.Entities;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
-using SimpleDataManagementSystem.Backend.Logic.Exceptions;
 using SimpleDataManagementSystem.Backend.Logic.Models;
 using SimpleDataManagementSystem.Backend.Logic.Repositories.Abstractions;
 using System;
 using System.Collections.Generic;
-using System.Formats.Asn1;
+using System.Data;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementations
 {
@@ -202,6 +201,150 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
             item.URLdoslike = null;
 
             await _dbContext.SaveChangesAsync();
+        }
+
+        // ItemSearchResponseDTO
+        public async Task<Tuple<List<Item>?, int>> SearchItemsAsync(ItemSearchRequestDTO request, CancellationToken cancellationToken)
+        {
+            string whereClause = "";
+            string orderByClause = "";
+
+            if (!string.IsNullOrWhiteSpace(request.SearchQuery))
+            {
+                whereClause = $@" 
+WHERE
+( 
+    @searchQuery IS NULL
+    OR 
+    i.Cijena = (select TRY_CONVERT(numeric(18, 2), @searchQuery))
+)
+OR
+(
+	@searchQuery IS NULL 
+	OR 
+	UPPER(i.Nazivproizvoda) LIKE ('%' + UPPER(@searchQuery) + '%')
+--set collation
+    COLLATE Latin1_general_CI_AI
+) 
+                ";
+            }
+
+            switch (request.SortBy)
+            {
+                case SearchableItemSortOrder.NazivproizvodaAsc:
+                    orderByClause = " i.Nazivproizvoda ASC ";
+                    break;
+                case SearchableItemSortOrder.NazivproizvodaDesc:
+                    orderByClause = " i.Nazivproizvoda DESC ";
+                    break;
+                case SearchableItemSortOrder.CijenaAsc:
+                    orderByClause = " i.Cijena ASC ";
+                    break;
+                case SearchableItemSortOrder.CijenaDesc:
+                    orderByClause = " i.Cijena DESC ";
+                    break;
+                default:
+                    orderByClause = " i.Nazivproizvoda DESC ";
+                    break;
+            }
+
+            var rawSql =
+@$"
+SELECT 
+	i.Nazivproizvoda
+    ,i.Cijena
+    ,i.URLdoslike
+FROM 
+	Items AS i
+    {whereClause}
+ORDER BY
+	{orderByClause}
+OFFSET (@page - 1) * @take ROWS
+FETCH NEXT @take ROWS ONLY
+;
+";
+
+            List<ItemEntity> results = new List<ItemEntity>();
+            int totalItemsFound = 0;
+
+            using (var connection = _dbContext.Database.GetDbConnection())
+            {
+                connection.Open();
+
+                var totalsCommand = new SqlCommand($@"
+SELECT
+COUNT(*) AS 'TotalItemsFound'
+FROM 
+Items AS i 
+WHERE 
+i.Nazivproizvoda LIKE ('%'+@nazivproizvoda+'%') 
+COLLATE Latin1_general_CI_AI",
+                    (SqlConnection)connection
+                );
+                totalsCommand.Parameters.Add(new SqlParameter("nazivproizvoda", request.SearchQuery));
+
+                var totalItemsFoundReader = totalsCommand.ExecuteReader();
+
+                if (totalItemsFoundReader != null)
+                {
+                    while (totalItemsFoundReader.Read())
+                    {
+                        totalItemsFound = totalItemsFoundReader.GetInt32("TotalItemsFound");
+                    }
+                }
+
+
+                List<SqlParameter> ps = new List<SqlParameter>();
+                ps.Add(new SqlParameter("searchQuery", request.SearchQuery?.ToUpper()));
+                ps.Add(new SqlParameter("take", request.Take));
+                ps.Add(new SqlParameter("page", request.Page));
+
+                var command = connection.CreateCommand();
+                command.CommandType = CommandType.Text;
+                command.CommandText = rawSql;
+                command.Parameters.AddRange(ps.ToArray());
+
+                var reader = command.ExecuteReader();
+
+                if (reader != null)
+                { 
+                    while (reader.Read())
+                    {
+                        var item = new ItemEntity();
+
+                        item.Nazivproizvoda = reader.GetString("Nazivproizvoda");
+                        item.Cijena = reader.GetDecimal("Cijena");
+                        item.URLdoslike = reader.IsDBNull("URLdoslike") ? null : reader.GetString("URLdoslike");
+
+                        results.Add(item);
+                    }
+
+                    reader.Close();
+                }
+
+                command.Dispose();
+                connection.Close();
+            }
+
+            // TODO join "Retailer"
+            var model = new List<Item>();
+
+            if (results != null)
+            {
+                model.AddRange(
+                    results
+                        .Select(x => new Item()
+                        {
+                            Cijena = x.Cijena,
+                            Nazivproizvoda = x.Nazivproizvoda,
+                            URLdoslike = x.URLdoslike
+                        })
+                        .ToList()
+                );
+
+            }
+
+            return new Tuple<List<Item>?, int>(model, totalItemsFound);
         }
 
 
