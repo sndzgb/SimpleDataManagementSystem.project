@@ -8,6 +8,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Helpers
     {
         // TODO add error handling
         // TODO move to shared project
+        // TODO put claims in Token
         public static List<Claim>? GetClaimsFromToken(string token)
         {
             if (string.IsNullOrEmpty(token))
@@ -23,8 +24,21 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Helpers
             claims.Add(new Claim(ClaimTypes.Role, jwt.Claims.Where(x => x.Type == ClaimTypes.Role).Single().Value));
             claims.Add(new Claim(ExtendedClaims.Type.Jwt, token));
             claims.Add(new Claim(ExtendedClaims.Type.IsPasswordChangeRequired, jwt.Claims.Where(x => x.Type == ExtendedClaims.Type.IsPasswordChangeRequired).Single().Value));
+            claims.Add(new Claim(ExtendedClaims.Type.Username, jwt.Claims.Where(x => x.Type == ExtendedClaims.Type.Username).Single().Value));
 
             return claims;
+        }
+
+        public static string? GetValueFromClaim(Claim claim)
+        {
+            return GetClaimsFromToken(claim.Type)?.FirstOrDefault()?.Value;
+        }
+
+        public static string? GetValueFromClaimsByKey(IEnumerable<Claim> claims, string key)
+        {
+            var cs = claims.Where(x => x.Type == key);
+            var val = cs.FirstOrDefault()?.Value;
+            return val;
         }
     }
 }
