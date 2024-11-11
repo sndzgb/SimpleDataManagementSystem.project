@@ -537,3 +537,9 @@ input:disabled {
     border-bottom: 1px solid gainsboro;
     width: fit-content;
 }
+
+
+.HIGHLIGHTED-TEXT {
+    background-color: yellow;
+    font-weight: bold;
+}
