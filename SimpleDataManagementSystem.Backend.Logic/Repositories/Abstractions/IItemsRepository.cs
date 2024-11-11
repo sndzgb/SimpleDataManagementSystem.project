@@ -18,5 +18,6 @@ namespace SimpleDataManagementSystem.Backend.Logic.Repositories.Abstractions
         Task<List<Item>?> GetItemsByTitleAsync(string title);
         Task<ItemDTO?> GetItemByIdAsync(string itemId);
         Task UpdateItemPartialAsync(string itemId);
+        Task<Tuple<List<Item>?, int>> SearchItemsAsync(ItemSearchRequestDTO request, CancellationToken cancellationToken); // ItemSearchResponseDTO
     }
 }
