@@ -64,6 +64,12 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Middlewares
                 httpStatusCode = (int)HttpStatusCode.BadRequest;
             }
 
+            if (type == typeof(OperationCanceledException))
+            {
+                message = string.IsNullOrEmpty(ex.Message) ? "Request was cancelled." : ex.Message;
+                httpStatusCode = (int)HttpStatusCode.NoContent;
+            }
+
             if (type == typeof(Exception))
             {
                 message = "An error occured while processing your request.";
