@@ -6,6 +6,7 @@ using SimpleDataManagementSystem.Frontend.Web.Razor.Events;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Middlewares;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Options;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
+using SimpleDataManagementSystem.Shared.Extensions;
 using System.Security.Claims;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor
@@ -59,7 +60,8 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor
                 
                 //options.LoginPath = "/Account/Login";
                 options.LoginPath = "/";
-                options.AccessDeniedPath = "/Account/AccessDenied";
+                options.AccessDeniedPath = "/Forbidden";
+
                 //options.SlidingExpiration = true;
                 //options.Cookie.Expiration = TimeSpan.FromMinutes(1440);
                 options.Cookie.MaxAge = TimeSpan.FromMinutes(1440);
@@ -75,10 +77,12 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor
 
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("Admin", policy => policy.RequireClaim(ClaimTypes.Role, "Admin"));
-                options.AddPolicy("AdminOnly", policy => policy.RequireClaim(ClaimTypes.Role, "Admin"));
+                options.AddDefaultPolicies();
+
+                //options.AddPolicy("Admin", policy => policy.RequireClaim(ClaimTypes.Role, "Admin"));
+                //options.AddPolicy("AdminOnly", policy => policy.RequireClaim(ClaimTypes.Role, "Admin"));
                 //options.AddPolicy("RequireResourceOwnership", policy => policy.RequireClaim("UserId", "{UserId}"));
-            });
+            }).AddServicesForDefaultPolicies();
 
             builder.Services.AddHttpClient(HttpClients.SimpleDataManagementSystemHttpClient.Name, client =>
             {
@@ -103,7 +107,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor
             app.UseCors(myCorsPolicy);
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment()) // TODO change to production
+            if (!app.Environment.IsDevelopment()) // TODO change to production
             {
                 // TODO
                 //app.UseStatusCodePagesWithReExecute("/Error/{0}");
@@ -118,7 +122,11 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor
                 app.UseDeveloperExceptionPage();
             }
 
-            //app.UseMiddleware<ExceptionHandlingMiddleware>();
+            //handler=PageError
+            app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
+
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+            app.UseMiddleware<AllowPasswordChangeMiddleware>();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
