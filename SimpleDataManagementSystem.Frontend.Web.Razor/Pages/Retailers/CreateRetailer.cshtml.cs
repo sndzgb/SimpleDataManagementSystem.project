@@ -1,54 +1,59 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
+using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
 {
-    [Authorize(Roles = "Admin,Employee")]
     [ValidateAntiForgeryToken]
-    public class CreateRetailerModel : PageModel
+    public class CreateRetailerModel : BasePageModel<NewRetailerViewModel>
     {
         private readonly IRetailersService _retailersService;
+        private readonly IAuthorizationService _authorizationService;
 
 
-        public CreateRetailerModel(IRetailersService retailersService)
+        public CreateRetailerModel(IRetailersService retailersService, IAuthorizationService authorizationService)
         {
             _retailersService = retailersService;
+            _authorizationService = authorizationService;
         }
 
 
-        [BindProperty]
-        public NewRetailerViewModel NewRetailer { get; set; }
+        public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
+        {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
 
-        public WebApiCallException Error { get; set; }
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                HttpContext.User,
+                new { roles },
+                Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                context.Result = Forbid();
+                return;
+            }
+
+            base.OnPageHandlerExecuting(context);
+        }
 
 
         public async Task<IActionResult> OnGet()
         {
-            return null;
+            return Page();
         }
 
         public async Task<IActionResult> OnPost(NewRetailerViewModel newRetailerViewModel)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return await OnGet();
-                }
+            var newUserId = await _retailersService.AddNewRetailerAsync(newRetailerViewModel);
 
-                var newUserId = await _retailersService.AddNewRetailerAsync(newRetailerViewModel);
-
-                return RedirectToPage("/Retailers/Retailers");
-            }
-            catch (WebApiCallException wace)
-            {
-                Error = wace; // set error on model
-                return await OnGet();
-            }
+            return RedirectToPage("/Retailers/Retailers");
         }
     }
 }

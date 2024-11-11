@@ -1,68 +1,154 @@
 ﻿@page "/Retailers/Create"
 
 @using Microsoft.AspNetCore.Mvc.ModelBinding
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 @using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers.CreateRetailerModel
 
 @{
-    ViewData["Title"] = "Create Retailer";
+    ViewData["Title"] = "Create new retailer";
 }
 
-<h1>Create Retailer</h1>
+<div class="header">
+    <h1>Create new retailer</h1>
+</div>
 
-<br />
+    
+<br>
 
 
-@await Component.InvokeAsync("InvalidModelState", ModelState)
+<div class="content-container">
 
+    <!-- #region DisplayError -->
+    @await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
+    <!-- #endregion DisplayError -->
 
-<div style="border:1px solid black; margin:auto;width:70%; text-align:center;padding:20px;">
+    <!-- #region ModelStateValidationErrors -->
+    @await Component.InvokeAsync(typeof(InvalidModelStateViewComponent), ModelState)
+    <!-- #endregion ModelStateValidationErrors -->
+
+    <br>
+
     <form method="post" enctype="multipart/form-data">
-        <label for="name">Name:</label>
-        <br />
-        <input name="name" />
+        <div class="form-controls-container">
+            <div class="form-controls">
+                <div class="port-side">
+                    <div class="input-control">
+                        <div class="required">
+                            <label>Name:</label>
+                        </div>
+                        <div>
+                            <input type="text" name="name" value="@Model?.Model?.Name" />
+                        </div>
+                    </div>
 
-        <br />
+                    <br>
 
-        <label for="priority">Priority:</label>
-        <br />
-        <input name="priority" />
+                    <div class="input-control">
+                        <div class="required">
+                            <label>Priority:</label>
+                        </div>
+                        <div>
+                            <input type="number" name="priority" value="@Model?.Model?.Priority" />
+                        </div>
+                    </div>
+                </div>
 
-        <br />
+                <div class="starboard-side">
+                    <div class="image-control">
+                        <div>
+                            <label>Thumbnail:</label>
+                        </div>
+                        <div id="thumbnail">
+                            <div style="position: relative">
+                                <div class="thumbnail-preview-container">
+                                    <img height="300"
+                                         width="300"
+                                         id="thumbnailPreview"
+                                         src="@(Model?.Model?.LogoImage == null ? "/Resources/image_not_available.png" : Model.Model.LogoImage)" />
+                                </div>
 
-        <label for="logoImage">Logo:</label>
-        <br />
+                                <div class="thumbnail-preview-delete-control element-invisible-no-space"
+                                     style="position:absolute; top:5px; right: 5px;">
+                                    <button type="button" style="border:none;
+                                                cursor:default;
+                                                background-color: transparent;
+                                                background-repeat: no-repeat;
+                                                border: none;
+                                                overflow: hidden;
+                                                outline: none;">
+                                        <i onclick="removePreview(event)" style="cursor: pointer;" class="fa-solid fa-circle-xmark fa-lg">
+                                        </i>
+                                    </button>
+                                </div>
+                            </div>
 
-        <div style="display: none;">
-            <img id="thumbnail" style="width:300px; height:300px; max-width:300px; max-height:300px;" />
-            <br />
+                            <div class="thumbnail-upload-control">
+                                <div>
+                                    <label id="thumbnailAddOrUpdate">Add new thumbnail:</label>
+                                </div>
+                                <div>
+                                    <input id="thumbnailUpload" value="@Model?.Model?.LogoImage" type="file" name="logoImage" onchange="loadThumbnailPreview(event)" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <br />
+
+                    </div>
+                </div>
+
+            </div>
+
+            <br>
+
+            <div class="flex-justify-center">
+                <button class="button-default" type="submit">
+                    Create
+                </button>
+            </div>
         </div>
-
-        <br />
-
-        <input type="file" name="logoImage" onchange="loadThumbnail(event)" />
-
-        <br />
-        <br />
-
-        <button type="submit">Create</button>
     </form>
 </div>
 
 
-@* TODO move to .JS *@
 @section scripts {
+
     <script>
-        var loadThumbnail = function (event) {
-            var output = document.getElementById('thumbnail');
+        function removePreview(event) {
+            var img = document.getElementById('thumbnailPreview');
+            img.removeAttribute('src');
+            img.src = "/Resources/image_not_available.png";
 
-            output.parentElement.style.display = '';
+            var input = document.getElementById('thumbnailUpload').value = "";
 
+            // TODO toggle this control (function)
+            var thumbnailUploadControl = document.getElementsByClassName('thumbnail-upload-control')[0];
+            thumbnailUploadControl.classList.remove('element-invisible-no-space');
+
+            // TODO toggle this control (function)
+            var thumbnailPreviewDeleteControl = document.getElementsByClassName('thumbnail-preview-delete-control')[0];
+            thumbnailPreviewDeleteControl.classList.add('element-invisible-no-space');
+        }
+    </script>
+
+    <script>
+        var loadThumbnailPreview = function (event) {
+            // TODO toggle this control (function)
+            var thumbnailUploadControl = document.getElementsByClassName('thumbnail-upload-control')[0];
+            thumbnailUploadControl.classList.add('element-invisible-no-space');
+
+            // TODO toggle this control (function)
+            var thumbnailPreviewDeleteControl = document.getElementsByClassName('thumbnail-preview-delete-control')[0];
+            thumbnailPreviewDeleteControl.classList.remove('element-invisible-no-space');
+
+            var output = document.getElementById('thumbnailPreview');
             output.src = URL.createObjectURL(event.target.files[0]);
             output.onload = function () {
                 URL.revokeObjectURL(output.src) // free memory
             }
         };
     </script>
+
 }
