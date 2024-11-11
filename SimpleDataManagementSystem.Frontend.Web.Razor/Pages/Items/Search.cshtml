@@ -1,0 +1,239 @@
+﻿@page "/Items/Search"
+
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
+@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Extensions
+
+@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.SearchModel
+
+@{
+    ViewData["Title"] = "Items search";
+}
+
+<div class="header">
+    <h1>
+        Search items - '<b>@(Model?.Model?.Request?.SearchQuery ?? "-")</b>'
+    </h1>
+</div>
+
+<br />
+
+@await Component.InvokeAsync(nameof(Shared.Components.InvalidModelState), ModelState)
+<!-- #region DisplayError -->
+@await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
+<!-- #endregion DisplayError -->
+
+
+<div class="search-container">
+    <div class="search-header" onclick="onSearchHeaderClicked(this)">
+        <div class="search-spacer">
+        </div>
+        <div class="search-title">
+            <label>Search options:</label>
+        </div>
+        <div class="search-toggler">
+            <button type="button" class="search-toggler-button">
+                <i class="fa-solid fa-circle-chevron-down"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="search-form-controls">
+        <form id="search-form" method="get" asp-page="/Items/Search" >
+            <div class="search-input-controls">
+                <div class="search-query">
+                    <div>
+                        <label for="searchQuery">Search query:</label>
+                    </div>
+                    <div>
+                        <input 
+                            title="Search query" 
+                            name="searchQuery" 
+                            id="searchQuery" 
+                            value="@Model?.Model?.Request?.SearchQuery"
+                        />
+                    </div>
+                </div>
+                <div class="search-sort">
+                    <div>
+                        <label for="sortBy">Sort by:</label>
+                    </div>
+                    <div>
+                        <select id="sortBy" name="sortBy">
+                            @foreach (SortableItem si in Enum.GetValues(typeof(SortableItem)))
+                            {
+                                <option value="@((int)si)" selected="@((Model?.Model?.Request?.SortBy ?? Model?.SortBy) == (int)si)">
+                                    @si.GetDescription()
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="search-take">
+                    <div>
+                        <label for="take">Take:</label>
+                    </div>
+                    <div>
+                        <input style="text-align: center; width:4ch;" name="take" id="take" value="@(Model?.Model?.Request?.Take ?? Model?.ItemsPerPage)" />
+                    </div>
+                </div>
+                <div class="search-page">
+                    <div>
+                        <label for="page">Page:</label>
+                    </div>
+                    <div>
+                        <input style="text-align: center; width:4ch;" name="page" id="page" value="@(Model?.Model?.Request?.Page ?? Model?.PageNumber)" />
+                    </div>
+                </div>
+            </div>
+            <div class="search-form-submit-control">
+                <div>
+                    <button type="submit" class="button-default">
+                        Search
+                    </button>
+                </div>
+                <div>
+                    <button onclick="onClearFormFieldsClick(this)" type="button" class="button-danger">Clear</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<br />
+
+<div class="search-statistics" style="display:flex; justify-content:space-between;">
+    <div class="search-total">
+        <div>
+            <label>Total found:<span>&nbsp;</span></label>
+        </div>
+        <div>
+            <b>
+                <label>@(Model?.Model?.PageInfo?.Total ?? 0)</label>
+            </b>
+        </div>
+    </div>
+    <div class="search-query-text">
+        <div>
+            <label>Search query:<span>&nbsp;</span></label>
+        </div>
+        <div>
+            <label>
+                <b>
+                    '@(Model?.Model?.Request?.SearchQuery ?? "-")'
+                </b>
+            </label>
+        </div>
+    </div>
+</div>
+
+<br>
+
+<div class="table-default">
+    <table style="table-layout: fixed; width: 100%;">
+        <thead>
+            <tr>
+                <th>Naziv proizvoda</th>
+                <th>Cijena</th>
+                <th>Thumbnail</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model?.Model?.Items != null)
+            {
+                @foreach (var item in Model?.Model?.Items!)
+                {
+                    <tr style="max-height: 70px; height:70px;">
+                        <td class="transformed-data">@item.Nazivproizvoda</td>
+                        <td class="transformed-data">@item.Cijena.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)</td>
+                        <td>
+                            <img 
+                                width="64"
+                                height="64" 
+                                src="@(item?.URLdoslikeUri != null ? item.URLdoslikeUri : "/Resources/image_not_available.png")" 
+                            />
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    @if (Model?.Model?.Items.Count == 0)
+    {
+        <div class="no-data">
+            No data to show.
+        </div>
+    }
+</div>
+
+
+<!-- #region Pagination -->
+@await Component.InvokeAsync(typeof(PagerViewComponent), Model?.Model?.PageInfo)
+<!-- #endregion Pagination -->
+
+
+@section scripts {
+
+    <script>
+
+        // TODO get from "input" field
+        let searchQuery = "";
+
+        $(document).ready(function () {
+            const val = $("#searchQuery").val();
+            searchQuery = val;
+        });
+
+        $(document).ready(function(e) {
+            $(".transformed-data").each(function (index, element) {
+                const ht = getHighlightedText(
+                    $(this).text()
+                );
+                $(this).html(ht);
+            });
+        });
+
+        function getHighlightedText(t) {
+            const x1 = decodeURIComponent(searchQuery).toLocaleUpperCase("hr-HR").normalize('NFD').replace(/\p{Diacritic}/gu, '');
+
+            const x2 = t.toLocaleUpperCase("hr-HR").normalize('NFD').replace(/\p{Diacritic}/gu, '');
+
+            const indexOf = x2.indexOf(x1);
+
+            if (indexOf != -1) {
+                const rpl = rplc(t, indexOf, searchQuery.length);
+                return rpl.toUpperCase();
+            } else {
+                return t;
+            }
+        }
+
+        function rplc(originalValue, startIndex, replaceCharNumbers) {
+            let value = originalValue.substring(startIndex, startIndex + replaceCharNumbers);
+            let labeled = "<label style='background-color:yellow; font-weight:bold;'>" + value + "</label>"
+            let final = originalValue.substring(0, startIndex) + labeled + originalValue.substring(startIndex + replaceCharNumbers);
+            return final;
+        }
+
+        function onSearchHeaderClicked(e) {
+            e.classList.toggle("search-header-bottom-wider-margin");
+
+            let i = e.querySelector('i');
+
+            if (i.className == "fa-solid fa-circle-chevron-up") {
+                i.className = "fa-solid fa-circle-chevron-down";
+            }
+            else {
+                i.className = "fa-solid fa-circle-chevron-up";
+            }
+
+            document.getElementsByClassName('search-form-controls')[0].classList.toggle('search-menu-collapsed');
+        }
+
+        function onClearFormFieldsClick(e) {
+            document.getElementById("search-form").reset();
+        }
+
+    </script>
+}

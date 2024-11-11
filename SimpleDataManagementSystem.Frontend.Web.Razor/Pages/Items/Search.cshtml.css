@@ -1,0 +1,86 @@
+﻿
+#search-form {
+    border: 1px solid gainsboro;
+    padding: 10px;
+}
+
+.search {
+    justify-content: center;
+}
+
+input {
+    text-align: center;
+}
+
+.search-query-text, .search-total {
+    text-align: center;
+    font-style: italic;
+}
+
+.search-query, .search-sort {
+    flex: 1 1 100%;
+    margin: 10px 0px;
+}
+
+.search-sort select {
+    text-align: center;
+}
+
+.search-page, .search-take {
+    justify-content: center;
+    margin: 10px;
+}
+
+.search div {
+    margin: 5px;
+}
+
+.search-input-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+}
+
+.search-form-submit-control {
+    display: flex;
+    justify-content: center;
+}
+
+.search-form-submit-control div {
+    margin: 5px;
+}
+
+.search-container {
+    margin: 5px 0px;
+}
+
+.search-toggler-button {
+    border: none;
+    cursor: default;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: none;
+    overflow: hidden;
+    outline: none;
+}
+
+.search-menu-collapsed {
+    display: none;
+}
+
+.search-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid gainsboro;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+    .search-header * {
+        cursor: pointer;
+    }
+
+.search-header-bottom-wider-margin {
+    margin-bottom: 20px;
+}
