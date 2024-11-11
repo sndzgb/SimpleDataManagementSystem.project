@@ -1,22 +1,26 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
+using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
 {
-    [Authorize(Roles = "Admin,Employee")]
-    public class EditCategoryModel : PageModel
+    public class EditCategoryModel : BasePageModel<UpdateCategoryViewModel>
     {
         private readonly ICategoriesService _categoriesService;
+        private readonly IAuthorizationService _authorizationService;
 
 
-        public EditCategoryModel(ICategoriesService categoriesService)
+        public EditCategoryModel(ICategoriesService categoriesService, IAuthorizationService authorizationService)
         {
             _categoriesService = categoriesService;
+            _authorizationService = authorizationService;
         }
 
 
@@ -25,37 +29,39 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
 
         public CategoryViewModel Category { get; set; }
 
-        [BindProperty]
-        public UpdateCategoryViewModel UpdatedCategory { get; set; }
 
-        public WebApiCallException Error { get; set; }
+        public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
+        {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                HttpContext.User,
+                new { roles },
+                Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                context.Result = Forbid();
+                return;
+            }
+
+            base.OnPageHandlerExecuting(context);
+        }
 
 
         public async Task<IActionResult> OnGet()
         {
             Category = await _categoriesService.GetCategoryByIdAsync(CategoryId);
 
-            return null;
+            return Page();
         }
 
         public async Task<IActionResult> OnPost()
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return await OnGet();
-                }
+            await _categoriesService.UpdateCategoryAsync(CategoryId, Model);
 
-                await _categoriesService.UpdateCategoryAsync(CategoryId, UpdatedCategory);
-
-                return RedirectToPage("/Categories/Categories");
-            }
-            catch (WebApiCallException wace)
-            {
-                Error = wace; // set error on model
-                return await OnGet();
-            }
+            return RedirectToPage("/Categories/Categories");
         }
     }
 }

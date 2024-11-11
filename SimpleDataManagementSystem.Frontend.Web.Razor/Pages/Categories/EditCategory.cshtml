@@ -1,34 +1,71 @@
 ﻿@page "/Categories/{CategoryId}/Edit"
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories.EditCategoryModel
 
 @{
-    ViewData["Title"] = "Edit Category";
+    ViewData["Title"] = "Edit category - '" + (Model?.Category?.Name ?? "-") + "'";
 }
 
-<h1>Edit Category</h1>
-
-<br />
-
-
-@await Component.InvokeAsync("InvalidModelState", ModelState)
-
-
-<div style="text-align:center; border:1px solid black; padding:20px;">
-    <form method="post">
-        <label for="name">Category Name:</label>
-        <br />
-        <input value="@Model.Category.Name" name="name" />
-
-        <br />
-
-        <label for="priority">Priority:</label>
-        <br />
-        <input value="@Model.Category.Priority" name="priority" />
-
-        <br />
-        <br />
-
-        <button type="submit">Update</button>
-    </form>
+<div class="header">
+    <h1>Edit category - '<b>@Model?.Category?.Name</b>'</h1>
 </div>
+
+
+<br>
+
+
+<div class="content-container">
+
+    <!-- #region DisplayError -->
+    @await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
+    <!-- #endregion DisplayError -->
+
+    <!-- #region ModelStateValidationErrors -->
+    @await Component.InvokeAsync(typeof(InvalidModelStateViewComponent), ModelState)
+    <!-- #endregion ModelStateValidationErrors -->
+
+    <br>
+
+    @if (Model?.Category != null)
+    {
+        <form method="post">
+            <div class="form-controls-container">
+                <div class="form-controls">
+
+                    <div class="input-control single-per-line">
+                        <div class="required">
+                            <label>Name:</label>
+                        </div>
+                        <div>
+                            <input type="text" name="name" value="@Model.Category.Name" />
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="input-control">
+                        <div class="required">
+                            <label>Priority:</label>
+                        </div>
+                        <div>
+                            <input type="number" name="priority" value="@Model.Category.Priority" />
+                        </div>
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div>
+                    <button class="button-default" type="submit">
+                        Edit
+                    </button>
+                </div>
+
+            </div>
+        </form>
+    }
+</div>
+
+
