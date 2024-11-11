@@ -7,7 +7,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Events
     {
         public override Task RedirectToAccessDenied(RedirectContext<CookieAuthenticationOptions> context)
         {
-            context.RedirectUri = "/Account/AccessDenied";
+            context.RedirectUri = "/Forbidden";
 
             return base.RedirectToAccessDenied(context);
         }
