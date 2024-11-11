@@ -9,9 +9,7 @@ using SimpleDataManagementSystem.Backend.WebAPI.Services;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Write;
 using SimpleDataManagementSystem.Shared.Common.Constants;
-using System.Globalization;
 using System.Linq;
-using System.Reflection;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 {
@@ -229,10 +227,11 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 
             if (!authorizationResult.Succeeded)
             {
-                return Forbid();
+                return new ObjectResult(new ErrorWebApiModel(StatusCodes.Status403Forbidden, null, null))
+                {
+                    StatusCode = StatusCodes.Status403Forbidden
+                };
             }
-
-            //await Task.Delay(1500);
 
             var items = await _itemsService.GetAllItemsAsync(take, page);
 
@@ -292,6 +291,72 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
             FilesService.Delete(item.URLdoslike);
 
             return Ok();
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchItems(
+            int page, int take, string? searchQuery, string? sortBy, 
+            CancellationToken cancellationToken
+        )
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery))
+            {
+                return 
+                    new ObjectResult(
+                        new ErrorWebApiModel(
+                            StatusCodes.Status400BadRequest,
+                            "Search field is required.",
+                            null
+                        )
+                    )
+                    { 
+                        StatusCode = StatusCodes.Status400BadRequest 
+                    };
+            }
+
+            SearchableItemSortOrder sort = SearchableItemSortOrder.NazivproizvodaDesc;
+
+            if (Int32.TryParse(sortBy, out int num))
+            {
+                sort = (SearchableItemSortOrder)num;
+            }
+
+            var result = 
+                await _itemsService.SearchItemsAsync(
+                    new ItemSearchRequestDTO()
+                    {
+                        Page = page,
+                        Take = take,
+                        SearchQuery = searchQuery,
+                        SortBy = sort
+                    }, 
+                    cancellationToken
+            );
+
+            var model = new ItemSearchResponseWebApiModel()
+            {
+                Items = result.Items.Select(x => new ItemWebApiModel()
+                {
+                    Cijena = x.Cijena,
+                    Nazivproizvoda = x.Nazivproizvoda,
+                    URLdoslikeUri = string.IsNullOrEmpty(x.URLdoslike) ? null : Path.Combine(Paths.FILES_BASE_URL, x.URLdoslike)
+                }).ToList(),
+                PageInfo = new PagedWebApiModel()
+                {
+                    Page = result.PageInfo.Page,
+                    Take = result.PageInfo.Take,
+                    Total = result.PageInfo.Total
+                },
+                Request = new ItemSearchRequestWebApiModel()
+                {
+                    Page = page,
+                    Take = take,
+                    SearchQuery = searchQuery,
+                    SortBy = sort
+                }
+            };
+
+            return Ok(model);
         }
     }
 }
