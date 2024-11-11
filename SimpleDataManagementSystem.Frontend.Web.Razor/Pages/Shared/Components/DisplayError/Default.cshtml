@@ -3,24 +3,29 @@
 @model ErrorViewModel
 
 @{
-
+    ViewData["Title"] = "Error";
 }
 
 @if (Model != null)
 {
-    <div style="text-align:center; color:red; font-weight: bold;">
-        <p>@Model.Message</p>
-        
-        @if (Model.Errors != null)
-        {
-            @foreach (var e in Model.Errors)
-            {
-                <em>
-                    <label>@e</label>
-                </em>
+    <div style="display:flex; flex-flow: wrap; text-align:center; justify-content:center; color:red;">
+        <div>
+            <i>
+                @Model.Message
+            </i>
+        </div>
 
-                <br />
-            }
+        @if (Model?.Errors != null)
+        {
+            <div style="flex-basis: 100%; color:red;">
+                @foreach (var e in Model.Errors)
+                {
+                    <div>
+                        <span>&#8226;</span>
+                        <label>@e</label>
+                    </div>
+                }
+            </div>
         }
     </div>
 

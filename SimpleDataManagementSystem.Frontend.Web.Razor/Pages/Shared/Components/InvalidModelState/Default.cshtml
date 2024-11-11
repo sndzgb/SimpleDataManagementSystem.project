@@ -11,26 +11,21 @@
 
 @if (errors != null && errors.Count > 0)
 {
-    <div>
-        <i>
-            Please review and update the following form errors:
-        </i>
+    <div style="display:flex; flex-flow: wrap; text-align:center; justify-content:center;">
+        <div>
+            <i>
+                Please review and update the following form errors:
+            </i>
+        </div>
 
-        @foreach (var e in errors)
-        {
-            <div style="color:red; margin-left:30px;">
-                <span>
-                    &#8226;
-                </span>
-
-                <label>
-                    @e
-                </label>
-
-                <br />
-            </div>
-        }
+        <div style="flex-basis: 100%; color:red;">
+            @foreach (var e in errors)
+            {
+                <div>
+                    <span>&#8226;</span>
+                    <label>@e</label>
+                </div>
+            }
+        </div>
     </div>
-
-    <br />
 }

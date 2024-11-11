@@ -28,46 +28,49 @@
 }
 
 
-@if (Model.PageInfo.EndPage > 0)
+@if (Model != null)
 {
-    <div class="modelTablePagination">
-        <ul>
-            @if (Model.PageInfo.Page > 1)
-            {
-                <li>
-                    <a href="@(final)take=@(Model.PageInfo.Take)&page=1">
-                        First
-                    </a>
-                </li>
-                <li>
-                    <a href="@(final)take=@(Model.PageInfo.Take)&page=@(Model.PageInfo.Page - 1)">
-                        Previous
-                    </a>
-                </li>
-            }
+    @if (Model?.PageInfo?.EndPage > 0)
+    {
+        <div class="modelTablePagination">
+            <ul>
+                @if (Model.PageInfo.Page > 1)
+                {
+                    <li>
+                        <a href="@(final)take=@(Model.PageInfo.Take)&page=1">
+                            First
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@(final)take=@(Model.PageInfo.Take)&page=@(Model.PageInfo.Page - 1)">
+                            Previous
+                        </a>
+                    </li>
+                }
 
-            @for (var page = Model.PageInfo.StartPage; page <= Model.PageInfo.EndPage; page++)
-            {
-                <li class="@(page == Model.PageInfo.Page ? "active" : "")">
-                    <a href="@(final)take=@(Model.PageInfo.Take)&page=@(page)">
-                        @(page)
-                    </a>
-                </li>
-            }
+                @for (var page = Model.PageInfo.StartPage; page <= Model.PageInfo.EndPage; page++)
+                {
+                    <li class="@(page == Model.PageInfo.Page ? "active" : "")">
+                        <a href="@(final)take=@(Model.PageInfo.Take)&page=@(page)">
+                            @(page)
+                        </a>
+                    </li>
+                }
 
-            @if (Model.PageInfo.Page < Model.PageInfo.TotalPages)
-            {
-                <li>
-                    <a href="@(final)take=@(Model.PageInfo.Take)&page=@(Model.PageInfo.Page + 1)">
-                        Next
-                    </a>
-                </li>
-                <li>
-                    <a href="@(final)take=@(Model.PageInfo.Take)&page=@(Model.PageInfo.TotalPages)">
-                        Last
-                    </a>
-                </li>
-            }
-        </ul>
-    </div>
+                @if (Model.PageInfo.Page < Model.PageInfo.TotalPages)
+                {
+                    <li>
+                        <a href="@(final)take=@(Model.PageInfo.Take)&page=@(Model.PageInfo.Page + 1)">
+                            Next
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@(final)take=@(Model.PageInfo.Take)&page=@(Model.PageInfo.TotalPages)">
+                            Last
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
 }
