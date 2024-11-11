@@ -1,0 +1,40 @@
+﻿@page "/Account/Details"
+@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Account.DetailsModel
+@{
+    ViewData["Title"] = "Account details";
+}
+
+<div class="header">
+    <h1>Account details - <b>'@Model?.Model?.Username'</b></h1>
+</div>
+
+
+<br>
+
+
+<div class="content-container">
+
+    <div class="readonly-form-controls-container">
+        <div class="readonly-form-controls">
+
+            <div class="readonly-control single-per-line">
+                <div>
+                    <label>Change password:</label>
+                </div>
+            </div>
+
+            <div class="readonly-control single-per-line">
+                <div>
+                    <a href="/account/password-change">
+                        <button>
+                            Change
+                        </button>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+</div>
