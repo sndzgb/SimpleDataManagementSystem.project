@@ -19,7 +19,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
         }
 
 
-        public async Task<string?> LogInAsync(string username, string password)
+        public async Task<AuthTokenViewModel?> LogInAsync(string username, string password)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
@@ -41,10 +41,8 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
                 return null;
             }
 
-
-
-            // FOR ALL METHODS BUT THIS!!
-            return await response.HandleResponseAsync<string>();
+            // USE THIS FOR ALL METHODS BUT THIS ONE!!
+            return await response.HandleResponseAsync<AuthTokenViewModel>();
             //await response.HandleIfInvalidResponseAsync();
             //response.EnsureSuccessStatusCode();
 
@@ -87,6 +85,55 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
             //    return json;
             //}
+        }
+
+        public async Task<UserViewModel?> GetAccountDetailsAsync()
+        {
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
+
+            var response = await httpClient.GetAsync($"/api/accounts/details");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                using var contentStream = await response.Content.ReadAsStreamAsync();
+
+                var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
+
+                throw new WebApiCallException(message);
+            }
+            else
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var responseContent = JsonSerializer.Deserialize<UserViewModel>(json);
+                return responseContent;
+            }
+        }
+
+        public async Task UpdatePasswordAsync(string oldPassword, string newPassword)
+        {
+            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
+
+            var content = new StringContent(
+                JsonSerializer.Serialize(
+                    new { oldPassword = oldPassword, newPassword = newPassword }
+                ), 
+                Encoding.UTF8, "application/json"
+            );
+
+            var response = await httpClient.PutAsync($"api/accounts/password", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                using var contentStream = await response.Content.ReadAsStreamAsync();
+
+                var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
+
+                throw new WebApiCallException(message);
+            }
+            else
+            {
+                await Task.CompletedTask;
+            }
         }
     }
 }

@@ -4,6 +4,8 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 {
     public interface IAccountsService
     {
-        Task<string?> LogInAsync(string username, string password);
+        Task<AuthTokenViewModel?> LogInAsync(string username, string password);
+        Task<UserViewModel?> GetAccountDetailsAsync();
+        Task UpdatePasswordAsync(string oldPassword, string newPassword);
     }
 }
