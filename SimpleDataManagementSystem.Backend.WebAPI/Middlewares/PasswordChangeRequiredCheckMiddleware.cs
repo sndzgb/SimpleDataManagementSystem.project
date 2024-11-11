@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Net;
+using System.Text;
+using System.Text.Json;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Middlewares
 {
@@ -36,6 +39,17 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Middlewares
                 )
             {
                 context!.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+
+                var model = new ErrorWebApiModel(
+                    (int)HttpStatusCode.Unauthorized, 
+                    "You are not allowed to access this resource until you change your password.", 
+                    null
+                );
+                var json = JsonSerializer.Serialize(model);
+                var bytes = Encoding.UTF8.GetBytes(json);
+
+                await context!.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+
                 return;
             }
 
