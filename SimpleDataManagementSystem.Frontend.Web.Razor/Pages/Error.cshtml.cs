@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
+using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
 using System.Diagnostics;
 using System.Net;
@@ -12,7 +13,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     [IgnoreAntiforgeryToken]
-    public class ErrorModel : PageModel
+    public class ErrorModel : BasePageModel<ErrorViewModel> // PageModel
     {
         public ErrorModel()
         {
@@ -20,36 +21,57 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
         }
 
 
-        public ErrorViewModel? Error { get; set; }
-
-
-        public IActionResult OnGet()
+        // USE MIDDLEWARE FOR EXCEPTIONS & handling, THIS FOR showing error HttpStatusCodes -- Call web api and return 500, 400, 401, 403, 404, ...
+        public IActionResult OnGet(int? statusCode)
         {
-            var exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
+            
+            var error = HttpContext.Items.TryGetValue(nameof(ErrorViewModel), out object? r);
+            ErrorViewModel? result = (ErrorViewModel?)r;
 
-            var exception = exceptionHandlerPathFeature.Error;
-
-            //var pc = PageContext;
-            //var hc = HttpContext;
-
-            if (exceptionHandlerPathFeature?.Error is WebApiCallException)
+            /*
+                true if:
+                    1) Client - "AuthorizationService.AuthorizeAsync()" fails
+                    2) Server - returns "AuthorizationService.AuthorizeAsync" failure
+            */
+            if (statusCode == StatusCodes.Status403Forbidden)
             {
-                var apiException = exception as WebApiCallException;
+                return RedirectToPage("/Forbidden");
+            }
+            
+            if (statusCode == StatusCodes.Status404NotFound)
+            {
                 Error = new ErrorViewModel(
-                    apiException.Error.StatusCode,
-                    apiException.Error.Message,
-                    apiException.Error.Errors
+                    StatusCodes.Status404NotFound,
+                    result?.Message ?? "Resource not found.",
+                    result?.Errors
                 );
-
-                //ViewData["Error"] = "Test error";
-                //return RedirectToPage("/Items/Create/1");
-                return Page();
             }
 
-            // TODO handle other errors...
+            if (statusCode == StatusCodes.Status400BadRequest)
+            {
+                Error = new ErrorViewModel(
+                    StatusCodes.Status400BadRequest,
+                    result?.Message ?? "Bad request occured.",
+                    result?.Errors
+                );
+            }
+            
+            if (statusCode == StatusCodes.Status401Unauthorized)
+            {
+                return RedirectToPage("/Account/PasswordChange");
+            }
+            
+            if (statusCode == StatusCodes.Status500InternalServerError)
+            {
+                // Get error message from HttpContext.Items
+                Error = new ErrorViewModel(
+                    StatusCodes.Status500InternalServerError, 
+                    "Something went wrong while processing your request.", 
+                    null
+                );
+            }
 
             return Page();
-            //return new ObjectResult(null) { StatusCode = StatusCodes.Status500InternalServerError };
         }
 
         public IActionResult OnPost()
@@ -62,73 +84,21 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
 
             var request = HttpContext.Request;
 
-            //if (request)
-            //{
-            //    base.LocalRedirect();
-            //}
-
-
             if (type == typeof(UnauthorizedException)) // login
             {
-                return base.RedirectToPage("/Account/Account");
+                return base.RedirectToPage("/Account/Login");
             }
 
             if (type == typeof(ForbiddenException)) // not allowed
             {
                 Error = new ErrorViewModel(403, "Forbidden.", null);
                 return null;
-                //return OnGet();
             }
 
 
             // default
             Error = new ErrorViewModel(500, "Unknown error occured while processing your request.");
             return null;
-            //return OnGet();
-
-
-            //if (type == typeof(HttpRequestException))
-            //{
-            //    if (HttpContext.Response.StatusCode == StatusCodes.Status401Unauthorized)
-            //    {
-            //        //HttpContext.Items.Add("Error", "Invalid login attempt.");
-            //        //HttpContext.Response.Redirect("/Unauthorized", true);
-                    
-            //        //return Forbid();
-            //        return base.RedirectToPage("/Error"); // default
-            //    }
-                
-            //    //HttpContext.Items.Add("Error", "Invalid login attempt.");
-            //    //ViewData["Error"] = "Invalid login attempt";
-            //    return base.RedirectToPage("/Index");
-            //    //return base.RedirectToPagePermanent("/Index");
-            //}
-
-
-
-
-            //var pc = PageContext;
-            //var hc = HttpContext;
-
-
-            if (exceptionHandlerPathFeature?.Error is WebApiCallException)
-            {
-                var apiException = exception as WebApiCallException;
-                Error = new ErrorViewModel(
-                    apiException.Error.StatusCode,
-                    apiException.Error.Message,
-                    apiException.Error.Errors
-                );
-                
-                //return;
-            }
-
-            // TODO handle other errors... - server unavailable, serialization/ deserialization errors, ...
-
-            //return;
-
-            return OnGet();
-            //return BadRequest();
         }
     }
 }

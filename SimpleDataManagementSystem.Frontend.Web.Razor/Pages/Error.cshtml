@@ -1,4 +1,5 @@
-﻿@page
+﻿@page "/Error"
+@* @page "/Error/PageError/{0}" *@
 
 @model ErrorModel
 
@@ -6,48 +7,41 @@
     ViewData["Title"] = "Error";
 }
 
-<h1>Error</h1>
+<div class="header">
+    <h1>Error</h1>
+</div>
 
 <br />
 
-
-@* @switch (Model.Error.StatusCode)
+@if (Model?.Error != null)
 {
-    case 400:
-        <h3>400</h3>
-        break;
-    case 404:
-        <h3>404</h3>
-        break;
-    default:
-        <p>Hello, World...?</p>
-        break;
-} *@
+    <div style="
+        padding:20px;
+        font-size:20px; 
+        display:flex; 
+        flex-flow: wrap; 
+        text-align:center; 
+        justify-content:center; 
+        color: white; 
+        background-color: indianred;"
+    >
+        <div style="text-decoration:underline;">
+            <h1>
+                @(Model.Error?.Message ?? "Something went wrong while processing your request. Please try again.")
+            </h1>
+        </div>
 
-
-<div style="text-align:center; color:red">
-    <h3>
-        <b>
-            Status: 
-        </b>
-        @Model?.Error?.StatusCode
-    </h3>
-    <h3>
-        <b>
-            Error description: 
-        </b>
-        @Model?.Error?.Message
-    </h3>
-    
-    @if (Model?.Error.Errors != null)
-    {
-        @foreach (var e in Model.Error.Errors)
+        @if (Model.Error?.Errors != null)
         {
-            <br />
-
-            <label>
-                @e
-            </label>
+            <div style="flex-basis: 100%;">
+                @foreach (var e in Model.Error.Errors)
+                {
+                    <div>
+                        <span>&#8226;</span>
+                        <label>@e</label>
+                    </div>
+                }
+            </div>
         }
-    }
-</div>
+    </div>
+}
