@@ -1,15 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using SimpleDataManagementSystem.Shared.Common.Constants;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace SimpleDataManagementSystem.Backend.WebAPI.Policies
+namespace SimpleDataManagementSystem.Shared.Common.Policies
 {
-    // TODO instead of anon obj.
-    //public class AllowedRoles
-    //{
-    //    public List<int> Roles { get; set; } = new List<int>();
-    //}
-
     public class UserIsInRoleAuthorizationRequirement : IAuthorizationRequirement
     {
         public UserIsInRoleAuthorizationRequirement()
@@ -17,7 +16,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Policies
         }
     }
 
-    public class UserIsInRoleAuthorizationHandler : 
+    public class UserIsInRoleAuthorizationHandler :
         AuthorizationHandler<UserIsInRoleAuthorizationRequirement, object>
     {
         public override async Task HandleAsync(AuthorizationHandlerContext context)
@@ -32,13 +31,13 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Policies
             )
         {
             var role = context.User?.Claims?.Where(x => x.Type == ClaimTypes.Role).FirstOrDefault()?.Value;
-            
+
             if (role == null)
             {
                 context.Fail();
                 return Task.CompletedTask;
             }
-            
+
             if (!Enum.TryParse(role, out Roles userRole))
             {
                 context.Fail();
