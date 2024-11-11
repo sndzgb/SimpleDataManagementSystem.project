@@ -1,35 +1,53 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
 {
-    public class RetailersModel : PageModel
+    public class RetailersModel : BasePageModel<RetailersViewModel>
     {
         private readonly IRetailersService _retailersService;
-        
+        private readonly IAuthorizationService _authorizationService;
 
-        public RetailersModel(IRetailersService retailersService)
+
+        public RetailersModel(IRetailersService retailersService, IAuthorizationService authorizationService)
         {
             _retailersService = retailersService;
+            _authorizationService = authorizationService;
         }
 
 
-        public RetailersViewModel Retailers { get; set; }
-
-
-        public async Task OnGet([FromQuery] int take = 8, [FromQuery] int page = 1)
+        public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
         {
-            Retailers = await _retailersService.GetAllRetailersAsync(take, page);
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee, (int)Roles.User };
 
-            return;
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                HttpContext.User,
+                new { roles },
+                Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                context.Result = Forbid();
+                return;
+            }
+
+            base.OnPageHandlerExecuting(context);
         }
 
-        public void OnPost()
+
+        public async Task<IActionResult> OnGet([FromQuery] int take = 8, [FromQuery] int page = 1)
         {
+            Model = await _retailersService.GetAllRetailersAsync(take, page);
+
+            return Page();
         }
     }
 }

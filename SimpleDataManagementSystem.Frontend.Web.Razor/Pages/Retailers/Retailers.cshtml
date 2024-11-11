@@ -6,87 +6,124 @@
 @using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 @using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
 @using System.Security.Claims
+@using SimpleDataManagementSystem.Shared.Common.Constants
 
 @{
     ViewData["Title"] = "Retailers";
 }
 
-<h1>Retailers</h1>
+<div class="header">
+    <h1>Retailers</h1>
+</div>
 
-<br />
 
+<br>
 
-@if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
-    ||
-    User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
-    )
-{
+<div class="menu">
     <div>
-        <a href="/Retailers/Create"><button>Create</button></a>
+        @if (
+            PermissionsHelper.IsInRole
+            (
+                Roles.Admin,
+                User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+            )
+            ||
+            PermissionsHelper.IsInRole
+            (
+                Roles.Employee,
+                User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+            )
+        )
+        {
+            <a href="/Retailers/Create"><button class="button-default" type="button">Create</button></a>
+        }
     </div>
 
-    <hr />
-}
+    @* <div class="spacer">
+    </div> *@
 
-<div>
-    <table>
+    @* <div style="display: flex; flex-direction: row;">
+    <form method="get" asp-page="/Items/Search">
+    <input name="searchQuery"
+    style="outline: none; flex-grow: 2; border: none; border-bottom: 1px solid gainsboro;" />
+    <button type="submit" style="border: none; border-bottom: 1px solid gainsboro; background-color: white;">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    </button>
+    </form>
+    </div> *@
+</div>
+
+
+<br>
+
+<div class="table-default">
+    <table style="table-layout: fixed; width: 100%;">
         <thead>
             <tr>
-                <th>
-                    Logo
-                </th>
-                <th>
-                    Name
-                </th>
-                @if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
-                    ||
-                    User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
+                <th>ID</th>
+                <th>Name</th>
+                <th>Priority</th>
+                <th>Logo</th>
+                @if (
+                    PermissionsHelper.IsInRole
+                    (
+                        Roles.Admin,
+                        User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
                     )
+                    ||
+                    PermissionsHelper.IsInRole
+                    (
+                        Roles.Employee,
+                        User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                    )
+                )
                 {
-                    <th>
-                        Management
-                    </th>
+                    <th>Management</th>
                 }
             </tr>
         </thead>
         <tbody>
-            @if (Model.Retailers != null)
+            @if (Model?.Model?.Retailers != null)
             {
-                @foreach (var retailer in Model.Retailers.Retailers)
+                @foreach (var r in Model.Model.Retailers)
                 {
-                    <tr>
-                        @if (string.IsNullOrEmpty(retailer.LogoImageUri))
-                        {
-                            <td>
-                                <img height=64 width=64 src="/Resources/image_not_available.png" alt="image not available" />
-                            </td>
-                        }
-                        else
-                        {
-                            <td>
-                                <img height=64 width=64 src="@retailer.LogoImageUri" alt="@System.IO.Path.GetFileNameWithoutExtension(retailer.LogoImageUri)" />
-                            </td>
-                        }
+                    <tr style="max-height: 70px; height:70px;">
+                        <td>@r.ID</td>
+                        <td>@r.Name</td>
+                        <td>@r.Priority</td>
                         <td>
-                            @retailer.Name
+                            <img width="64" height="64"
+                                 src="@(r.LogoImageUri != null ? r.LogoImageUri : "/resources/image_not_available.png")" 
+                            />
                         </td>
-                        @if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
-                           ||
-                            User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
-                           )
+                        @if (
+                            PermissionsHelper.IsInRole
+                            (
+                                Roles.Admin,
+                                User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                            )
+                            ||
+                            PermissionsHelper.IsInRole
+                            (
+                                Roles.Employee,
+                                User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                            )
+                        )
                         {
-                            <td>
-                                <div class="options @retailer.ID">
-                                    <a href="/Retailers/@retailer.ID/Edit"><button type="button">Edit</button></a>
-                                    |
-                                    <button class="delete" id="@retailer.ID">Delete</button>
-                                </div>
-
-                                <div class="confirm @retailer.ID" style="display:none;">
-                                    Confirm:
-                                    <button onclick="confirmDelete(@retailer.ID)">Yes</button>
-                                    <button onclick="cancelDelete(@retailer.ID)">No</button>
-                                </div>
+                            <td class="options">
+                                <a href="/Retailers/@r.ID)/Details">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                </a>
+                                <span>&nbsp;</span>
+                                <span>&nbsp;</span>
+                                <a href="/Retailers/@r.ID/Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <span>&nbsp;</span>
+                                <span>&nbsp;</span>
+                                <a href="/Retailers/@r.ID/Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
                             </td>
                         }
                     </tr>
@@ -94,55 +131,16 @@
             }
         </tbody>
     </table>
+
+    @if (Model?.Model?.Retailers?.Count == 0)
+    {
+        <div class="no-data">
+            No data to show.
+        </div>
+    }
+
 </div>
 
-
 <!-- #region Pagination -->
-@await Component.InvokeAsync(typeof(PagerViewComponent), Model.Retailers.PageInfo)
+@await Component.InvokeAsync(typeof(PagerViewComponent), Model?.Model?.PageInfo)
 <!-- #endregion Pagination -->
-
-
-@section scripts {
-    <script>
-        function confirmDelete(retailerId) {
-            var retailer = { "retailerId": retailerId };
-
-            var token = $('input[name="__RequestVerificationToken"]').val();
-
-            $.ajax({
-                type: "POST",
-                url: "/Retailers/" + retailerId + "/Delete/?handler=DeleteRetailer",
-                data: {
-                    __RequestVerificationToken: token,
-                },
-                success: function (r) {
-                    $(".confirm." + retailerId).closest("tr").remove();
-                    showSnackbar("Retailer deleted successfully");
-                },
-                error: function (xhr, status, error) {
-                    console.log(xhr.responseText);
-                    console.log(status);
-                    console.log(error);
-                }
-            });
-        }
-
-        function cancelDelete(userId) {
-            $(".options." + userId).css("display", "inline-block");
-            $(".confirm." + userId).css("display", "none");
-        }
-
-        $(document).ready(function () {
-            $(".delete").click(function (e) {
-                e.preventDefault();
-                var retailerId = $(this).attr("id");
-
-                var parent = $("#" + retailerId).parent();
-
-                parent.hide();
-
-                $(".confirm." + retailerId).css("display", "");
-            });
-        });
-    </script>
-}
