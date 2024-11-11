@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
 using SimpleDataManagementSystem.Backend.Logic.Models;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
-using SimpleDataManagementSystem.Backend.WebAPI.Policies;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Write;
 using SimpleDataManagementSystem.Shared.Common.Constants;
@@ -13,7 +12,6 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Roles = "Admin")] // TODO
     public class UsersController : ControllerBase
     {
         private readonly IUsersService _usersService;
@@ -30,21 +28,6 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllUsers(int? take = 8, int? page = 1)
         {
-            //int[] roles = { (int)Roles.Admin }; // TODO put in class/ model
-            //AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
-            //    User,
-            //    new { roles },
-            //    Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
-            //);
-
-            //if (!authorizationResult.Succeeded)
-            //{
-            //    return new ObjectResult
-            //    (
-            //        new ErrorWebApiModel(StatusCodes.Status403Forbidden, "You are not authorized to view this resource.", null)
-            //    );
-            //}
-
             int[] roles = new int[] { (int)Roles.Admin };
 
             AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
@@ -145,13 +128,19 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         {
             int[] roles = new int[] { (int)Roles.Admin };
 
-            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+            AuthorizationResult isInRole = await _authorizationService.AuthorizeAsync(
                 User,
                 new { roles },
                 Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
             );
 
-            if (!authorizationResult.Succeeded)
+            AuthorizationResult isResourceOwner = await _authorizationService.AuthorizeAsync(
+                HttpContext.User,
+                userId,
+                Policies.PolicyNames.UserIsResourceOwner
+            );
+
+            if (!isInRole.Succeeded && !isResourceOwner.Succeeded)
             {
                 return Forbid();
             }

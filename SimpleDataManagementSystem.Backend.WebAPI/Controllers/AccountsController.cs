@@ -5,7 +5,6 @@ using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
 using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
 using SimpleDataManagementSystem.Backend.WebAPI.Helpers;
-using SimpleDataManagementSystem.Backend.WebAPI.Policies;
 using SimpleDataManagementSystem.Backend.WebAPI.Services.Abstractions;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Records;
@@ -43,6 +42,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 
             if (user == null)
             {
+                return Unauthorized(new ErrorWebApiModel((int)HttpStatusCode.Unauthorized, "Invalid username and / or password.", null));
                 return NotFound(new ErrorWebApiModel((int)HttpStatusCode.NotFound, "User not found.", null));
             }
 

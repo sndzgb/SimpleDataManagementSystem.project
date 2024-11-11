@@ -181,6 +181,19 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllRetailers([FromQuery] int? take = 8, [FromQuery] int? page = 1)
         {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee, (int)Roles.User };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             var retailers = await _retailersService.GetAllRetailersAsync(take, page);
 
             var model = new RetailersWebApiModel();
