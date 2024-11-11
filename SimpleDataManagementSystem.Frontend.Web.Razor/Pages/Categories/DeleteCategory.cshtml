@@ -1,7 +1,84 @@
 ﻿@page "/Categories/{CategoryId}/Delete"
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories.DeleteCategoryModel
 
 @{
-    ViewData["Title"] = "Delete Category";
+    ViewData["Title"] = "Delete category - '" + (Model?.Model?.Name ?? "-") + "'";
 }
+
+<div class="header">
+    <h1>Delete category - '<b>@Model?.Model?.Name</b>'</h1>
+</div>
+
+
+<br>
+
+
+<div class="content-container">
+
+    <!-- #region DisplayError -->
+    @await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
+    <!-- #endregion DisplayError -->
+
+    <br>
+
+    @if (Model?.Model != null)
+    {
+        <form method="post">
+            <div class="readonly-form-controls-container">
+                <div class="readonly-form-controls">
+
+                    <div class="readonly-control single-per-line">
+                        <div>
+                            <label>Category ID:</label>
+                        </div>
+                        <div>
+                            <em>
+                                <label>@Model.Model.ID</label>
+                            </em>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="readonly-control single-per-line">
+                        <div>
+                            <label>Category name:</label>
+                        </div>
+                        <div>
+                            <em>
+                                <label>@Model.Model.Name</label>
+                            </em>
+                        </div>
+                    </div>
+
+                    <div class="readonly-control single-per-line">
+                        <div>
+                            <label>Priority:</label>
+                        </div>
+                        <div>
+                            <em>
+                                <label>@Model.Model.Priority</label>
+                            </em>
+                        </div>
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div class="flex-justify-center">
+                    <div>
+                        <button class="button-danger" type="submit">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    }
+</div>
+
+
