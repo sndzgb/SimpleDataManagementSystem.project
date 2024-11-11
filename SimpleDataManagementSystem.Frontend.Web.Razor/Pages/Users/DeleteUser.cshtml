@@ -1,7 +1,132 @@
 ﻿@page "/Users/{UserId}/Delete"
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
+@using SimpleDataManagementSystem.Shared.Common.Constants
+@using System.Security.Claims
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.DeleteUserModel
 
 @{
-    ViewData["Title"] = "Delete User";
+    ViewData["Title"] = "Delete user - '" + (Model?.Model?.Username ?? "-") + "'";
 }
+
+<div class="header">
+    <h1>Delete user - '<b>@Model?.Model?.Username }}</b>'</h1>
+</div>
+
+
+<br>
+
+
+<div class="content-container">
+
+    <!-- #region DisplayError -->
+    @await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
+    <!-- #endregion DisplayError -->
+
+    <br>
+
+    @if (Model?.Model != null)
+    {
+        <form method="post">
+            <div class="readonly-form-controls-container">
+                <div class="readonly-form-controls">
+
+                    <div class="readonly-control single-per-line">
+                        <div>
+                            <label>User ID:</label>
+                        </div>
+                        <div>
+                            <em>
+                                <label>@Model.Model.ID</label>
+                            </em>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="readonly-control single-per-line">
+                        <div>
+                            <label>Username:</label>
+                        </div>
+                        <div>
+                            <em>
+                                <label>@Model.Model.Username</label>
+                            </em>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="readonly-control single-per-line">
+                        <div>
+                            <label>Role ID:</label>
+                        </div>
+                        <div>
+                            <em>
+                                <label>@Model.Model.RoleId</label>
+                            </em>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="readonly-control single-per-line">
+                        <div>
+                            <label>Role name:</label>
+                        </div>
+                        <div>
+                            <em>
+                                <label>@Model.Model.RoleName</label>
+                            </em>
+                        </div>
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div class="flex-justify-center">
+                    @if (
+                        (
+                            PermissionsHelper.IsResourceOwner(
+                                Model.Model.ID.ToString(),
+                                User.Claims?.Where(x => x.Type == ExtendedClaims.Type.UserId)?.FirstOrDefault()?.Value!
+                            )
+                        )
+                        ||
+                        (
+                            PermissionsHelper.IsInRole(
+                                Roles.Admin,
+                                User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                            )
+                        )
+                    )
+                    {
+                        <div>
+                            <button class="button-danger" type="submit">
+                                Delete
+                            </button>
+                        </div>
+                    }
+
+                    @if (
+                       PermissionsHelper.IsInRole(
+                           Roles.Admin,
+                           User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                       )
+                    )
+                    {
+                        <div>
+                            <a href="/account/details">
+                                <button class="button-default">
+                                    Account
+                                </button>
+                            </a>
+                        </div>
+                    }
+                </div>
+
+            </div>
+        </form>
+    }
+</div>
