@@ -9,8 +9,5 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
 
         [Required(ErrorMessage = "New password is required")]
         public string NewPassword { get; set; }
-
-        //[Required(ErrorMessage = "User is not defined")]
-        //public int UserId { get; set; }
     }
 }
