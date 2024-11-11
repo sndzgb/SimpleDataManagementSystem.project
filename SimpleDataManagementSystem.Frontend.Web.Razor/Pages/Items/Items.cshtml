@@ -5,123 +5,146 @@
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 @using System.Web
 @using System.Security.Claims
+@using SimpleDataManagementSystem.Shared.Common.Constants
 
 @{
     ViewData["Title"] = "Items";
 }
 
-<h1>Items</h1>
+
+<div class="header">
+    <h1>Items</h1>
+</div>
+
 
 <br />
 
 
-@if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
-   ||
-    User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
-   )
-{
-    <div style="display:flex; justify-content:space-between;">
-        <a href="/Items/Create"><button>Create</button></a>
+<div class="menu">
+    <div>
+        @if (
+                PermissionsHelper.IsInRole
+                (
+                    Roles.Admin,
+                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                )
+                ||
+                PermissionsHelper.IsInRole
+                (
+                    Roles.Employee,
+                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                )
+        )
+        {
+            <a href="/Items/Create"><button class="button-default" type="button">Create</button></a>
+        }
     </div>
 
-    <hr />
-}
+    <div class="spacer">
+    </div>
 
-<div>
-    <table>
+    <div style="display: flex; flex-direction: row;">
+        <form method="get" validatable asp-page="/Items/Search">
+            <div>
+                <input 
+                    class="" 
+                    form-field-required 
+                    name="searchQuery"
+                    data-validation-required-error-message="Search query is required."
+                    placeholder="Enter a search query..."
+                    style="outline: none; flex-grow: 2; border: none; border-bottom: 1px solid gainsboro;" 
+                />
+                <button type="submit" style="border: none; border-bottom: 1px solid gainsboro; background-color: white;">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+            @* <div style="color:red;">
+                <small>
+                    Search query is required.
+                </small>
+            </div> *@
+        </form>
+    </div>
+</div>
+
+
+<br />
+
+
+<div class="table-default">
+    <table style="table-layout: fixed; width: 100%;">
         <thead>
             <tr>
-                <th>
-                    Naziv proizvoda
-                </th>
-                <th>
-                    Opis
-                </th>
-                <th>
-                    Datum akcije
-                </th>
-                <th>
-                    Naziv retailera
-                </th>
-                <th>
-                    Cijena
-                </th>
-                <th>
-                    Thumbnail
-                </th>
-                <th>
-                    Category ID
-                </th>
-                @if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
-                    ||
-                    User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
-                    )
+                <th>Naziv proizvoda</th>
+                <th>Opis</th>
+                <th>Datum akcije</th>
+                <th>Cijena</th>
+                <th>Kategorija</th>
+                <th>Thumbnail</th>
+                @if (
+                        PermissionsHelper.IsInRole
+                        (
+                            Roles.Admin,
+                            User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                        )
+                        ||
+                        PermissionsHelper.IsInRole
+                        (
+                            Roles.Employee,
+                            User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                        )
+                )
                 {
-                    <th>
-                        Management
-                    </th>
+                    <th>Management</th>
                 }
             </tr>
         </thead>
         <tbody>
-            @if (Model.Items != null)
+            @if (Model?.Model?.Items != null)
             {
-                @foreach (var item in Model.Items.Items)
+                @foreach (var item in Model.Model.Items)
                 {
-                    <tr>
-                        <td>
-                            @* TODO details page: 
-                                <a href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda)/Details">@item.Nazivproizvoda</a>
-                            *@
-                            @item.Nazivproizvoda
-                        </td>
-                        <td>
-                            @(string.IsNullOrEmpty(item.Opis) ? "-" : item.Opis)
-                        </td>
-                        <td>
-                            @(string.IsNullOrEmpty(item.Datumakcije) ? "-" : item.Datumakcije)
-                        </td>
-                        <td>
-                            @item.Nazivretailera
-                        </td>
-                        <td>
-                            @item.Cijena
-                        </td>
-                        @if (string.IsNullOrEmpty(item.URLdoslikeUri))
-                        {
-                            <td>
-                                <img height=64 width=64 src="/Resources/image_not_available.png" alt="image not available" />
-                            </td>
-                        }
-                        else
-                        {
-                            <td>
-                                <img height=64 width=64 src="@item.URLdoslikeUri" alt="@System.IO.Path.GetFileNameWithoutExtension(@item.URLdoslikeUri)" />
-                            </td>
-                        }
-                        <td>
-                            @(item.Kategorija == null ? "-" : item.Kategorija)
-                        </td>
-                        @if (User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Admin"
-                           ||
-                            User?.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value == "Employee"
-                           )
-                        {
-                            <td>
-                                <div class="options @item.Nazivproizvoda">
-                                    <a href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda)/Edit"><button type="button">Edit</button></a>
-                                    |
-                                    <button class="delete" id="@item.Nazivproizvoda" onclick="deleteItem(this);">Delete</button>
-                                </div>
+                    <tr style="max-height: 70px; height:70px; word-wrap: anywhere;">
+                        <td>@(item.Nazivproizvoda ?? "-")</td>
+                        <td>@(item.Opis ?? "-")</td>
+                        <td>@(item.Datumakcije ?? "-")</td>
+                        <td>@(item.Cijena.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))</td>
+                        <td>@(item.Kategorija)</td>
 
-                                <div class="confirm @item.Nazivproizvoda" style="display:none;">
-                                    Confirm:
-                                    <form method="post">
-                                        @Html.AntiForgeryToken()
-                                        <button type="button" onclick="confirmDelete('@item.Nazivproizvoda');">Yes</button>
-                                    </form>
-                                    <button onclick="cancelDelete(this);">No</button>
-                                </div>
+                        <td>
+                            <img width="64" height="64" 
+                                src="@(item.URLdoslikeUri != null ? item.URLdoslikeUri : "/resources/image_not_available.png")" 
+                            />
+                        </td>
+
+                        @if (
+                                PermissionsHelper.IsInRole
+                                (
+                                    Roles.Admin,
+                                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                                )
+                                ||
+                                PermissionsHelper.IsInRole
+                                (
+                                    Roles.Employee,
+                                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                                )
+                        )
+                        {
+                            <td class="options">
+                                <a href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Details">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                </a>
+                                <span>&nbsp;</span>
+                                <span>&nbsp;</span>
+                                <a href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <span>&nbsp;</span>
+                                <span>&nbsp;</span>
+                                <a href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
                             </td>
                         }
                     </tr>
@@ -129,53 +152,16 @@
             }
         </tbody>
     </table>
+
+    @if (Model?.Model?.Items?.Count == 0)
+    {
+        <div class="no-data">
+            No data to show.
+        </div>
+    }
+
 </div>
 
-
 <!-- #region Pagination -->
-@await Component.InvokeAsync(typeof(PagerViewComponent), Model.Items?.PageInfo)
+@await Component.InvokeAsync(typeof(PagerViewComponent), Model?.Model?.PageInfo)
 <!-- #endregion Pagination -->
-
-
-@section scripts {
-    <script>
-
-        function deleteItem(element) {
-            var td = $(element).closest("td");
-            td.children(".options").css("display", "none");
-            td.children(".confirm").css("display", "");
-        }
-
-        function confirmDelete(itemId) {
-            var token = $('input[name="__RequestVerificationToken"]').val();
-            
-            var encUri = encodeURIComponent(itemId);
-
-            $.ajax({
-                type: "POST",
-                url: "/Items/" + encUri + "/Delete/?handler=DeleteItem",
-                data: {
-                    __RequestVerificationToken: token,
-                },
-                success: function (r) {
-                    var el = document.getElementById(itemId);
-                    $(el).closest("tr").remove();
-                    showSnackbar("Item deleted successfully");
-                },
-                error: function (xhr, status, error) {
-                    // TODO display error on screen - TOAST
-                    console.log(xhr.responseText);
-                    console.log(status);
-                    console.log(error);
-                }
-            });
-        }
-
-        function cancelDelete(element) {
-            var td = $(element).closest("td");
-            td.children(".confirm").css("display", "none");
-            td.children(".options").css("display", "");
-        }
-
-    </script>
-}
