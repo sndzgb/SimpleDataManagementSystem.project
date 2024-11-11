@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Constants;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
+using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
@@ -10,31 +12,47 @@ using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
 {
-    [Authorize(Roles = "Admin")]
-    public class EditUserModel : PageModel
+    public class EditUserModel : BasePageModel<UpdateUserViewModel>
     {
         private readonly IUsersService _usersService;
         private readonly IRolesService _rolesService;
+        private readonly IAuthorizationService _authorizationService;
 
 
-        public EditUserModel(IUsersService usersService, IRolesService rolesService)
+        public EditUserModel(IUsersService usersService, IRolesService rolesService, IAuthorizationService authorizationService)
         {
             _usersService = usersService;
             _rolesService = rolesService;
+            _authorizationService = authorizationService;
         }
 
 
         [FromRoute]
         public int UserId { get; set; }
 
-        [BindProperty]
-        public UpdateUserViewModel UpdatedUser { get; set; } // updated model
-
         public UserViewModel User { get; set; } // user details
 
         public List<RoleViewModel> AvailableRoles { get; set; } // roles to choose from
 
-        public WebApiCallException Error { get; set; }
+
+        public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
+        {
+            int[] roles = new int[] { (int)Roles.Admin };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                HttpContext.User,
+                new { roles },
+                Policies.PolicyNames.UserIsInRole
+            );
+
+            if (!authorizationResult.Succeeded)
+            {
+                context.Result = Forbid();
+                return;
+            }
+
+            base.OnPageHandlerExecuting(context);
+        }
 
 
         public async Task<IActionResult> OnGet()
@@ -49,27 +67,14 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
 
             await Task.WhenAll(tasks);
 
-            return null;
+            return Page();
         }
 
         public async Task<IActionResult> OnPost()
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return await OnGet();
-                }
+            await _usersService.UpdateUserAsync(UserId, Model);
 
-                await _usersService.UpdateUserAsync(UserId, UpdatedUser);
-
-                return RedirectToPage("/Users/Users");
-            }
-            catch (WebApiCallException wace)
-            {
-                Error = wace; // set error on model
-                return await OnGet();
-            }
+            return RedirectToPage("/Users/Users");
         }
     }
 }

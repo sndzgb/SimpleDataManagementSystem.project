@@ -1,50 +1,93 @@
 ﻿@page "/Users/{UserId:int}/Edit"
 
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Constants
+@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 @using SimpleDataManagementSystem.Shared.Common.Constants
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.EditUserModel
 
 @{
-    ViewData["Title"] = "Edit User";
+    ViewData["Title"] = "Edit user - '" + (Model?.User.Username ?? "-") + "'";
 }
 
-<h1>Edit user</h1>
 
-<br />
-
-
-@await Component.InvokeAsync("InvalidModelState", ModelState)
+<div class="header">
+    <h1>Edit user - <b>'@Model?.User?.Username'</b></h1>
+</div>
 
 
-<div style="text-align:center; border:1px solid black; padding:20px;">
-    <form method="post">
-        <label>User ID:</label>
-        <br />
-        <input disabled value="@Model.User.ID" />
-        
-        <br />
+<br>
 
-        <label>Username:</label>
-        <br />
-        <input name="username" value="@Model.User.Username" />
-        
-        <br />
 
-        <label for="roleId">Role:</label>
-        <br />
-        <select name="roleId" disabled="@(Model.User.RoleId == (int)Roles.Admin)">
-            @foreach (var r in Model.AvailableRoles)
-            {
-                <option name="roleId" selected="@(Model.User.RoleId == r.Id)" value="@r.Id">@r.Name</option>
-            }
-        </select>
+<div class="content-container">
 
-        <br />
-        <br />
+    <!-- #region DisplayError -->
+    @await Component.InvokeAsync(typeof(DisplayErrorViewComponent), Model?.Error)
+    <!-- #endregion DisplayError -->
 
-        <button type="submit">Update</button>
-    </form>
+    <!-- #region ModelStateValidationErrors -->
+    @await Component.InvokeAsync(typeof(InvalidModelStateViewComponent), ModelState)
+    <!-- #endregion ModelStateValidationErrors -->
+
+    <br>
+
+    @if (Model?.User != null)
+    {
+        <form method="post">
+            <div class="form-controls-container">
+                <div class="form-controls">
+
+                    <br>
+
+                    <div class="readonly-control single-per-line">
+                        <div>
+                            <label>Password change required:</label>
+                        </div>
+                        <div style="color: @(Model.User.IsPasswordChangeRequired ? "red" : "white")">
+                            <em>
+                                <label>@(Model.User.IsPasswordChangeRequired ? "Yes" : "No")</label>
+                            </em>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="input-control single-per-line">
+                        <div class="required">
+                            <label>Username:</label>
+                        </div>
+                        <div>
+                            <input type="text" name="username" value="@Model.User.Username" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="required">
+                            <label for="role">Role:</label>
+                        </div>
+                        <div>
+                            <select id="role" name="roleId">
+                                @foreach (var r in Model.AvailableRoles)
+                                {
+                                    <option value="@r.Id" selected="@(r.Id == Model.User.RoleId)">@r.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div>
+                    <button class="button-default" type="submit">
+                        Edit
+                    </button>
+                </div>
+            </div>
+        </form>
+    }
+
 </div>
 
 
