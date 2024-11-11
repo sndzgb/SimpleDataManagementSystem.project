@@ -144,7 +144,7 @@
                 @foreach (var item in Model?.Model?.Items!)
                 {
                     <tr style="max-height: 70px; height:70px;">
-                        <td class="transformed-data">@item.Nazivproizvoda</td>
+                        <td class="transformed-data">@(RawHtmlHelpers.SanitizeHtmlString(item.Nazivproizvoda))</td>
                         <td class="transformed-data">@item.Cijena.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)</td>
                         <td>
                             <img 
@@ -211,7 +211,7 @@
 
         function rplc(originalValue, startIndex, replaceCharNumbers) {
             let value = originalValue.substring(startIndex, startIndex + replaceCharNumbers);
-            let labeled = "<label style='background-color:yellow; font-weight:bold;'>" + value + "</label>"
+            let labeled = "<label class='highlighted-text'>" + value + "</label>";
             let final = originalValue.substring(0, startIndex) + labeled + originalValue.substring(startIndex + replaceCharNumbers);
             return final;
         }
