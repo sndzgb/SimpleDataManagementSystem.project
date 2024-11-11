@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 {
@@ -18,6 +19,16 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
             StatusCode = statusCode;
             Message = message;
             Errors = errors;
+        }
+
+        public ErrorViewModel()
+        {
+            
+        }
+
+        public string ToJson()
+        {
+            return JsonSerializer.Serialize(this);
         }
     }
 }
