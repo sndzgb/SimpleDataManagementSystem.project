@@ -34,7 +34,7 @@ namespace SimpleDataManagementSystem.Backend.Database
 
             modelBuilder.Entity<UserEntity>()
                 .Property(x => x.Id)
-                .IsRequired(false)
+                .IsRequired(true)
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
