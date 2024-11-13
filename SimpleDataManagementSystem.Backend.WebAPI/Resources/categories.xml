@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Categories>
 	<Category>
-		<ID><![CDATA[1]]></ID>
+		<ID><![CDATA[-2147483647]]></ID>
 		<Name><![CDATA[Ostalo]]></Name>
 		<Priority><![CDATA[10000]]></Priority>
 	</Category>
 	<Category>
-		<ID><![CDATA[2]]></ID>
+		<ID><![CDATA[-2147483646]]></ID>
 		<Name><![CDATA[Osobna njega]]></Name>
 		<Priority><![CDATA[20]]></Priority>
 	</Category>
 	<Category>
-		<ID><![CDATA[3]]></ID>
+		<ID><![CDATA[-2147483645]]></ID>
 		<Name><![CDATA[Dom]]></Name>
 		<Priority><![CDATA[33]]></Priority>
 	</Category>
 	<Category>
-		<ID><![CDATA[4]]></ID>
+		<ID><![CDATA[-2147483644]]></ID>
 		<Name><![CDATA[Meso i mesni proizvodi]]></Name>
 		<Priority><![CDATA[3]]></Priority>
 	</Category>
 	<Category>
-		<ID><![CDATA[5]]></ID>
+		<ID><![CDATA[-2147483643]]></ID>
 		<Name><![CDATA[Kruh i pekarski proizvodi]]></Name>
 		<Priority><![CDATA[4]]></Priority>
 	</Category>
 	<Category>
-		<ID><![CDATA[6]]></ID>
+		<ID><![CDATA[-2147483642]]></ID>
 		<Name><![CDATA[Kolačići, grickalice i slatkiši]]></Name>
 		<Priority><![CDATA[7]]></Priority>
 	</Category>
 	<Category>
-		<ID><![CDATA[7]]></ID>
+		<ID><![CDATA[-2147483641]]></ID>
 		<Name><![CDATA[Alkoholna pića]]></Name>
 		<Priority><![CDATA[9]]></Priority>
 	</Category>
