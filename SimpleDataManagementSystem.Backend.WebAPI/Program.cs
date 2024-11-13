@@ -11,6 +11,7 @@ using SimpleDataManagementSystem.Backend.Database;
 using SimpleDataManagementSystem.Backend.Database.Entities;
 using SimpleDataManagementSystem.Backend.Database.Repositories.Implementations;
 using SimpleDataManagementSystem.Backend.Logic.Models;
+using SimpleDataManagementSystem.Backend.Logic.Options;
 using SimpleDataManagementSystem.Backend.Logic.Repositories.Abstractions;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
 using SimpleDataManagementSystem.Backend.Logic.Services.Implementations;
@@ -122,6 +123,16 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
                 options.SuppressModelStateInvalidFilter = true
             );
 
+            builder.Services.Configure<EmailClientOptions>
+            (
+                config.GetSection(EmailClientOptions.EmailOptionsSectionName)
+            );
+            
+            builder.Services.Configure<AppOptions>
+            (
+                config.GetSection(AppOptions.AppOptionsSectionName)
+            );
+
             builder.Services.AddDbContext<SimpleDataManagementSystemDbContext>(options =>
                 options.UseSqlServer(connectionString)
             );
@@ -150,6 +161,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
 
             //builder.Services.AddHttpContextAccessor();
 
+            builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IItemsService, ItemsService>();
             builder.Services.AddScoped<IItemsRepository, ItemsRepository>();
             builder.Services.AddScoped<IUsersService, UsersService>();

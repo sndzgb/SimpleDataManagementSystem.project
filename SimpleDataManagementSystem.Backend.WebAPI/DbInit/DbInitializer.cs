@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using SimpleDataManagementSystem.Backend.Database;
 using SimpleDataManagementSystem.Backend.Database.Entities;
-using SimpleDataManagementSystem.Backend.Logic.Models;
+using SimpleDataManagementSystem.Backend.Logic.Options;
+using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
+using SimpleDataManagementSystem.Backend.Logic.Services.Implementations;
+using SimpleDataManagementSystem.Shared.Common.Constants;
 using System;
 using System.Reflection;
 using System.Xml;
@@ -11,7 +15,12 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
 {
     internal class DbInitializer
     {
-        internal static void Initialize(SimpleDataManagementSystemDbContext dbContext)
+        internal static void Initialize(
+                SimpleDataManagementSystemDbContext dbContext, 
+                IEmailService emailService,
+                IOptions<AppOptions> appOptions,
+                IOptions<EmailClientOptions> emailClientOptions
+            )
         {
             ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
             
@@ -25,10 +34,12 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
 
             // TODO add navigation properties: roles, claims
             var user = new UserEntity();
-            user.Username = "admin";
+            user.Username = "admin"; // TODO generate random username... do the same as with password, and email it both to the user
             user.Id = 0;
             user.CreatedUTC = DateTime.UtcNow;
-            user.RoleId = 1;
+            user.RoleId = (int)Roles.Admin;
+
+            user.IsPasswordChangeRequired = true;
             //user.Id = 0;
             //user.UserName = "admin";
             //user.EmailConfirmed = false;
@@ -38,45 +49,14 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
             //user.LockoutEnabled = false;
             //user.AccessFailedCount = 5;
 
+            var generatedPassword = GenerateRandomDefaultPassword();
+
             var hasher = new PasswordHasher<UserEntity>(); //IdentityUser
-            user.PasswordHash = hasher.HashPassword(user, "admin!1A");
+            user.PasswordHash = hasher.HashPassword(user, generatedPassword);
 
+            // TODO error handling - wrap all db seed functions in try-catch
 
-
-            // SEED roles
-            using (var transaction = dbContext.Database.BeginTransaction())
-            {
-                dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Roles] ON");
-
-                var roles = new List<RoleEntity>();
-
-                roles.Add(new RoleEntity()
-                {
-                    Id = 1,
-                    Name = "Admin",
-                    CreatedUTC = DateTime.UtcNow
-                });
-                roles.Add(new RoleEntity()
-                {
-                    Id = 2,
-                    Name = "Employee",
-                    CreatedUTC = DateTime.UtcNow
-                });
-                roles.Add(new RoleEntity()
-                {
-                    Id = 3,
-                    Name = "User",
-                    CreatedUTC = DateTime.UtcNow
-                });
-
-                dbContext.Roles.AddRange(roles);
-                dbContext.SaveChanges();
-
-                dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Roles] OFF");
-
-                transaction.Commit();
-            }
-
+            SeedRoles(dbContext);
 
             // SEED users (admin)
             using (var transaction = dbContext.Database.BeginTransaction())
@@ -94,33 +74,115 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
             }
 
 
-            // admin user & roles
-//            dbContext.Database.ExecuteSqlRaw(@"
-//SET IDENTITY_INSERT Roles ON
-//;
+            emailService.Send(new Email()
+            {
+                Body = $@"
+<div style='text-align:center;'>
+    <div>
+        <p>Username:</p>
+        <b>
+            <label>{user.Username}</label>
+        </b>
+    </div>
+    <div>
+        <p>Password:</p>
+        <b>
+            <label>{generatedPassword}</label>
+        </b>
+    </div>
+</div>
+",
+                Subject = "Admin account credentials",
+                From = emailClientOptions.Value.NoReplyEmail,
+                To = appOptions.Value.AdminEmail
+            });
 
-//INSERT INTO Roles (Id, Name) VALUES (1, 'Admin'), (2, 'Employee'), (3, 'User')
-//;
 
-//SET IDENTITY_INSERT Roles OFF
-//;
-
-//SET IDENTITY_INSERT Users ON
-//;
-
-//INSERT INTO Users(Id, Username, Password, RoleId) VALUES (0, 'admin', 'admin', 1)
-//;
-
-//SET IDENTITY_INSERT Users OFF
-//;
-//");
-
+#if !DEVELOPMENT
+            return;
+#endif
 
             SeedRetailers(dbContext);
             SeedCategories(dbContext);
             SeedItems(dbContext);
+        }
 
-            //dbContext.SaveChanges(); // TODO
+
+        /// <summary>
+        /// Converts an array of randomly generated characters into a string.
+        /// </summary>
+        /// <param name="maxLength">Final string character length.</param>
+        /// <returns>Random string.</returns>
+        private static string GenerateRandomDefaultPassword(int maxLength = 16)
+        {
+            const string ALLOWED_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!?#@$^*()";
+            Random rnd = new Random();
+
+            char[] chars = new char[maxLength];
+
+            for (int i = 0; i < maxLength; i++)
+            {
+                chars[i] = ALLOWED_CHARS[rnd.Next(0, ALLOWED_CHARS.Length)];
+            }
+
+            var str = new string(chars);
+
+            return str;
+        }
+
+        private static void RemoveEmptyStrings(SimpleDataManagementSystemDbContext dbContext)
+        {
+            // Look for changes
+            dbContext.ChangeTracker.DetectChanges();
+
+            // Loop through each entity
+            foreach (var entity in dbContext.ChangeTracker.Entries())
+            {
+                // Use reflection to find editable string properties
+                var properties = from p in entity.Entity.GetType().GetProperties()
+                                 where p.PropertyType == typeof(string)
+                                       && p.CanRead
+                                       && p.CanWrite
+                                 select p;
+
+                // Loop through each property and replace empty strings with null
+                foreach (var property in properties)
+                {
+                    if (string.IsNullOrWhiteSpace(property.GetValue(entity.Entity, null) as string))
+                        property.SetValue(entity.Entity, null, null);
+                }
+            }
+        }
+
+
+        private static void SeedRoles(SimpleDataManagementSystemDbContext dbContext)
+        {
+            using (var transaction = dbContext.Database.BeginTransaction())
+            {
+                dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Roles] ON");
+
+                var roles = new List<RoleEntity>();
+
+                var rolesEnum = Enum.GetValues(typeof(Roles)).Cast<Roles>();
+
+                foreach (Roles role in rolesEnum)
+                {
+                    roles.Add(new RoleEntity()
+                    {
+                        Id = (int)role,
+                        Name = role.ToString(),
+                        CreatedUTC = DateTime.UtcNow
+                    });
+                }
+
+                dbContext.Roles.AddRange(roles);
+                dbContext.SaveChanges();
+
+                dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Roles] OFF");
+
+                transaction.Commit();
+            }
+
         }
 
 
@@ -179,20 +241,28 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
                         var ext = Path.GetExtension(model.URLdoslike);
                         var uri = new Uri(model.URLdoslike);
 
-
                         //var s = Path.GetFileName(uri.LocalPath);
 
-
                         var response = httpClient.GetAsync(uri).GetAwaiter().GetResult();
-                        using (var fs = new FileStream(Path.Combine(temp, Path.GetFileName(uri.LocalPath)), FileMode.CreateNew)) // TODO check file extension...
+                        if (response.IsSuccessStatusCode)
                         {
-                            response.Content.CopyToAsync(fs).GetAwaiter().GetResult();
+                            using (var fs = new FileStream(Path.Combine(temp, Path.GetFileName(uri.LocalPath)), FileMode.CreateNew)) // TODO check file extension...
+                            {
+                                response.Content.CopyToAsync(fs).GetAwaiter().GetResult();
+                            }
+
+                            model.URLdoslike = Path.Combine("Images\\Items\\" + Path.GetFileName(model.URLdoslike));
+                        }
+                        else
+                        {
+                            model.URLdoslike = null;
                         }
                     }
 
                     // demo purposes only; saves in "bin" folder
                     //model.URLdoslike = Path.Combine(assDir, "Images\\Items\\" + Path.GetFileName(model.URLdoslike));
-                    model.URLdoslike = Path.Combine("Images\\Items\\" + Path.GetFileName(model.URLdoslike));
+                    
+                    //model.URLdoslike = Path.Combine("Images\\Items\\" + Path.GetFileName(model.URLdoslike));
                     lItems.Add(model);
                 }
 
@@ -206,31 +276,6 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
                 //dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Items] OFF");
 
                 transaction.Commit();
-            }
-        }
-
-
-        private static void RemoveEmptyStrings(SimpleDataManagementSystemDbContext dbContext)
-        {
-            // Look for changes
-            dbContext.ChangeTracker.DetectChanges();
-
-            // Loop through each entity
-            foreach (var entity in dbContext.ChangeTracker.Entries())
-            {
-                // Use reflection to find editable string properties
-                var properties = from p in entity.Entity.GetType().GetProperties()
-                                 where p.PropertyType == typeof(string)
-                                       && p.CanRead
-                                       && p.CanWrite
-                                 select p;
-
-                // Loop through each property and replace empty strings with null
-                foreach (var property in properties)
-                {
-                    if (string.IsNullOrWhiteSpace(property.GetValue(entity.Entity, null) as string))
-                        property.SetValue(entity.Entity, null, null);
-                }
             }
         }
 
@@ -326,15 +371,25 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
                         var ext = Path.GetExtension(model.LogoImageUrl);
                         var uri = new Uri(model.LogoImageUrl);
                         var response = httpClient.GetAsync(uri).GetAwaiter().GetResult();
-                        using (var fs = new FileStream(Path.Combine(temp, model.Name + ext), FileMode.CreateNew))
+                        if (!response.IsSuccessStatusCode)
                         {
-                            response.Content.CopyToAsync(fs).GetAwaiter().GetResult();
+                            model.LogoImageUrl = null;
+                        } 
+                        else
+                        {
+                            using (var fs = new FileStream(Path.Combine(temp, model.Name + ext), FileMode.CreateNew))
+                            {
+                                response.Content.CopyToAsync(fs).GetAwaiter().GetResult();
+                            }
+
+                            model.LogoImageUrl = Path.Combine("Images\\Retailers\\" + model.Name + Path.GetExtension(model.LogoImageUrl));
                         }
+
                     }
 
                     // demo purposes only; saves in "bin" folder
                     //model.LogoImageUrl = Path.Combine(assDir, "Images\\Retailers\\" + model.Name + Path.GetExtension(model.LogoImageUrl));
-                    model.LogoImageUrl = Path.Combine("Images\\Retailers\\" + model.Name + Path.GetExtension(model.LogoImageUrl));
+                    //model.LogoImageUrl = Path.Combine("Images\\Retailers\\" + model.Name + Path.GetExtension(model.LogoImageUrl));
                     lRetailers.Add(model);
                 }
 
