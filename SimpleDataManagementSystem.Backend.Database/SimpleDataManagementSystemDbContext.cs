@@ -17,6 +17,7 @@ namespace SimpleDataManagementSystem.Backend.Database
         {
         }
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -33,12 +34,14 @@ namespace SimpleDataManagementSystem.Backend.Database
 
             modelBuilder.Entity<UserEntity>()
                 .Property(x => x.Id)
+                .IsRequired(false)
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
             modelBuilder.Entity<UserEntity>()
                 .Property(x => x.CreatedUTC)
-                .HasMaxLength(255);
+                .HasDefaultValueSql("GETUTCDATE()")
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<UserEntity>()
                 .Property(x => x.RoleId)
@@ -135,7 +138,8 @@ namespace SimpleDataManagementSystem.Backend.Database
             modelBuilder.Entity<RoleEntity>()
                 .Property(x => x.CreatedUTC)
                 .HasColumnType("datetime2")
-                .HasDefaultValue(DateTime.UtcNow);
+                .HasDefaultValueSql("GETUTCDATE()")
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<RoleEntity>()
                 .HasIndex(x => x.Name)

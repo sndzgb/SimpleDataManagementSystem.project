@@ -121,7 +121,7 @@ namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementatio
                     ID = userEntity.Role!.Id,
                     Name = userEntity.Role!.Name
                 };
-        }
+            }
 
             return user;
         }

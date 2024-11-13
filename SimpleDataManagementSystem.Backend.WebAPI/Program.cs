@@ -195,10 +195,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
 
             app.MapControllers();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSeedSqlServer();
-            }
+            app.UseSeedSqlServer();
 
             app.Run();
         }
