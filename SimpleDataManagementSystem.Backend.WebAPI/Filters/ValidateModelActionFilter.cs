@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
+using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Filters
 {
