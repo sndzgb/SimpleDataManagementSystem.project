@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Account
 {
@@ -34,9 +34,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Account
             return Page();
         }
 
-        public async Task<IActionResult> OnPost()
+        public async Task<IActionResult> OnPost(CancellationToken cancellationToken)
         {
-            await _accountsService.UpdatePasswordAsync(Model?.OldPassword, Model?.NewPassword);
+            await _accountsService.UpdatePasswordAsync(Model?.OldPassword, Model?.NewPassword, cancellationToken);
 
             await HttpContext.SignOutAsync();
 
