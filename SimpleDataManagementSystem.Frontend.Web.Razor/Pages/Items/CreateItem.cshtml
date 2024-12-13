@@ -2,7 +2,6 @@
 
 @using Microsoft.AspNetCore.Mvc.ModelBinding
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
-@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.CreateItemModel
 
@@ -70,6 +69,22 @@
                     </div>
 
                     <br>
+                    
+                    <div class="input-control">
+                        <div>
+                            <label>Enabled:</label>
+                        </div>
+                        <div>
+                            <input name="isEnabled"
+                                   type="checkbox"
+                                   id="isEnabled"
+                                   value="true"
+                                   checked 
+                            />
+                        </div>
+                    </div>
+
+                    <br>
 
                     <div class="input-control">
                         <div class="required">
@@ -92,7 +107,7 @@
                                 {
                                     @foreach (var r in Model.AvailableRetailers.Retailers)
                                     {
-                                        <option value="@r.ID" selected="@(Model?.Model?.RetailerId == r.ID)">@r.Name</option>
+                                        <option value="@r.Id" selected="@(Model?.Model?.RetailerId == r.Id)">@r.Name</option>
                                     }
                                 }
                             </select>
@@ -111,7 +126,7 @@
                                 {
                                     @foreach (var c in Model.AvailableCategories.Categories)
                                     {
-                                        <option value="@c.ID" selected="@(Model?.Model?.Kategorija == c.ID )">@c.Name</option>
+                                        <option value="@c.Id" selected="@(Model?.Model?.Kategorija == c.Id)">@c.Name</option>
                                     }
                                 }
                             </select>
@@ -180,11 +195,6 @@
 
 @section scripts {
     
-    @*
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-    *@
     <script>
         function removePreview(event) {
             var img = document.getElementById('thumbnailPreview');
