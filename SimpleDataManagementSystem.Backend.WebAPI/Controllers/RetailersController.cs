@@ -1,13 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
+using SimpleDataManagementSystem.Backend.Logic.DTOs.Request;
+using SimpleDataManagementSystem.Backend.Logic.DTOs.Response;
 using SimpleDataManagementSystem.Backend.Logic.Models;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
 using SimpleDataManagementSystem.Backend.WebAPI.Constants;
+using SimpleDataManagementSystem.Backend.WebAPI.Controllers.Base;
 using SimpleDataManagementSystem.Backend.WebAPI.Services;
-using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
-using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Write;
+using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Request;
+using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Data;
 using System.Reflection;
@@ -16,85 +18,108 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RetailersController : ControllerBase
+    public class RetailersController : BaseController
     {
-        private const string IMAGE_BASE_PATH = "Images\\Retailers";
-
-        private readonly IRetailersService _retailersService;
+        private readonly IRetailersCoreService _retailersCoreService;
         private readonly IAuthorizationService _authorizationService;
 
-        // TODO
-        // private readonly IFilesService _filesService; 
-
-        // TODO move file upload/ delete to "FilesService" in service layer
+        private const string RETAILER_IMAGE_BASE_RELATIVE_PATH = "Images\\Retailers";
 
 
-        public RetailersController(IRetailersService retailersService, IAuthorizationService authorizationService)
+        public RetailersController(IRetailersCoreService retailersCoreService, IAuthorizationService authorizationService)
         {
-            _retailersService = retailersService;
+            _retailersCoreService = retailersCoreService;
             _authorizationService = authorizationService;
         }
 
 
-        [HttpPost]
-        public async Task<IActionResult> AddNewRetailer([FromForm] NewRetailerWebApiModel newRetailerWebApiModel)
+        [HttpGet("{retailerId}")]
+        public async Task<IActionResult> GetSingleRetailer([FromRoute] int retailerId, CancellationToken cancellationToken)
         {
-            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+            var canGetSingleRetailer = await CanGetSingleRetailerAsync(this.HttpContext);
 
-            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
-                User,
-                new { roles },
-                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
-            );
-
-            if (!authorizationResult.Succeeded)
+            if (!canGetSingleRetailer)
             {
                 return Forbid();
             }
 
-            string? imageUrlPath = null;
-
-            if (newRetailerWebApiModel.LogoImage != null)
+            var retailer = await _retailersCoreService.GetRetailerAsync(new GetRetailerRequestDTO()
             {
-                imageUrlPath = Path.Combine(IMAGE_BASE_PATH, Guid.NewGuid() + "_" + newRetailerWebApiModel.LogoImage.FileName);
+                RequestedByUserId = GetUserId(),
+                RetailerId = retailerId
+            }, cancellationToken);
+
+            if (retailer == null)
+            {
+                return NotFound();
             }
 
-            int newRetailerId = await _retailersService.AddNewRetailerAsync(new NewRetailerDTO()
-            {
-                Name = newRetailerWebApiModel.Name,
-                Priority = newRetailerWebApiModel.Priority,
-                LogoImageUrl = imageUrlPath
-            });
+            var response = MapToGetSingleRetailerResponse(retailer);
 
-            if (newRetailerWebApiModel.LogoImage != null)
-            {
-                FilesService.Upload(imageUrlPath, newRetailerWebApiModel.LogoImage.OpenReadStream());
-            }
-
-            // TODO get newly created retailer from DB, and return it to the client
-            return Created($"api/retailers/{newRetailerId}", newRetailerId); 
+            return Ok(response);
         }
 
-        [HttpDelete("{retailerId}")]
-        public async Task<IActionResult> DeleteRetailer([FromRoute] int retailerId)
+        [HttpGet]
+        public async Task<IActionResult> GetMultipleRetailers(
+                CancellationToken cancellationToken,
+                [FromQuery] int? take = 8, 
+                [FromQuery] int? page = 1
+            )
         {
-            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+            var canGetMultipleRetailers = await CanGetMultipleRetailersAsync(this.HttpContext);
 
-            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
-                User,
-                new { roles },
-                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
-            );
-
-            if (!authorizationResult.Succeeded)
+            if (!canGetMultipleRetailers)
             {
                 return Forbid();
             }
 
-            var retailer = await _retailersService.GetRetailerByIdAsync(retailerId);
+            var retailers = await _retailersCoreService.GetRetailersAsync(new GetRetailersRequestDTO()
+            {
+                RequestedByUserId = GetUserId(),
+                PageInfo = new GetRetailersRequestDTO.PageDTO()
+                {
+                    Take = (int)take,
+                    Page = (int)page
+                }
+            }, cancellationToken);
 
-            await _retailersService.DeleteRetailerAsync(retailerId);
+            var response = MapToGetMultipleRetailersResponse(retailers);
+            response.PageInfo.Page = (int)page;
+            response.PageInfo.Take = (int)take;
 
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteRetailer([FromRoute] int retailerId, CancellationToken cancellationToken)
+        {
+            var canDeleteRetailer = await CanDeleteRetailerAsync(this.HttpContext);
+
+            if (!canDeleteRetailer)
+            {
+                return Forbid();
+            }
+
+            // get retailer so we can delete image
+            var retailer = await _retailersCoreService.GetRetailerAsync(new GetRetailerRequestDTO()
+            {
+                RequestedByUserId = GetUserId(),
+                RetailerId = retailerId,
+            }, cancellationToken);
+
+            if (retailer == null)
+            {
+                return Ok();
+            }
+
+            await _retailersCoreService.DeleteRetailerAsync(new DeleteRetailerRequestDTO(
+                    new DeleteRetailerRequestDTO.DeleteRetailerRequestMetadata(retailerId)
+                )
+            {
+                RequestedByUserId = GetUserId()
+            }, cancellationToken);
+
+            // delete image
             if ((retailer.LogoImageUrl != null) || !(string.IsNullOrEmpty(retailer.LogoImageUrl)))
             {
                 FilesService.Delete(retailer.LogoImageUrl);
@@ -104,47 +129,119 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
         }
 
         [HttpPut("{retailerId}")]
-        public async Task<IActionResult> UpdateRetailer([FromRoute] int retailerId, [FromForm] UpdateRetailerWebApiModel updateRetailerWebApiModel)
+        public async Task<IActionResult> UpdateRetailer(
+                [FromRoute] int retailerId, 
+                [FromForm] UpdateRetailerRequestWebApiModel updateRetailerRequestWebApiModel, 
+                CancellationToken cancellationToken
+            )
         {
-            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+            var canUpdateRetailer = await CanUpdateRetailerAsync(this.HttpContext);
 
-            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
-                User,
-                new { roles },
-                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
-            );
-
-            if (!authorizationResult.Succeeded)
+            if (!canUpdateRetailer)
             {
                 return Forbid();
             }
 
-            // check if null, delete image & null DB path
-            string imageUrlPath = string.Empty;
-
-            if (updateRetailerWebApiModel.LogoImage != null)
+            var existingRetailer = await _retailersCoreService.GetRetailerAsync(new GetRetailerRequestDTO()
             {
-                imageUrlPath = Path.Combine(IMAGE_BASE_PATH, Guid.NewGuid() + "_" + updateRetailerWebApiModel.LogoImage.FileName);
+                RequestedByUserId = GetUserId(),
+                RetailerId = retailerId
+            }, cancellationToken);
+
+            if (existingRetailer == null)
+            {
+                return NotFound();
             }
 
-            await _retailersService.UpdateRetailerAsync(retailerId, new UpdateRetailerDTO()
-            {
-                Name = updateRetailerWebApiModel.Name,
-                Priority = updateRetailerWebApiModel.Priority,
-                LogoImageUrl = imageUrlPath
-            });
+            string? imageUrlPath = null;
 
-            if (updateRetailerWebApiModel.LogoImage != null)
+            if (updateRetailerRequestWebApiModel.LogoImage != null)
             {
-                // save image
-                FilesService.Upload(imageUrlPath, updateRetailerWebApiModel.LogoImage.OpenReadStream());
+                imageUrlPath = Path.Combine(
+                    RETAILER_IMAGE_BASE_RELATIVE_PATH, Guid.NewGuid() + "_" + updateRetailerRequestWebApiModel.LogoImage.FileName
+                );
+            }
+
+            await _retailersCoreService.UpdateRetailerAsync(new UpdateRetailerRequestDTO(
+                        new UpdateRetailerRequestDTO.UpdateRetailerRequestMetadata(retailerId)
+                    )
+                {
+                    LogoImageUrl = imageUrlPath,
+                    Name = updateRetailerRequestWebApiModel.Name,
+                    Priority = updateRetailerRequestWebApiModel.Priority,
+                    RequestedByUserId = GetUserId(),
+                    DeleteCurrentLogoImage = updateRetailerRequestWebApiModel.DeleteCurrentLogoImage
+                },
+                cancellationToken
+            );
+
+            // delete image if requested
+            if (updateRetailerRequestWebApiModel.DeleteCurrentLogoImage)
+            {
+                FilesService.Delete(existingRetailer.LogoImageUrl);
+            }
+
+            // upload if requested
+            if (updateRetailerRequestWebApiModel.LogoImage != null)
+            {
+                // TODO use Timestamp instead of Guid
+                FilesService.Upload(
+                    //Path.Combine(
+                    //    RETAILER_IMAGE_BASE_RELATIVE_PATH, Guid.NewGuid() + "_" + updateRetailerRequestWebApiModel.LogoImage.FileName
+                    //),
+                    imageUrlPath,
+                    updateRetailerRequestWebApiModel.LogoImage.OpenReadStream()
+                );
             }
 
             return Ok();
         }
 
-        [HttpGet("{retailerId}")]
-        public async Task<IActionResult> GetRetailerById([FromRoute] int retailerId)
+        [HttpPost]
+        public async Task<IActionResult> CreateRetailer(
+                [FromForm] CreateRetailerRequestWebApiModel createRetailerRequestWebApiModel, 
+                CancellationToken cancellationToken
+            )
+        {
+            var canCreateRetailer = await CanCreateRetailerAsync(HttpContext);
+
+            if (!canCreateRetailer)
+            {
+                return Forbid();
+            }
+
+            string? imageUrlPath = null;
+
+            if (createRetailerRequestWebApiModel.LogoImage != null)
+            {
+                imageUrlPath = Path.Combine(
+                    RETAILER_IMAGE_BASE_RELATIVE_PATH, Guid.NewGuid() + "_" + createRetailerRequestWebApiModel.LogoImage.FileName
+                );
+            }
+
+            var createdRetailer = await _retailersCoreService.CreateRetailerAsync(new CreateRetailerRequestDTO()
+            {
+                LogoImageUrl = imageUrlPath,
+                Priority = createRetailerRequestWebApiModel.Priority,
+                Name = createRetailerRequestWebApiModel.Name,
+                RequestedByUserId = GetUserId()
+            }, cancellationToken);
+
+            if (createRetailerRequestWebApiModel.LogoImage != null)
+            {
+                FilesService.Upload(imageUrlPath, createRetailerRequestWebApiModel.LogoImage.OpenReadStream());
+            }
+
+            var response = MapToCreateRetailerResponse(createdRetailer);
+
+            return Ok(response);
+            //return CreatedAtAction(nameof(GetSingleRetailer), new { id = response.Id }, response);
+        }
+
+
+        #region Permissions
+
+        private async Task<bool> CanUpdateRetailerAsync(HttpContext httpContext)
         {
             int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
 
@@ -154,99 +251,135 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
                 Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
             );
 
-            if (!authorizationResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorizationResult.Succeeded;
+        }
+        
+        private async Task<bool> CanGetSingleRetailerAsync(HttpContext httpContext)
+        {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
 
-            var retailer = await _retailersService.GetRetailerByIdAsync(retailerId);
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
 
-            if (retailer == null)
-            {
-                return NotFound(new ErrorWebApiModel(StatusCodes.Status404NotFound, "The requested resource was not found.", null));
-            }
+            return authorizationResult.Succeeded;
+        }
 
-            var model = new RetailerWebApiModel()
+        private async Task<bool> CanGetMultipleRetailersAsync(HttpContext httpContext)
+        {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            return authorizationResult.Succeeded;
+        }
+
+        private async Task<bool> CanDeleteRetailerAsync(HttpContext httpContext)
+        {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            return authorizationResult.Succeeded;
+        }
+
+        private async Task<bool> CanCreateRetailerAsync(HttpContext httpContext)
+        {
+            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                new { roles },
+                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
+            );
+
+            return authorizationResult.Succeeded;
+        }
+
+        #endregion
+
+
+        #region Mapping
+
+        private GetSingleRetailerResponseWebApiModel MapToGetSingleRetailerResponse(GetRetailerResponseDTO getRetailerResponseDTO)
+        {
+            var response = new GetSingleRetailerResponseWebApiModel()
             {
-                ID = retailer.ID,
-                Name = retailer.Name,
-                Priority = retailer.Priority,
-                LogoImageUri = string.IsNullOrEmpty(retailer.LogoImageUrl) ? null : Path.Combine(Paths.FILES_BASE_URL, retailer.LogoImageUrl)
-                //LogoImageUri = Path.Combine(Paths.FILES_BASE_URL, retailer.LogoImageUrl)
+                Id = getRetailerResponseDTO.Id,
+                LogoImageUrl = string.IsNullOrEmpty(
+                    getRetailerResponseDTO.LogoImageUrl) ? null : Path.Combine(Paths.FILES_BASE_URL, getRetailerResponseDTO.LogoImageUrl),
+                Name = getRetailerResponseDTO.Name,
+                Priority = getRetailerResponseDTO.Priority
             };
 
-            return Ok(model);
+            return response;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllRetailers([FromQuery] int? take = 8, [FromQuery] int? page = 1)
+        private GetMultipleRetailersResponseWebApiModel MapToGetMultipleRetailersResponse(GetRetailersResponseDTO getRetailersResponseDTO)
         {
-            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee, (int)Roles.User };
-
-            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
-                User,
-                new { roles },
-                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
-            );
-
-            if (!authorizationResult.Succeeded)
+            var response = new GetMultipleRetailersResponseWebApiModel();
+            response.Retailers = new List<GetMultipleRetailersResponseWebApiModel.RetailerWebApiModel>();
+            response.PageInfo = new GetMultipleRetailersResponseWebApiModel.PageWebApiModel()
             {
-                return Forbid();
-            }
-
-            var retailers = await _retailersService.GetAllRetailersAsync(take, page);
-
-            var model = new RetailersWebApiModel();
-
-            model.PageInfo.Total = retailers.PageInfo.Total;
-            model.PageInfo.Take = retailers.PageInfo.Take;
-            model.PageInfo.Page = retailers.PageInfo.Page;
-
-            if (retailers.Retailers != null)
+                Total = getRetailersResponseDTO.PageInfo.Total
+            };
+            response.Retailers.AddRange(getRetailersResponseDTO.Retailers.Select(x => new GetMultipleRetailersResponseWebApiModel.RetailerWebApiModel()
             {
-                foreach (var retailer in retailers.Retailers)
-                {
-                    model.Retailers.Add(new RetailerWebApiModel()
-                    {
-                        ID = retailer.ID,
-                        Name = retailer.Name,
-                        Priority = retailer.Priority,
-                        LogoImageUri = string.IsNullOrEmpty(retailer.LogoImageUrl) ? null : Path.Combine(Paths.FILES_BASE_URL, retailer.LogoImageUrl)
-                    });
-                }
-            }
+                Id = x.Id,
+                LogoImageUrl = string.IsNullOrEmpty(
+                    x.LogoImageUrl) ? null : Path.Combine(Paths.FILES_BASE_URL, x.LogoImageUrl),
+                Name = x.Name,
+                Priority = x.Priority
+            }).ToList());
 
-            return Ok(model);
+            return response;
         }
 
-        [HttpPatch("{retailerId}")]
-        public async Task<IActionResult> PatchRetailer([FromRoute] int retailerId)
+        //private UpdateRetailerRequestDTO? MapToUpdateRetailerRequest(int retailerId, UpdateRetailerRequestWebApiModel model)
+        //{
+        //    if (model == null)
+        //    {
+        //        return null;
+        //    }
+
+        //    var result = new UpdateRetailerRequestDTO();
+        //    result.Metadata = new UpdateRetailerRequestDTO.UpdateRetailerRequestMetadataDTO()
+        //    {
+        //        RetailerId = retailerId
+        //    };
+        //    result.Request = new UpdateRetailerRequestDTO.RequestDTO()
+        //    {
+        //        Name = model.Name,
+        //        LogoImageUrl = model.LogoImageUrl,
+        //        Priority = model.Priority,
+        //        UserId = GetUserId()
+        //    };
+
+        //    return result;
+        //}
+
+        private CreateRetailerResponseWebApiModel MapToCreateRetailerResponse(CreateRetailerResponseDTO createRetailerResponseDTO)
         {
-            int[] roles = new int[] { (int)Roles.Admin, (int)Roles.Employee };
+            var result = new CreateRetailerResponseWebApiModel();
+            result.Priority = createRetailerResponseDTO.Priority;
+            result.Name = createRetailerResponseDTO.Name;
+            result.Id = createRetailerResponseDTO.Id;
+            result.LogoImageUrl = string.IsNullOrEmpty(
+                    createRetailerResponseDTO.LogoImageUrl) ? null : Path.Combine(Paths.FILES_BASE_URL, createRetailerResponseDTO.LogoImageUrl);
 
-            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
-                User,
-                new { roles },
-                Shared.Common.Constants.Policies.PolicyNames.UserIsInRole
-            );
-
-            if (!authorizationResult.Succeeded)
-            {
-                return Forbid();
-            }
-
-            var retailer = await _retailersService.GetRetailerByIdAsync(retailerId);
-
-            if (retailer == null)
-            {
-                return BadRequest($"Retailer with ID '{retailerId}' was not found");
-            }
-
-            await _retailersService.UpdateRetailerPartialAsync(retailer.ID);
-
-            FilesService.Delete(retailer.LogoImageUrl);
-
-            return Ok();
+            return result;
         }
+
+        #endregion
     }
 }

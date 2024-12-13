@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SimpleDataManagementSystem.Backend.Logic.DTOs.Response;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
+using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Response;
+using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 {
@@ -8,21 +11,46 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
     [ApiController]
     public class RolesController : ControllerBase
     {
-        private readonly IRolesService _rolesService;
+        private readonly IRolesCoreService _rolesCoreService;
 
-
-        public RolesController(IRolesService rolesService)
+        public RolesController(IRolesCoreService rolesCoreService)
         {
-            _rolesService = rolesService;
+            _rolesCoreService = rolesCoreService;
         }
 
 
         [HttpGet]
-        public async Task<IActionResult> GetAllRoles() 
+        public async Task<IActionResult> GetRoles(CancellationToken cancellationToken)
         {
-            var roles = await _rolesService.GetAllRolesAsync();
+            var roles = await _rolesCoreService.GetRolesAsync(cancellationToken);
 
-            return Ok(roles);
+            var response = MapToGetRolesResponse(roles);
+
+            return Ok(response);
         }
+
+
+        #region Mapping
+
+        private GetRolesWebApiModel MapToGetRolesResponse(GetRolesResponseDTO getRolesResponseDTO)
+        {
+            var response = new GetRolesWebApiModel();
+            response.Roles = new List<GetRolesWebApiModel.RoleWebApiModel>();
+            response.Roles.AddRange(getRolesResponseDTO.Roles.Select(x => new GetRolesWebApiModel.RoleWebApiModel()
+            {
+                Id = x.Id,
+                Name = x.Name
+            }));
+
+            response.PageInfo = new GetRolesWebApiModel.PageWebApiModel()
+            {
+                Page = 1,
+                Take = 8
+            };
+
+            return response;
+        }
+
+        #endregion
     }
 }

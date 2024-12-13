@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
-using SimpleDataManagementSystem.Backend.Logic.DTOs.Write;
+using SimpleDataManagementSystem.Backend.Logic.DTOs.Request;
+using SimpleDataManagementSystem.Backend.Logic.Models;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
+using SimpleDataManagementSystem.Backend.WebAPI.Controllers.Base;
 using SimpleDataManagementSystem.Backend.WebAPI.Helpers;
 using SimpleDataManagementSystem.Backend.WebAPI.Services.Abstractions;
-using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
+using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Records;
-using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Write;
+using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Request;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Net;
 using System.Text.Json;
@@ -18,17 +19,17 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountsController : ControllerBase
+    public class AccountsController : BaseController
     {
-        private readonly IUsersService _usersService;
+        private readonly IUsersCoreService _usersCoreService;
         private readonly ITokenGeneratorService _tokenGeneratorService;
         private readonly IAuthorizationService _authorizationService;
 
 
-        public AccountsController(IUsersService usersService, ITokenGeneratorService tokenGeneratorService,
+        public AccountsController(IUsersCoreService usersCoreService, ITokenGeneratorService tokenGeneratorService,
             IAuthorizationService authorizationService)
         {
-            _usersService = usersService;
+            _usersCoreService = usersCoreService;
             _tokenGeneratorService = tokenGeneratorService;
             _authorizationService = authorizationService;
         }
@@ -36,14 +37,20 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> LogIn(UserLogInRequestDTO userLogInRequestDTO)
+        public async Task<IActionResult> LogIn(
+                GetUserByLoginCredentialsRequestWebApiModel getUserByLoginCredentialsRequestWebApiModel,
+                CancellationToken cancellationToken
+            )
         {
-            var user = await _usersService.GetUserByLogInCredentialsAsync(userLogInRequestDTO.Username, userLogInRequestDTO.Password);
+            var user = await _usersCoreService.GetUserByLoginCredentialsAsync(new GetUserByLoginCredentialsRequestDTO()
+            {
+                Password = getUserByLoginCredentialsRequestWebApiModel.Password,
+                Username = getUserByLoginCredentialsRequestWebApiModel.Username
+            }, cancellationToken);
 
             if (user == null)
             {
                 return Unauthorized(new ErrorWebApiModel((int)HttpStatusCode.Unauthorized, "Invalid username and / or password.", null));
-                return NotFound(new ErrorWebApiModel((int)HttpStatusCode.NotFound, "User not found.", null));
             }
 
             var jwt = await _tokenGeneratorService.GenerateTokenAsync(
@@ -53,44 +60,32 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
                     user.Username,
                     user.Roles,
                     user.IsPasswordChangeRequired
-                )
+                ), 
+                cancellationToken
             );
 
             return Ok(new { jwt = jwt });
         }
 
         [HttpGet("details")]
-        //[Route("details")]
-        //[AllowAnonymous]
-        //[Authorize]
-        public async Task<IActionResult> GetAccountDetails()
+        public async Task<IActionResult> GetAccountDetails(CancellationToken cancellationToken)
         {
-            var userId = HttpContextHelpers.GetAuthenticatedUserIdFromHttpContext(HttpContext);
+            var canGetAccountDetails = await CanGetAccountDetailyAsync(HttpContext);
 
-            if (userId == null)
+            if (!canGetAccountDetails)
             {
-                return BadRequest();
+                return Forbid();
             }
 
-            //return Forbid();
-            //return Unauthorized(new ErrorWebApiModel(StatusCodes.Status401Unauthorized, "Unauthorized to view this resource"));
-
-            var user = await _usersService.GetUserByIdAsync((int)userId);
+            var user = await _usersCoreService.GetUserAsync(new Logic.DTOs.Request.GetUserRequestDTO()
+            {
+                RequestedByUserId = GetUserId(),
+                UserId = GetUserId()
+            }, cancellationToken);
 
             if (user == null)
             {
                 return NotFound();
-            }
-
-            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
-                User,
-                user.ID,
-                Shared.Common.Constants.Policies.PolicyNames.UserIsResourceOwner // "UserIsResourceOwnerPolicy"
-            );
-
-            if (!authorizationResult.Succeeded)
-            {
-                return Forbid();
             }
 
             return Ok(user);
@@ -98,7 +93,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 
         [HttpPut("password")]
         [AllowAnonymous]
-        public async Task<IActionResult> UpdatePassword(UpdatePasswordWebApiModel passwordChangeWebApiModel)
+        public async Task<IActionResult> UpdatePassword(UpdatePasswordWebApiModel passwordChangeWebApiModel, CancellationToken cancellationToken)
         {
             // allowAnonymous is just for the purposes of "PasswordChangeRequiredCheckMiddleware"
             // user has to be authenticated, and if password change is required - let the user exectue this api call
@@ -120,13 +115,38 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
                 return Forbid();
             }
 
-            await _usersService.UpdatePasswordAsync((int)userId!, new UpdatePasswordDTO()
+            await _usersCoreService.UpdatePasswordAsync(new UpdatePasswordRequestDTO(
+                    new UpdatePasswordRequestDTO.UpdatePasswordRequestMetadata(GetUserId())
+                )
             {
                 OldPassword = passwordChangeWebApiModel.OldPassword,
                 NewPassword = passwordChangeWebApiModel.NewPassword
-            });
+            }, cancellationToken);
 
             return Ok();
         }
+
+
+        #region Permissions
+
+        private async Task<bool> CanGetAccountDetailyAsync(HttpContext httpContext)
+        {
+            var userId = HttpContextHelpers.GetAuthenticatedUserIdFromHttpContext(HttpContext);
+
+            if (userId == null)
+            {
+                return false;
+            }
+
+            AuthorizationResult authorizationResult = await _authorizationService.AuthorizeAsync(
+                User,
+                GetUserId(),
+                Shared.Common.Constants.Policies.PolicyNames.UserIsResourceOwner // "UserIsResourceOwnerPolicy"
+            );
+
+            return authorizationResult.Succeeded;
+        }
+
+        #endregion
     }
 }

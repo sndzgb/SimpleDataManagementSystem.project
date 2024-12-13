@@ -29,11 +29,10 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 
             var path = Path.Combine(assDirPath, "Images", category, image);
 
-            // TODO check if file exists
-            //if (!System.IO.File.Exists(path))
-            //{
-            //    return Ok();
-            //}
+            if (!System.IO.File.Exists(path))
+            {
+                return NotFound();
+            }
 
             return File(System.IO.File.ReadAllBytes(path), "image/jpeg"); // TODO png, jpg, jpeg - get request file extension
         }
