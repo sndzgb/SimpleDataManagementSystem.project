@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using SimpleDataManagementSystem.Backend.Database;
 using SimpleDataManagementSystem.Backend.Database.Entities;
 using SimpleDataManagementSystem.Backend.Database.Repositories.Implementations;
@@ -39,7 +40,23 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
             var config = builder.Configuration;
+            
+            //builder.Logging.ClearProviders();
+
+            var configuration = new ConfigurationBuilder()
+                //.SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
+                .AddJsonFile("appsettings.User.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .AddCommandLine(args)
+                .Build();
+
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(configuration)
+                .CreateLogger();
 
             var connectionString = builder.Configuration.GetConnectionString("SimpleDataManagementSystemDbContext");
 
