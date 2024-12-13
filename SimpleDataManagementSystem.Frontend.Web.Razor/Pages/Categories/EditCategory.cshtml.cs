@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
@@ -27,7 +27,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
         [FromRoute]
         public int CategoryId { get; set; }
 
-        public CategoryViewModel Category { get; set; }
+        public GetSingleCategoryResponseViewModel Category { get; set; }
 
 
         public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
@@ -50,16 +50,16 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
         }
 
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
         {
-            Category = await _categoriesService.GetCategoryByIdAsync(CategoryId);
+            Category = await _categoriesService.GetSingleCategoryAsync(CategoryId, cancellationToken);
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPost()
+        public async Task<IActionResult> OnPost(CancellationToken cancellationToken)
         {
-            await _categoriesService.UpdateCategoryAsync(CategoryId, Model);
+            await _categoriesService.UpdateCategoryAsync(CategoryId, Model, cancellationToken);
 
             return RedirectToPage("/Categories/Categories");
         }

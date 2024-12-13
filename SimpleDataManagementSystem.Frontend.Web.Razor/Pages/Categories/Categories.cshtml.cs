@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
 {
-    public class CategoriesModel : BasePageModel<CategoriesViewModel>
+    public class CategoriesModel : BasePageModel<GetMultipleCategoriesResponseViewModel>
     {
         private readonly ICategoriesService _categoriesService;
         private readonly IAuthorizationService _authorizationService;
@@ -41,9 +41,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
             base.OnPageHandlerExecuting(context);
         }
 
-        public async Task<IActionResult> OnGet([FromQuery] int take = 8, [FromQuery] int page = 1)
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken, [FromQuery] int take = 8, [FromQuery] int page = 1)
         {
-            Model = await _categoriesService.GetAllCategoriesAsync(take, page);
+            Model = await _categoriesService.GetMultipleCategoriesAsync(cancellationToken, take, page);
 
             return Page();
         }

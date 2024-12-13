@@ -4,14 +4,14 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Net;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
 {
     [ValidateAntiForgeryToken]
-    public class DeleteCategoryModel : BasePageModel<CategoryViewModel>
+    public class DeleteCategoryModel : BasePageModel<GetSingleCategoryResponseViewModel>
     {
         private readonly ICategoriesService _categoriesService;
         private readonly IAuthorizationService _authorizationService;
@@ -48,16 +48,16 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
         }
 
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
         {
-            Model = await _categoriesService.GetCategoryByIdAsync(CategoryId);
+            Model = await _categoriesService.GetSingleCategoryAsync(CategoryId, cancellationToken);
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPost()
+        public async Task<IActionResult> OnPost(CancellationToken cancellationToken)
         {
-            await _categoriesService.DeleteCategoryAsync(CategoryId);
+            await _categoriesService.DeleteCategoryAsync(CategoryId, cancellationToken);
 
             return RedirectToPage("/Categories/Categories");
         }

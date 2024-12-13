@@ -84,7 +84,7 @@
                 @foreach (var c in Model.Model.Categories)
                 {
                     <tr style="max-height: 70px; height:70px;" *ngFor="let c of categories?.categories">
-                        <td>@c.ID</td>
+                        <td>@c.Id</td>
                         <td>@c.Name</td>
                         @if (
                             PermissionsHelper.IsInRole
@@ -101,17 +101,17 @@
                         )
                         {
                             <td class="options">
-                                <a href="/Categories/@c.ID)/Details">
+                                <a href="/Categories/@c.Id/Details">
                                     <i class="fa-solid fa-circle-info"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Categories/@c.ID/Edit">
+                                <a href="/Categories/@c.Id/Edit">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Categories/@c.ID/Delete">
+                                <a href="/Categories/@c.Id/Delete">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </td>

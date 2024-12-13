@@ -5,12 +5,12 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
 {
-    public class CreateCategoryModel : BasePageModel<NewCategoryViewModel>
+    public class CreateCategoryModel : BasePageModel<CreateCategoryViewModel>
     {
         private readonly ICategoriesService _categoriesService;
         private readonly IAuthorizationService _authorizationService;
@@ -48,9 +48,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories
             return Page();
         }
 
-        public async Task<IActionResult> OnPost(NewCategoryViewModel newCategoryViewModel)
+        public async Task<IActionResult> OnPost(CreateCategoryViewModel createCategoryViewModel, CancellationToken cancellationToken)
         {
-            var newCategory = await _categoriesService.AddNewCategoryAsync(newCategoryViewModel);
+            await _categoriesService.CreateCategoryAsync(createCategoryViewModel, cancellationToken);
 
             return RedirectToPage("/Categories/Categories");
         }
