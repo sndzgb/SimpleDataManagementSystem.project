@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Logging;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Constants;
@@ -9,6 +9,7 @@ using SimpleDataManagementSystem.Frontend.Web.Razor.Options;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
 using SimpleDataManagementSystem.Shared.Extensions;
 using SimpleDataManagementSystem.Shared.Options;
+using System.Globalization;
 using System.Security.Claims;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor
@@ -44,8 +45,26 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor
                     });
             });
 
+            builder.Services.AddLocalization(options => {
+                options.ResourcesPath = "Resources";
+            });
+
+            builder.Services.Configure<RequestLocalizationOptions>(options =>
+            {
+                var supportedCultures = new[]
+                {
+                    new CultureInfo("en"),
+                    new CultureInfo("hr")
+                };
+                options.DefaultRequestCulture = new RequestCulture("en");
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+            });
+
             // Add services to the container.
-            builder.Services.AddRazorPages();
+            builder.Services.AddRazorPages()
+                .AddViewLocalization();
+
             builder.Services.AddMvc((options) =>
             {
                 options.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor((x, y) =>
@@ -54,7 +73,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor
                 options.ModelBindingMessageProvider.SetNonPropertyAttemptedValueIsInvalidAccessor(x =>
                     $"The value for '{x.SplitCamelCase()}' is not valid."
                 );
-            });
+            })
+            .AddMvcLocalization();
+
             //builder.Services.AddRazorPages((options) =>
             //{
             //    options.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor((x, y) =>
@@ -167,6 +188,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor
             app.UseAuthorization();
 
             app.MapRazorPages();
+
+            var localizationOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>().Value;
+            app.UseRequestLocalization(localizationOptions);
 
             app.Run();
         }
