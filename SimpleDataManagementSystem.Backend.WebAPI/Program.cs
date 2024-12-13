@@ -23,6 +23,7 @@ using SimpleDataManagementSystem.Backend.WebAPI.Options;
 using SimpleDataManagementSystem.Backend.WebAPI.Services.Abstractions;
 using SimpleDataManagementSystem.Backend.WebAPI.Services.Implementations;
 using SimpleDataManagementSystem.Shared.Extensions;
+using SimpleDataManagementSystem.Shared.Options;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
@@ -39,6 +40,8 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
     {
         public static void Main(string[] args)
         {
+            const string HUBS_PREFIX = "/hubs";
+
             var builder = WebApplication.CreateBuilder(args);
 
             var config = builder.Configuration;
@@ -65,16 +68,21 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
 
-            // TODO test
+            builder.Services.AddOptions<CorsOptions>().BindConfiguration(nameof(CorsOptions));
+
             builder.Services.AddCors(options =>
             {
+                var corsOptions = builder.Configuration.GetRequiredSection(CorsOptions.CorsOptionsSectionName).Get<CorsOptions>();
+                ArgumentNullException.ThrowIfNull(corsOptions, nameof(corsOptions));
                 options.AddPolicy(myCorsPolicy,
                     builder =>
                     {
                         builder
-                            .AllowAnyOrigin()
+                            .WithOrigins(corsOptions.AllowedOrigins)
+                            //.AllowAnyOrigin()
                             .AllowAnyHeader()
                             .AllowAnyMethod()
+                            .AllowCredentials()
                             .WithExposedHeaders("Set-Authorization");
                     });
             });
@@ -98,6 +106,27 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
                     ValidateAudience = true,
                     ValidateIssuerSigningKey = true,
                     ClockSkew = TimeSpan.Zero
+                };
+
+                x.SaveToken = true;
+
+                x.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        // ff the request is for our hub...
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments(HUBS_PREFIX)))
+                        {
+                            // ...read the token out of the query string
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
@@ -150,6 +179,8 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
                 config.GetSection(AppOptions.AppOptionsSectionName)
             );
 
+            builder.Services.AddOptions<SqliteOptions>().BindConfiguration(nameof(SqliteOptions));
+
             builder.Services.AddDbContext<SimpleDataManagementSystemDbContext>(options =>
                 options.UseSqlServer(connectionString)
             );
@@ -175,7 +206,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
             //    options.User.RequireUniqueEmail = true;
             //});
 
-
+            builder.Services.AddSignalR(cfg => cfg.EnableDetailedErrors = true);
             //builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddScoped<IEmailService, EmailService>();
@@ -197,9 +228,12 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
             // Configure the HTTP request pipeline.
             var app = builder.Build();
 
+            InitiateSqliteDb(builder.Configuration);
+
             app.UseCors(myCorsPolicy);
 
             app.UseMiddleware<ExceptionHandlingMiddleware>();
+            app.UseMiddleware<AccessTokenMiddleware>();
             app.UseMiddleware<TokenSlidingExpirationMiddleware>();
 
             app.UseHttpsRedirection();
@@ -215,6 +249,36 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
             app.UseSeedSqlServer();
 
             app.Run();
+        }
+
+
+        // Add table: Notifications content: Body (JSON), Receiver, IsRead, IsSent, /DateTime/, Sender, 
+        private static void InitiateSqliteDb(ConfigurationManager configuration)
+        {
+            // TODO clear table on startup; delete all items from table(s) -- WHERE 1 = 1
+            const string CONNECTIONS_TABLE_NAME = "connections";
+            var sqliteOptions = configuration.GetSection(nameof(SqliteOptions)).Get<SqliteOptions>();
+
+            ArgumentNullException.ThrowIfNull(sqliteOptions, nameof(sqliteOptions));
+
+            using (SqliteConnection con = new SqliteConnection(sqliteOptions.GetConnectionString()))
+            using (SqliteCommand command = con.CreateCommand())
+            {
+                con.Open();
+
+                command.CommandText = $@"
+CREATE TABLE IF NOT EXISTS {CONNECTIONS_TABLE_NAME}
+(
+    userId INTEGER NOT NULL,
+    connectionId TEXT NOT NULL,
+    hubId INTEGER NOT NULL,
+    PRIMARY KEY (userId, connectionId, hubId)
+) 
+WITHOUT ROWID
+";
+
+                command.ExecuteScalar();
+            }
         }
     }
 }

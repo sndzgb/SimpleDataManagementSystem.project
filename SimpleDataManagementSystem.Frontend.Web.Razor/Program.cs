@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Logging;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Constants;
 using SimpleDataManagementSystem.Frontend.Web.Razor.DelegatingHandlers;
@@ -7,6 +8,7 @@ using SimpleDataManagementSystem.Frontend.Web.Razor.Middlewares;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Options;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
 using SimpleDataManagementSystem.Shared.Extensions;
+using SimpleDataManagementSystem.Shared.Options;
 using System.Security.Claims;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor
@@ -21,14 +23,24 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor
 
             IdentityModelEventSource.ShowPII = true;
 
+            builder.Services.AddOptions<CorsOptions>().BindConfiguration(nameof(CorsOptions));
+
             var myCorsPolicy = "MyCorsPolicy";
             builder.Services.AddCors(options =>
             {
+                var corsOptions = builder.Configuration.GetRequiredSection(CorsOptions.CorsOptionsSectionName).Get<CorsOptions>();
+                ArgumentNullException.ThrowIfNull(corsOptions, nameof(corsOptions));
+
                 options.AddPolicy(myCorsPolicy,
                     builder =>
                     {
-                        builder.AllowAnyOrigin().AllowAnyHeader()
-                        .WithExposedHeaders("Set-Authentication");
+                        builder
+                            //.AllowAnyOrigin()
+                            .WithOrigins(corsOptions.AllowedOrigins)
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials()
+                            .WithExposedHeaders("Set-Authentication");
                     });
             });
 

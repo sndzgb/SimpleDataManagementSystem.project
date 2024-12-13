@@ -400,3 +400,4 @@ FodyWeavers.xsd
 /SimpleDataManagementSystem.Frontend.Web.Razor/wwwroot/lib/jquery
 /SimpleDataManagementSystem.Frontend.Web.Razor/wwwroot/lib/jquery-validation
 /SimpleDataManagementSystem.Frontend.Web.Razor/wwwroot/lib/jquery-validation-unobtrusive
+/SimpleDataManagementSystem.Frontend.Web.Razor/wwwroot/lib/signalr/dist

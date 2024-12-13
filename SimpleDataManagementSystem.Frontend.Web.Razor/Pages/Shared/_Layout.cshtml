@@ -38,10 +38,13 @@
             <p style="color:green;">Empty 2</p>
         } *@
         <main role="main" class="pb-3">
+            
+            @* hubs notifications *@
             @RenderBody()
         </main>
     </div>
 
+    @* TODO component *@
     @* #region - snackbar *@
     <div id="snackbar">
         <em>
@@ -79,5 +82,7 @@
 
     @await RenderSectionAsync("Scripts", required: false)
 
+
+    <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
 </body>
 </html>
