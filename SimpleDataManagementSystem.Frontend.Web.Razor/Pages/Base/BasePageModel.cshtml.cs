@@ -5,13 +5,16 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.IdentityModel.Tokens;
+using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Helpers;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels;
 using SimpleDataManagementSystem.Shared.Common.Constants;
+using System;
 using System.Diagnostics;
+using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base
 {
@@ -32,6 +35,80 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base
             {
                 _model = value;
             }
+        }
+
+        // TODO use this for granular logic; Global Middleware for unhandled exceptions -- redirect to 500 page
+        // TODO rename "ExceptionHandlingMiddleware" to "UnhandledExceptionHandlingMiddleware"
+        public override void OnPageHandlerExecuted(PageHandlerExecutedContext context)
+        {
+            var myCompleteAddress = Request.Path.Value + Request.QueryString.Value;
+
+            if (TempData["ErrorViewModel"] != null) // TODO nameof
+            {
+                Error = JsonSerializer.Deserialize<ErrorViewModel>(TempData["ErrorViewModel"].ToString());
+            }
+
+            if (context.Exception != null)
+            {
+                var exType = context.Exception.GetType();
+
+                if (exType == typeof(WebApiCallException))
+                {
+                    var ex = context.Exception as WebApiCallException;
+                    var error = new ErrorViewModel()
+                    {
+                        Errors = ex.Error.Errors,
+                        Message = ex.Error.Message,
+                        StatusCode = ex.Error.StatusCode
+                    };
+
+                    // TODO test!
+                    if (context.HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest") // ajax request
+                    {
+                        context.HttpContext.Response.StatusCode = 
+                            ex?.Error?.StatusCode ?? StatusCodes.Status500InternalServerError;
+                        context.HttpContext.Response.ContentType = "application/json";
+                        
+                        string json = JsonSerializer.Serialize(
+                            new ErrorViewModel(
+                                ex?.Error?.StatusCode ?? StatusCodes.Status500InternalServerError,
+                                ex?.Error?.Message,
+                                ex?.Error?.Errors
+                            )
+                        );
+
+                        //context.ExceptionHandled = true;
+                        context.HttpContext.Response.WriteAsync(json).GetAwaiter().GetResult();
+                        context.HttpContext.Response.CompleteAsync().GetAwaiter().GetResult();
+                    }
+
+                    if (error.StatusCode == StatusCodes.Status403Forbidden)
+                    {
+                        context.Result = Redirect("/Forbidden");
+                    }
+
+                    if (error.StatusCode == StatusCodes.Status401Unauthorized)
+                    {
+                        context.Result = Redirect("/Account/Login");
+                    }
+
+                    if (error.StatusCode == StatusCodes.Status404NotFound)
+                    {
+                        context.Result = Redirect("/Errors/NotFound");
+                    }
+
+                    if (error.StatusCode == StatusCodes.Status400BadRequest)
+                    {
+                        context.Result = Redirect(myCompleteAddress);
+                    }
+
+                    context.ExceptionHandled = true;
+
+                    TempData["ErrorViewModel"] = JsonSerializer.Serialize<ErrorViewModel>(error);
+                }
+            }
+
+            base.OnPageHandlerExecuted(context);
         }
 
 
