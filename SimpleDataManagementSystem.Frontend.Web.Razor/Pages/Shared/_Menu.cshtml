@@ -1,87 +1,154 @@
 ﻿@page
 
 @using System.Security.Claims
+@using Microsoft.AspNetCore.Localization
 @using SimpleDataManagementSystem.Shared.Common.Constants
+@inject IHttpContextAccessor context
+@inject Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions> localizationOptions;
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Shared._MenuModel
 
 @{
+	var culture = context.HttpContext.Features.Get<IRequestCultureFeature>();
+	var currentCulture = culture.RequestCulture.Culture;
+	var returnUrl = string.IsNullOrWhiteSpace(context.HttpContext.Request.Path)
+								?
+								"/"
+								:
+								$"{context.HttpContext.Request.Path.Value}{context.HttpContext.Request.QueryString}";
+
+	var supportedCultures = localizationOptions.Value.SupportedUICultures.Select(x => x.Name).ToList();
 }
 
-<div class="container" style="margin-top: 10px; margin-bottom:10px;">
-    <a href="/" class="logo navbarItem">
-        <img src="/favicon.ico" alt="logo" />
-    </a>
+<div class="container">
 
-    <div class="hamb">
-        <button type="button" onclick="onHambToggle(this)">
-            <span>&equiv;</span>
-        </button>
-    </div>
+	<div class="special">
+		<div class="link logo">
+			<a href="/" class="logo navbarItem"><img src="/favicon.ico" alt="logo" /></a>
+		</div>
 
-        <div class="links collapsed not-collapsed" id="navBarLinks">
-    @if (User.Identity.IsAuthenticated)
-    {
-            @if (
-                PermissionsHelper.IsInRole
-                (
-                    Roles.Admin,
-                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
-                )
-                ||
-                PermissionsHelper.IsInRole
-                (
-                    Roles.Employee,
-                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
-                )
-            )
-            {
-                <a href="/Items" class="navbarItem @Html.ActiveClass("/Items")">
-                    Items
-                </a>
-            }
-            @* TODO active link *@
-            <a href="/Categories" class="navbarItem @Html.ActiveClass("/Categories")">Categories</a>
-            <a href="/Retailers" class="navbarItem @Html.ActiveClass("/Retailers")">Retailers</a>
-            @if (
-                PermissionsHelper.IsInRole
-                (
-                    Roles.Admin,
-                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
-                )
-            )
-            {
-                <a href="/Users" class="navbarItem @Html.ActiveClass("/Users")">
-                    Users
-                </a>
-            }
+		<div class="hamb">
+			<button type="button" onclick="onHambClicked(this)">
+				<span>&equiv;</span>
+			</button>
+		</div>
+	</div>
 
-            <a href="/Account/Details" class="navbarItem @Html.ActiveClass("/Account")">Account</a>
+	@if (User.Identity.IsAuthenticated)
+	{
+		<div class="link toggleable collapsed not-collapsed">
+			<a href="/Categories" class="@Html.ActiveClass("/Categories")">Categories</a>
+		</div>
 
-            @if (User.Identity.IsAuthenticated)
-            {
-                <div class="logout" style="margin-left: auto;">
-                    @* TODO form POST *@
-                    <form method="post" name="form-logout" asp-page="/Account/Logout" asp-area="">
-                        <a onclick="onLogoutClicked(event)" href="/Account/Logout" style="margin:5px; text-decoration: none;">
-                            Logout, 
-                            <b>
-                                <i>
-                                    @ClaimsHelper.GetValueFromClaimsByKey(User.Claims.AsEnumerable(), ExtendedClaims.Type.Username)
-                                </i>
-                            </b>
-                        </a>
-                    </form>
-                </div>
-            }
+		@if (
+			PermissionsHelper.IsInRole
+			(
+				Roles.Admin,
+				User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+			)
+		)
+		{
+			<div class="link toggleable collapsed not-collapsed">
+				<a href="/Users" class="@Html.ActiveClass("/Users")">Users</a>
+			</div>
+		}
 
-    }
-            @if (!User.Identity.IsAuthenticated)
-            {
-                <a class="login" href="/Account/Login">
-                    Login
-                </a>
-            }
-        </div>
+		<div class="link toggleable collapsed not-collapsed">
+			<a href="/Retailers" class="@Html.ActiveClass("/Retailers")">Retailers</a>
+		</div>
+
+		@if (
+			PermissionsHelper.IsInRole
+			(
+				Roles.Admin,
+				User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+			)
+			||
+			PermissionsHelper.IsInRole
+			(
+				Roles.Employee,
+				User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+			)
+		) 
+		{
+			<div class="link toggleable collapsed not-collapsed dropdown-container">
+				<div>
+					<a href="/Items" class="@Html.ActiveClass("/Items")">Items</a><!--
+					--><button class="dropdown" onclick="onExpandClicked(this)">
+						<span class="dropdown-caret">
+							<i class="fa-solid fa-caret-up"></i>
+						</span>
+					</button>
+				</div>
+				<div class="dropdown-options collapsed-items-dropdown-menu bordered">
+					@if (
+							PermissionsHelper.IsInRole
+							(
+								Roles.Admin,
+								User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+							)
+						)
+					{
+						<a href="/Items/Monitored" class="dropdown-item @Html.ActiveClass("/Items/Monitored")">Items Being Monitored</a>
+						<div class="divider-hd-visible">
+							<hr class="visual-divider" />
+						</div>
+					}
+					<a href="/Items/My-Monitored-Items" class="dropdown-item @Html.ActiveClass("/Items/My-Monitored-Items")">My Monitored Items</a>
+					<!-- small screen divider START -->
+					<div class="divider"> 
+						<hr class="visual-divider" />
+					</div>
+					<!-- small screen divider END -->
+				</div>
+			</div>
+		}
+
+		<div class="link toggleable collapsed not-collapsed">
+			<div>
+				<a href="/Account/Details" class="@Html.ActiveClass("/Account")">Account</a>
+			</div>
+		</div>
+
+		<div class="link logout toggleable collapsed not-collapsed">
+			<form method="post" name="form-logout" asp-page="/Account/Logout" asp-area="">
+				<a onclick="onLogoutClicked(event)" href="/Account/Logout">Logout</a>
+			</form>
+		</div>
+	} 
+	else 
+	{
+		<div class="link logout toggleable collapsed not-collapsed">
+			<a href="/Account/Login" class="@Html.ActiveClass("/Account/Login")">Login</a>
+		</div>
+	}
+
+
+	<div class="link toggleable collapsed not-collapsed">
+		<div class="language-picker">
+			<div class="lang-selected">
+				<div class="lang-icon" onclick="toggleFlagDropDown(this)">
+					<img height=24 width=24 src="~/resources/images/@(currentCulture.Name).png">
+				</div>
+			</div>
+
+			<div class="lang-options hidden">
+				<ul style="list-style-type: none; padding:0px; margin:0px;">
+
+					<form id="form-id" asp-area="" asp-page="/Localization" method="post" asp-route-returnUrl="@returnUrl">
+						@foreach (var supportedCulture in supportedCultures.Where(x => x != currentCulture.Name))
+						{
+							<li 
+								class="available-culture-option" 
+								onclick="updateLocalization(this, '@supportedCulture'); document.getElementById('form-id').submit();"
+							>
+								<img height=24 width=24 src="~/resources/images/@(supportedCulture).png" />
+							</li>
+						}
+					</form>
+				</ul>
+			</div>
+		</div>
+	</div>
 
 </div>
