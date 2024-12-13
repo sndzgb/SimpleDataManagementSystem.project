@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
+using SimpleDataManagementSystem.Backend.Logic.Models;
 using SimpleDataManagementSystem.Backend.Logic.Repositories.Abstractions;
 using System;
 using System.Collections.Generic;
@@ -9,24 +9,24 @@ using System.Threading.Tasks;
 
 namespace SimpleDataManagementSystem.Backend.Database.Repositories.Implementations
 {
-    public class RolesRepository : IRolesRepository
+    public class RolesCoreRepository : IRolesCoreRepository
     {
         private readonly SimpleDataManagementSystemDbContext _dbContext;
 
 
-        public RolesRepository(SimpleDataManagementSystemDbContext dbContext)
+        public RolesCoreRepository(SimpleDataManagementSystemDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
 
-        public async Task<List<RoleDTO>?> GetAllRolesAsync()
+        public async Task<List<Role>> GetAllRolesAsync(CancellationToken cancellationToken)
         {
-            var roles = await _dbContext.Roles.Select(x => new RoleDTO()
+            var roles = await _dbContext.Roles.Select(x => new Role()
             {
-                Id = x.Id,
+                ID = x.Id,
                 Name = x.Name
-            }).ToListAsync();
+            }).ToListAsync(cancellationToken);
 
             return roles;
         }
