@@ -1,1 +1,100 @@
 ﻿
+.search-control {
+    display: flex;
+    /*flex-grow: 1;*/
+}
+
+
+.menu {
+    flex-wrap:wrap;
+    /*flex:1;*/
+    /*border:1px solid red;*/
+}
+
+.menu div {
+    padding: 1px;
+}
+
+/*all buttons except this one*/
+button:not(.search-input-control) {
+    min-width: 100px;
+}
+
+.menu-options {
+    /*border:1px solid green;*/
+    flex: 1;
+    /*display: flex;*/
+    /*text-align:end;*/
+}
+
+.spacer {
+    /*flex: 1;*/
+    /*border: 1px solid green;*/
+}
+
+.search-control-wrapper {
+    /*flex-shrink: 1;*/
+    /*display: flex;*/
+    /*flex-direction: row;*/
+    /*flex: 1;*/
+    /*border:1px solid yellow;*/
+    height: fit-content;
+    align-self: center;
+}
+
+
+
+
+.identifier {
+    /*position:relative;*/
+}
+.id-wrapper {
+    /*border:1px solid red;*/
+    display:flex;
+    font-size: 10px;
+    /*position:absolute;*/
+    /*top:3px;*/
+}
+
+.total-users-monitoring-counter {
+    color: grey;
+    /*#8d8d8d*/
+    margin-left:2px;
+}
+
+.monitored-favorites-counter {
+    /*border: 1px solid blue;*/
+    align-self: center;
+    display: flex;
+    font-size: 10px;
+}
+
+.id-main {
+    /*border:1px solid yellow;*/
+}
+
+
+/*.monitored-tracker {
+    display: inline;
+}
+
+.monitored {
+    position:relative;*/
+    /*width: fit-content;*/
+/*}
+
+.monitored-counter {
+    color:black;
+    pointer-events:none;
+    z-index:9999;
+    position: absolute;
+    bottom:-8px;
+    right:-8px;
+    overflow:visible;*/
+    /*width: fit-content;*/
+/*}*/
+
+.light-color {
+    color: grey;
+    /*color: #c4c4c4;*/
+}
