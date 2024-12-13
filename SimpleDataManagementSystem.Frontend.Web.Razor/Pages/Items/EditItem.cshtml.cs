@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Diagnostics;
 using System.Net;
@@ -55,11 +55,11 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
             } 
         }
 
-        public ItemViewModel Item { get; set; }
+        public GetSingleItemResponseViewModel Item { get; set; }
 
-        public CategoriesViewModel AvailableCategories { get; set; }
+        public GetMultipleCategoriesResponseViewModel AvailableCategories { get; set; }
 
-        public RetailersViewModel AvailableRetailers { get; set; }
+        public GetMultipleRetailersResponseViewModel AvailableRetailers { get; set; }
 
 
         public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
@@ -82,31 +82,30 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
         }
 
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
         {
             var tasks = new List<Task>();
 
-            tasks.Add(Task.Run(async () => Item = await _itemsService.GetItemByIdAsync(ItemId)));
-            tasks.Add(Task.Run(async () => AvailableRetailers = await _retailersService.GetAllRetailersAsync(Int32.MaxValue, 1)));
-            tasks.Add(Task.Run(async () => AvailableCategories = await _categoriesService.GetAllCategoriesAsync(Int32.MaxValue, 1)));
+            tasks.Add(Task.Run(async () => 
+                Item = await _itemsService.GetSingleItemAsync(ItemId, cancellationToken))
+            );
+            tasks.Add(Task.Run(async () => 
+            AvailableRetailers = await _retailersService.GetMultipleRetailersAsync(cancellationToken, Int32.MaxValue, 1))
+            );
+            tasks.Add(Task.Run(async () => 
+                AvailableCategories = await _categoriesService.GetMultipleCategoriesAsync(cancellationToken, Int32.MaxValue, 1))
+            );
 
             await Task.WhenAll(tasks);
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPost()
+        public async Task<IActionResult> OnPost(UpdateItemViewModel updateItemViewModel, CancellationToken cancellationToken)
         {
-            await _itemsService.UpdateItemAsync(ItemId, Model);
+            await _itemsService.UpdateItemAsync(ItemId, Model, cancellationToken);
 
             return RedirectToPage("/Items/Items");
-        }
-
-        public async Task<IActionResult> OnPostDeleteImage()
-        {
-            await _itemsService.UpdateItemPartialAsync(ItemId);
-            
-            return new JsonResult(null) { StatusCode = (int)HttpStatusCode.OK };
         }
     }
 }

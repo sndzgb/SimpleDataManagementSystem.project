@@ -1,17 +1,15 @@
 ﻿@page "/Items/{ItemId}/Edit"
 
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
-@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
-@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.EditItemModel
 
 @{
-    ViewData["Title"] = "Edit item - '" + (Model?.Item?.Nazivproizvoda ?? "-") + "'";
+    ViewData["Title"] = "Edit item - '" + (Model?.Item?.Item.Nazivproizvoda ?? "-") + "'";
 }
 
 <div class="header">
-    <h1>Edit item - '<b>@Model?.Item?.Nazivproizvoda</b>'</h1>
+    <h1>Edit item - '<b>@Model?.Item?.Item.Nazivproizvoda</b>'</h1>
 </div>
 
 
@@ -43,10 +41,9 @@
                             </div>
                             <div>
                                 <textarea name="opis"
-                                          style="display:block;"
                                           type="text"
                                           id="opis"
-                                          spellcheck="false">@Model.Item.Opis</textarea>
+                                          spellcheck="false">@Model.Item.Item.Opis</textarea>
                             </div>
                         </div>
 
@@ -57,11 +54,48 @@
                                 <label for="datumakcije">Datum akcije:</label>
                             </div>
                             <div>
-                                <input name="datumakcije" type="text" id="datumakcije" value="@Model.Item.Datumakcije" />
+                                <input name="datumakcije" type="text" id="datumakcije" value="@Model.Item.Item.Datumakcije" />
                             </div>
                         </div>
                         
                         <br>
+
+                        <div class="input-control single-per-line">
+                            <div>
+                                <label for="isMonitoredByUser">Monitoring:</label>
+                            </div>
+                            <div>
+                                @if (Model.Item.Monitoring.IsMonitoredByUser)
+                                {
+                                    <input type="checkbox"
+                                           data-val="true"
+                                           data-val-required="The monitoring field is required."
+                                           id="isMonitoredByUser"
+                                           name="isMonitoredByUser"
+                                           value="true"
+                                           checked>
+
+                                    <input name="isMonitoredByUser"
+                                           type="hidden"
+                                           value="false">
+                                }
+                                else
+                                {
+                                    <input type="checkbox"
+                                           data-val="true"
+                                           data-val-required="The monitoring field is required."
+                                           id="isMonitoredByUser"
+                                           name="isMonitoredByUser"
+                                           value="true">
+
+                                    <input name="isMonitoredByUser"
+                                           type="hidden"
+                                           value="false">
+                                }
+                            </div>
+                        </div>
+
+                        <br />
 
                         <div class="input-control single-per-line">
                             <div class="required">
@@ -70,8 +104,47 @@
                             <div>
                                 <input 
                                     name="cijena" type="number" id="cijena" 
-                                    value="@Model.Item.Cijena.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" 
+                                    value="@Model.Item.Item.Cijena.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" 
                                 />
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="input-control single-per-line">
+                            <div>
+                                <label for="isEnabled">Enabled:</label>
+                            </div>
+                            <div>
+                                @if (Model.Item.Item.IsEnabled)
+                                {
+                                    <input type="checkbox"
+                                           data-val="true"
+                                           data-val-required="The IsEnabled field is required."
+                                           id="IsEnabled"
+                                           name="IsEnabled"
+                                           value="true"
+                                           checked
+                                    >
+
+                                    <input name="IsEnabled"
+                                           type="hidden"
+                                           value="false">
+                                }
+                                else
+                                {
+                                    <input type="checkbox"
+                                           data-val="true"
+                                           data-val-required="The IsEnabled field is required."
+                                           id="IsEnabled"
+                                           name="IsEnabled"
+                                           value="true"
+                                    >
+
+                                    <input name="IsEnabled"
+                                           type="hidden"
+                                           value="false">
+                                }
                             </div>
                         </div>
 
@@ -85,7 +158,7 @@
                                 <select id="retailer" name="retailerId">
                                     @foreach (var r in Model.AvailableRetailers.Retailers)
                                     {
-                                        <option value="@r.ID" selected="@(r.ID == Model.Item.RetailerId)">@r.Name</option>
+                                        <option value="@r.Id" selected="@(r.Id == Model.Item.Item.Retailer.Id)">@r.Name</option>
                                     }
                                 </select>
                             </div>
@@ -101,7 +174,7 @@
                                 <select id="kategorija" name="kategorija">
                                     @foreach (var c in Model.AvailableCategories.Categories)
                                     {
-                                        <option value="@c.ID" selected="@(c.ID == Model.Item.Kategorija)">@c.Name</option>
+                                        <option value="@c.Id" selected="@(c.Id == Model.Item.Item.Category.Id)">@c.Name</option>
                                     }
                                 </select>
                             </div>
@@ -120,14 +193,13 @@
                                             height="300" 
                                             width="300" 
                                             id="thumbnailPreview"
-                                            src="@(Model.Item.URLdoslikeUri == null ? 
+                                            src="@(Model.Item.Item.URLdoslike == null ? 
                                                         "/Resources/image_not_available.png" 
                                                         : 
-                                                        Model.Item.URLdoslikeUri)" />
+                                                        Model.Item.Item.URLdoslike)" />
                                     </div>
 
-                                    @* visibility: @(Model.Item.URLdoslikeUri ?? "hidden;") *@
-                                    <div class="thumbnail-preview-delete-control @(Model.Item.URLdoslikeUri ?? " element-invisible-no-space ")"
+                                    <div class="thumbnail-preview-delete-control @(Model.Item.Item.URLdoslike ?? " element-invisible-no-space ")"
                                          style="position:absolute; top:5px; right: 5px;">
                                         <button type="button" style="border:none;
                                                 cursor:default;
@@ -136,7 +208,7 @@
                                                 border: none;
                                                 overflow: hidden;
                                                 outline: none;">
-                                            <i @(Model.Item.URLdoslikeUri != null ? 
+                                            <i @(Model.Item.Item.URLdoslike != null ? 
                                                     $"onclick=deleteImage('{Model.ItemId}')" 
                                                     :
                                                     $"onclick=removePreview(event)")
@@ -148,13 +220,16 @@
                                     </div>
                                 </div>
 
-                                @* style="visibility: @(Model.Item.URLdoslikeUri != null ? "hidden" : "")" *@
-                                <div class="thumbnail-upload-control @(Model.Item.URLdoslikeUri != null ? " element-invisible-no-space " : "")">
+                                <div class="thumbnail-upload-control @(Model.Item.Item.URLdoslike != null ? " element-invisible-no-space " : "")">
                                     <div>
                                         <label id="thumbnailAddOrUpdate">Add new thumbnail:</label>
                                     </div>
                                     <div>
                                         <input id="thumbnailUpload" type="file" name="URLdoslike" onchange="loadThumbnailPreview(event)" />
+                                        @if (Model.Item.Item.URLdoslike != null)
+                                        {
+                                            <input name="deleteCurrentURLdoslike" hidden value="false" />
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -183,34 +258,11 @@
 
     <script>
         function deleteImage(itemId) {
-            var token = $('input[name="__RequestVerificationToken"]').val();
 
-            var encUri = encodeURIComponent(itemId);
+            var el = document.getElementsByName('deleteCurrentURLdoslike')[0];
+            el.value = true;
 
-            // console.log(encUri);
-
-            $.ajax({
-                type: "POST",
-                url: "/Items/" + encUri + "/Edit/?handler=DeleteImage",
-                data: {
-                    __RequestVerificationToken: token,
-                },
-                success: function (r) {
-                    removePreview(null);
-                    showSnackbar("Image deleted successfully", snackbarType.INFO);
-                    location.reload();
-                },
-                error: function (xhr, status, error) {
-                    // TODO display error
-                    let response = JSON.parse(xhr.responseText);
-                    showSnackbar(response.message, snackbarType.INFO);
-
-                    console.log(xhr.responseText);
-                    console.log(xhr.responseText.message);
-                    console.log(status);
-                    console.log(error);
-                }
-            });
+            removePreview(null);
         }
     </script>
 
