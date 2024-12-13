@@ -17,9 +17,6 @@ namespace SimpleDataManagementSystem.Backend.Logic.Models
         public string? Nazivretailera { get; set; }
         public string? URLdoslike { get; set; }
 
-        public string? URLdoslike { get; set; }
-        public decimal Cijena { get; set; }
-
         public List<MonitoredItem>? Monitored { get; set; }
         public Category? Category { get; set; }
         public Retailer Retailer { get; set; }
