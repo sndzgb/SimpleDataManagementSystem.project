@@ -4,19 +4,21 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
 {
-    public class SearchModel : BasePageModel<ItemsSearchResponseViewModel>
+    public class SearchModel : BasePageModel<SearchItemsResponseViewModel>
     {
         private readonly IItemsService _itemsService;
         private readonly IAuthorizationService _authorizationService;
 
 
-        [FromQuery(Name = "searchQuery")]
-        public string SearchQuery { get; set; }
+        [FromQuery(Name = "query")]
+        public string Query { get; set; }
 
         private int? _itemsPerPage = 8;
         [FromQuery(Name = "take")]
@@ -86,16 +88,17 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
             base.OnPageHandlerExecuting(context);
         }
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
         {
             Model = await _itemsService.SearchItemsAsync(
-                new ItemsSearchRequestViewModel()
+                new SearchItemsRequestViewModel()
                 {
-                    SearchQuery = SearchQuery,
+                    Query = Query,
                     Page = PageNumber,
                     SortBy = SortBy,
                     Take = ItemsPerPage
-                }
+                },
+                cancellationToken
             );
 
             return Page();

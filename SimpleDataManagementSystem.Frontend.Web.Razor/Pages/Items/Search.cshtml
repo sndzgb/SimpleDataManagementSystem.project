@@ -1,8 +1,8 @@
 ﻿@page "/Items/Search"
 
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
-@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Extensions
+@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.SearchModel
 
@@ -12,7 +12,7 @@
 
 <div class="header">
     <h1>
-        Search items - '<b>@(Model?.Model?.Request?.SearchQuery ?? "-")</b>'
+        Search items - '<b>@(Model?.Query ?? "-")</b>'
     </h1>
 </div>
 
@@ -43,14 +43,14 @@
             <div class="search-input-controls">
                 <div class="search-query">
                     <div>
-                        <label for="searchQuery">Search query:</label>
+                        <label for="query">Search query:</label>
                     </div>
                     <div>
                         <input 
                             title="Search query" 
-                            name="searchQuery" 
-                            id="searchQuery" 
-                            value="@Model?.Model?.Request?.SearchQuery"
+                            name="query" 
+                            id="query" 
+                            value="@Model?.Query"
                         />
                     </div>
                 </div>
@@ -62,7 +62,7 @@
                         <select id="sortBy" name="sortBy">
                             @foreach (SortableItem si in Enum.GetValues(typeof(SortableItem)))
                             {
-                                <option value="@((int)si)" selected="@((Model?.Model?.Request?.SortBy ?? Model?.SortBy) == (int)si)">
+                                <option value="@((int)si)" selected="@((Model?.SortBy ?? Model?.SortBy) == (int)si)">
                                     @si.GetDescription()
                                 </option>
                             }
@@ -74,7 +74,7 @@
                         <label for="take">Take:</label>
                     </div>
                     <div>
-                        <input style="text-align: center; width:4ch;" name="take" id="take" value="@(Model?.Model?.Request?.Take ?? Model?.ItemsPerPage)" />
+                        <input style="text-align: center; width:4ch;" name="take" id="take" value="@(Model?.ItemsPerPage ?? Model?.ItemsPerPage)" />
                     </div>
                 </div>
                 <div class="search-page">
@@ -82,7 +82,7 @@
                         <label for="page">Page:</label>
                     </div>
                     <div>
-                        <input style="text-align: center; width:4ch;" name="page" id="page" value="@(Model?.Model?.Request?.Page ?? Model?.PageNumber)" />
+                        <input style="text-align: center; width:4ch;" name="page" id="page" value="@(Model?.PageNumber ?? Model?.PageNumber)" />
                     </div>
                 </div>
             </div>
@@ -120,7 +120,7 @@
         <div>
             <label>
                 <b>
-                    '@(Model?.Model?.Request?.SearchQuery ?? "-")'
+                    '@(Model?.Query ?? "-")'
                 </b>
             </label>
         </div>
@@ -150,7 +150,7 @@
                             <img 
                                 width="64"
                                 height="64" 
-                                src="@(item?.URLdoslikeUri != null ? item.URLdoslikeUri : "/Resources/image_not_available.png")" 
+                                src="@(item?.URLdoslike != null ? item.URLdoslike : "/Resources/image_not_available.png")" 
                             />
                         </td>
                     </tr>
@@ -181,7 +181,7 @@
         let searchQuery = "";
 
         $(document).ready(function () {
-            const val = $("#searchQuery").val();
+            const val = $("#query").val();
             searchQuery = val;
         });
 
