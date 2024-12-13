@@ -53,7 +53,8 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Middlewares
                                             token.Claims.Where(x => x.Type == ExtendedClaims.Type.Username).First().Value,
                                             token.Claims.Where(x => x.Type == ClaimTypes.Role).ToList().Select(x => x.Value).ToArray(),
                                             Convert.ToBoolean(token.Claims.Where(x => x.Type == ExtendedClaims.Type.IsPasswordChangeRequired).FirstOrDefault()?.Value)
-                                        )
+                                        ),
+                                        CancellationToken.None
                                     );
 
                                     context.Response.OnStarting(() =>
