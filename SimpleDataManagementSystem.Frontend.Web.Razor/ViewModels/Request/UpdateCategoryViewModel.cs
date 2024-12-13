@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request
 {
     public class UpdateCategoryViewModel
     {
@@ -9,7 +9,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Category priority is required")]
-        [Range(Int32.MinValue, Int32.MaxValue)]
+        [Range(int.MinValue, int.MaxValue)]
         public int Priority { get; set; }
     }
 }

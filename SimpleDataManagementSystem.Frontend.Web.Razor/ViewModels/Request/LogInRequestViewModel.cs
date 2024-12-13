@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request
 {
-    public class UserLogInRequestViewModel
+    public class LogInRequestViewModel
     {
         [Required(ErrorMessage = "Username is a required field")]
         public string Username { get; set; }

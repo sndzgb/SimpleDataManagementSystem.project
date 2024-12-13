@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request
 {
-    public class NewUserViewModel
+    public class CreateUserViewModel
     {
         [Required(ErrorMessage = "Username is required")]
         [StringLength(16, ErrorMessage = "Invalid username length", MinimumLength = 4)]
@@ -14,7 +14,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
         [StringLength(16, ErrorMessage = "Invalid password length", MinimumLength = 4)]
         public string Password { get; set; }
 
-        [Range(1, Int32.MaxValue, ErrorMessage = "Invalid role")]
+        [Range(1, int.MaxValue, ErrorMessage = "Invalid role")]
         public int RoleId { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request
 {
     public class UpdatePasswordViewModel
     {

@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response
 {
-    public class AuthTokenViewModel
+    public class LogInResponseViewModel
     {
         [JsonPropertyName("jwt")]
         public string? Jwt { get; set; }

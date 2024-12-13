@@ -2,9 +2,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request
 {
-    public class NewRetailerViewModel
+    public class CreateRetailerViewModel
     {
         [Required(ErrorMessage = "Name is required")]
         [StringLength(maximumLength: 255, ErrorMessage = "Invalid name", MinimumLength = 2)]

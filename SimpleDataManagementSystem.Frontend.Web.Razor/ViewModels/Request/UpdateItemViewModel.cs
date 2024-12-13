@@ -2,27 +2,34 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request
 {
     public class UpdateItemViewModel
     {
-        [Required(ErrorMessage = "Opis is required")]
-        [StringLength(maximumLength: 255, ErrorMessage = "Invalid opis", MinimumLength = 2)]
-        public string Opis { get; set; }
+        [StringLength(maximumLength: 255, ErrorMessage = "Invalid opis", MinimumLength = 1)]
+        public string? Opis { get; set; }
 
-        [Required(ErrorMessage = "Datum akcije name is required")]
-        [StringLength(maximumLength: 255, ErrorMessage = "Invalid datum akcije", MinimumLength = 2)]
-        public string Datumakcije { get; set; }
+        [StringLength(maximumLength: 255, ErrorMessage = "Invalid datum akcije length", MinimumLength = 1)]
+        public string? Datumakcije { get; set; }
 
         [Required(ErrorMessage = "Retailer is required")]
         public int RetailerId { get; set; }
 
+        [Required(ErrorMessage = "Cijena is required")]
         [DecimalValidator]
         public string Cijena { get; set; }
+
+        public bool DeleteCurrentURLdoslike { get; set; }
+
+        [Required(ErrorMessage = "Kategorija is required")]
         public int Kategorija { get; set; }
 
         [MaxFileSizeValidator(8 * 1024 * 1024, ErrorMessage = "Maximum allowed file size is {0} bytes")]
         [AllowedExtensionsValidator(new string[] { ".jpg", ".jpeg", ".png" })]
         public IFormFile? URLdoslike { get; set; }
+
+        public bool IsEnabled { get; set; }
+
+        public bool IsMonitoredByUser { get; set; }
     }
 }

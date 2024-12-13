@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request
 {
-    public class NewCategoryViewModel
+    public class CreateCategoryViewModel
     {
         [Required(ErrorMessage = "Category name is required")]
         [StringLength(maximumLength: 255, ErrorMessage = "Invalid category name length", MinimumLength = 2)]

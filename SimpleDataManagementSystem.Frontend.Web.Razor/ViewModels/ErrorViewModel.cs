@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels
 {
     public class ErrorViewModel
     {
@@ -31,7 +31,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
         */
         public ErrorViewModel()
         {
-            
+
         }
 
         public string ToJson()

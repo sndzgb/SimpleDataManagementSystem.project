@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels
 {
     public class PagedViewModel
     {
@@ -17,14 +17,14 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
                 take = 8;
             }
 
-            var totalPages = (int)Math.Ceiling((decimal)total / (decimal)take);
-            var currentPage = page != null ? (int)page : 1;
+            var totalPages = (int)Math.Ceiling(total / (decimal)take);
+            var currentPage = page != null ? page : 1;
             var startPage = currentPage - 5;
             var endPage = currentPage + 4;
 
             if (startPage <= 0)
             {
-                endPage -= (startPage - 1);
+                endPage -= startPage - 1;
                 startPage = 1;
             }
 
@@ -51,7 +51,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 
         [JsonPropertyName("page")]
         public int Page { get; set; }
-        
+
         [JsonPropertyName("take")]
         public int Take { get; set; }
 

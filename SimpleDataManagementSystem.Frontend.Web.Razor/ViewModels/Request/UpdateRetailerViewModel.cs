@@ -1,7 +1,7 @@
 ﻿using SimpleDataManagementSystem.Shared.Web.Validators;
 using System.ComponentModel.DataAnnotations;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request
 {
     public class UpdateRetailerViewModel
     {
@@ -15,5 +15,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
         [MaxFileSizeValidator(8 * 1024 * 1024, ErrorMessage = "Maximum allowed file size is {0} bytes")]
         [AllowedExtensionsValidator(new string[] { ".jpg", ".jpeg", ".png" })]
         public IFormFile? LogoImage { get; set; }
+
+        public bool DeleteCurrentLogoImage { get; set; }
     }
 }
