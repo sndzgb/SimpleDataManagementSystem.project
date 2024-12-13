@@ -4,7 +4,10 @@ using System.Text.Json;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using System;
 using Microsoft.AspNetCore.Mvc.Filters;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Http;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Middlewares
 {
@@ -34,6 +37,8 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Middlewares
             }
         }
 
+        // LOG & REDIRECT TO "500"
+
         // TODO add server error message with additional error descriptions (List<string>)
         private async Task HandleExceptionAsync(HttpContext context, Exception ex)
         {
@@ -58,7 +63,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Middlewares
                 //context.Response.Redirect("/Error", true);
                 //return;
             }
-            
+
             //if (type == typeof(DivideByZeroException))
             //{
             //    // remove, then add
@@ -70,7 +75,21 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Middlewares
             //    //context.Response.Redirect("/Error", true);
             //    //return;
             //}
-            
+
+
+
+            //if (type == typeof(OperationCanceledException))
+            //{
+            //    exceptionHandled = true;
+            //}
+
+            //if (type == typeof(TaskCanceledException))
+            //{
+
+            //}
+
+
+
             if (type == typeof(WebApiCallException))
             {
                 // TODO return 400 & let Error.cshtml handle the rest
@@ -87,7 +106,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Middlewares
                     //context.Response.StatusCode = 400;
                     
                     string json = JsonSerializer.Serialize(
-                        new ViewModels.Read.ErrorViewModel(
+                        new ErrorViewModel(
                             exception?.Error?.StatusCode ?? StatusCodes.Status500InternalServerError, 
                             exception?.Error?.Message, 
                             exception?.Error?.Errors
@@ -102,14 +121,23 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Middlewares
                     context.Response.StatusCode = exception?.Error?.StatusCode ?? StatusCodes.Status500InternalServerError;
                     context.Items.TryAdd(
                         nameof(ErrorViewModel), 
-                        new ViewModels.Read.ErrorViewModel(
+                        new ErrorViewModel(
                             exception?.Error?.StatusCode ?? StatusCodes.Status500InternalServerError,
                             exception?.Error?.Message ?? "Bad request occured. Please revise the data sent to the server.",
                             exception?.Error?.Errors
                         )
                     );
+
+                    //ITempDataDictionaryFactory factory = 
+                    //    context.RequestServices.GetService(typeof(ITempDataDictionaryFactory)) as ITempDataDictionaryFactory;
+                    //ITempDataDictionary tempData = factory.GetTempData(context);
+
+                    //TempDataDictionary t = new TempDataDictionary(context, );
+                    //context.Response.Redirect("/Items/Create");
+                    //await context.Response.CompleteAsync();
                 }
 
+                
                 exceptionHandled = true;
             }
 
@@ -118,7 +146,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Middlewares
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 context.Items.Add(
                     nameof(ErrorViewModel),
-                    new ViewModels.Read.ErrorViewModel(
+                    new ErrorViewModel(
                         StatusCodes.Status500InternalServerError,
                         "Internal server error.",
                         null
