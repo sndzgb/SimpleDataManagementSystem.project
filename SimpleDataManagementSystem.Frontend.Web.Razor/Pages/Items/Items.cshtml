@@ -6,6 +6,8 @@
 @using System.Web
 @using System.Security.Claims
 @using SimpleDataManagementSystem.Shared.Common.Constants
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<ItemsModel> loc
 
 @{
     ViewData["Title"] = "Items";
@@ -13,7 +15,7 @@
 
 
 <div class="header">
-    <h1>Items</h1>
+    <h1>Items - Total found: <b>@Model?.Model?.PageInfo.Total</b></h1>
 </div>
 
 
@@ -21,7 +23,7 @@
 
 
 <div class="menu">
-    <div>
+    <div class="menu-options">
         @if (
                 PermissionsHelper.IsInRole
                 (
@@ -36,33 +38,76 @@
                 )
         )
         {
-            <a href="/Items/Create"><button class="button-default" type="button">Create</button></a>
+            <div>
+                <div style="display:inline-block;">
+                    <div style="display:inline-block;">
+                        <a href="/Items/Create"><button class="button-default" type="button">@loc["Create"]</button></a> @*Create*@
+                    </div>
+                    <div style="display:inline-block;">
+                        <label>@loc["Create new item"]</label>
+                        @* <label>Create new item</label> *@
+                    </div>
+                </div>
+
+                <br />
+
+                <div style="display:inline-block;">
+                    <div style="display:inline-block;">
+                        <button 
+                            data-target="enable-disable" 
+                            type="button" 
+                            class="button-default toggle-enable-disable-column">
+                            Toggle
+                        </button>
+                    </div>
+                    <div style="display:inline-block;">
+                        <label>Toggle enable/ disable items column</label>
+                    </div>
+                </div>
+
+                <br />
+
+                <div style="display:inline-block;">
+                    <div style="display:inline-block; padding:5px 0px; margin:1px; min-width: 100px; text-align:center;">
+                        <form method="get" name="formFilter">
+                            <input 
+                                type="checkbox"
+                                @(Model.EnabledOnly ? "checked" : "")
+                                onchange="onCbToggle(this)" 
+                            />
+                            <input type="hidden" value="@Model.EnabledOnly" name="enabled_only" />
+                        </form>
+                    </div>
+                    <div style="display:inline-block;">
+                        <label>Show enabled items only</label>
+                    </div>
+                </div>
+            </div>
         }
     </div>
 
     <div class="spacer">
     </div>
 
-    <div style="display: flex; flex-direction: row;">
+    <div class="search-control-wrapper">
         <form method="get" validatable asp-page="/Items/Search">
-            <div>
+            <div class="search-control">
                 <input 
                     class="" 
                     form-field-required 
-                    name="searchQuery"
+                    name="query"
                     data-validation-required-error-message="Search query is required."
                     placeholder="Enter a search query..."
-                    style="outline: none; flex-grow: 2; border: none; border-bottom: 1px solid gainsboro;" 
+                    style="outline: none;  border: none; border-bottom: 1px solid gainsboro;" 
                 />
-                <button type="submit" style="border: none; border-bottom: 1px solid gainsboro; background-color: white;">
+                <button 
+                    type="submit" 
+                    class="search-input-control" 
+                    style="border: none; border-bottom: 1px solid gainsboro; background-color: white;"
+                >
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </button>
             </div>
-            @* <div style="color:red;">
-                <small>
-                    Search query is required.
-                </small>
-            </div> *@
         </form>
     </div>
 </div>
@@ -75,7 +120,9 @@
     <table style="table-layout: fixed; width: 100%;">
         <thead>
             <tr>
+                <th class="enable-disable">Toggle enabled status</th>
                 <th>Naziv proizvoda</th>
+                <th>Enabled</th>
                 <th>Opis</th>
                 <th>Datum akcije</th>
                 <th>Cijena</th>
@@ -105,15 +152,48 @@
                 @foreach (var item in Model.Model.Items)
                 {
                     <tr style="max-height: 70px; height:70px; word-wrap: anywhere;">
-                        <td>@(item.Nazivproizvoda ?? "-")</td>
+
+                        @if (
+                                PermissionsHelper.IsInRole
+                                (
+                                    Roles.Admin,
+                                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                                )
+                                ||
+                                PermissionsHelper.IsInRole
+                                (
+                                    Roles.Employee,
+                                    User.Claims?.Where(x => x.Type == ClaimTypes.Role)?.FirstOrDefault()?.Value!
+                                )
+                            )
+                        {
+                            <td class="enable-disable">
+                                <input type="checkbox" onchange="onEnableDisableChanged(this)" checked="@(item.IsEnabled)" />
+                            </td>
+                        }
+                        <td class="identifier">
+                            @if (item.IsEnabled)
+                            {
+                                <div class="monitored-favorites-counter" title="Total number of users monitoring this item">
+                                    <i class="fa-solid fa-bookmark light-color"></i>
+                                    <label class="total-users-monitoring-counter">
+                                        @item.Monitoring.TotalUsersMonitoringThisItem
+                                    </label>
+                                </div>
+                            }
+                            <div name="id">
+                                @(item.Nazivproizvoda ?? "-")
+                            </div>
+                        </td>
+                        <td>@(item.IsEnabled ? "Yes" : "No")</td>
                         <td>@(item.Opis ?? "-")</td>
                         <td>@(item.Datumakcije ?? "-")</td>
                         <td>@(item.Cijena.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))</td>
-                        <td>@(item.Kategorija)</td>
+                        <td>@(item.Category.Id)</td>
 
                         <td>
                             <img width="64" height="64" 
-                                src="@(item.URLdoslikeUri != null ? item.URLdoslikeUri : "/resources/image_not_available.png")" 
+                                src="@(item.URLdoslike != null ? item.URLdoslike : "/resources/image_not_available.png")" 
                             />
                         </td>
 
@@ -132,17 +212,37 @@
                         )
                         {
                             <td class="options">
-                                <a href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Details">
+                                    <label
+                                        class="monitored"
+                                        style="cursor:pointer; color: Dodgerblue;" 
+                                        title="Add to monitor list"
+                                    >
+                                        @if (item.Monitoring.IsMonitoredByCurrentUser)
+                                        {
+                                            <i onclick="onToggleMonitoredItemClicked(this)" class="fa-solid fa-bookmark"></i>
+                                        } 
+                                        else
+                                        {
+                                            <i onclick="onToggleMonitoredItemClicked(this)" class="bookmark fa-regular fa-bookmark"></i>
+                                        }
+                                    </label>
+                                <span>&nbsp;</span>
+                                <span>&nbsp;</span>
+                                @* TODO implement *@
+                                <a 
+                                    style="pointer-events:none; color: grey;" 
+                                    title="Go to details" 
+                                    href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Details">
                                     <i class="fa-solid fa-circle-info"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Edit">
+                                <a title="Go to edit" href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Edit">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Delete">
+                                <a title="Go to delete" href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Delete">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </td>
@@ -165,3 +265,268 @@
 <!-- #region Pagination -->
 @await Component.InvokeAsync(typeof(PagerViewComponent), Model?.Model?.PageInfo)
 <!-- #endregion Pagination -->
+
+@section scripts {
+@* 
+    <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+    <script src="~/js/itemUpdatedNotifierHub.js"></script>
+ *@
+    @* TODO on send check if empty, return *@
+
+    
+    @* TODO -DELETE DEMO ONLY- *@
+    <script>
+        function codeAddress() {
+            $.ajax({
+                url: '/Account/AccessToken/?handler=Token',
+                type: 'GET',
+                timeout: (30 * 1000),
+                success: (response) => {
+                    console.log("Got access_token: " + response);
+                },
+                error: (response) => {
+                    console.error('Unable to retrieve access_token');
+                    console.error(response);
+                }
+            })
+        }
+        window.onload = codeAddress;
+    </script>
+
+
+    <script>
+
+        function onCbToggle(e) {
+            let val = e.checked ? "true" : "false";
+            let inp = document.getElementsByName('enabled_only')[0];
+            inp.value = val;
+            document.getElementsByName('formFilter')[0].submit();
+        }
+
+        function onToggleMonitoredItemClicked(e) {
+
+            var id = getRecordIdValueFromRow(e);
+            
+            var token = $('input[name="__RequestVerificationToken"]').val();
+
+            xhr = $.ajax({
+                type: "POST",
+                url: "/Items?handler=ToggleMonitoredItem",
+                data: {
+                    __RequestVerificationToken: token,
+                    itemId: id
+                },
+                success: function (response) {
+                    // response
+                    console.log("success");
+                    showSnackbar("Monitored list updated successfully.", snackbarType.INFO);
+                    let elementClassList = e.classList;
+
+                    let notToggled = 'fa-regular';
+                    let toggled = 'fa-solid';
+
+                    let increase = true;
+                    if (elementClassList.contains(notToggled)) {
+                        elementClassList.remove(notToggled);
+                        elementClassList.add(toggled);
+                        increase = true;
+                    } else {
+                        elementClassList.remove(toggled);
+                        elementClassList.add(notToggled);
+                        increase = false;
+                    }
+
+                    updateTotalNumberOfUsersMonitoringCounter(e, increase);
+                },
+                error: function (xhr, status, error) {
+                    // xhr, status, error
+                    let response = JSON.parse(xhr.responseText);
+                    showSnackbar(response.message, snackbarType.DANGER);
+                }
+            });
+        }
+
+
+
+        function isIterable(obj) {
+            if (obj == null) {
+                return false;
+            }
+            return typeof obj[Symbol.iterator] === 'function';
+        }
+        var result = null;
+        var continueRecursion = true;
+        function find(e, className) {
+
+            if (!this.isIterable(e)) {
+                return null;
+            }
+
+            for (let i = 0; i < e.length; i++) {
+                if (e[i].classList.contains(className)) {
+                    return e[i];
+                }
+
+                if (e[i].children.length > 0) {
+                    let r = this.find(e[i].children, className);
+                    if (!r) {
+                        continue;
+                    }
+                    return r;
+                }
+            }
+
+            return null;
+        }
+        function updateTotalNumberOfUsersMonitoringCounter(e, increase) {
+            const idName = "identifier";
+
+            let idValue = "";
+
+            let tr = e.closest("tr");
+
+            let result = this.find(tr.cells, 'total-users-monitoring-counter');
+            result.innerHTML = (parseInt(result.innerHTML) + (increase ? +1 : -1)).toString();
+            
+        }
+
+        $(function () {
+            $('.toggle-enable-disable-column').on('click', function (e) {
+                // get the target for this checkbox and toggle it
+                var tableColumn = $(e.currentTarget).data('target');
+                $('.' + tableColumn).toggle();
+            });
+        })
+
+        function getRecordIdValueFromRow(row) {
+            const idName = "identifier";
+
+            let idValue = "";
+
+            let tr = row.closest("tr");
+            
+            let cells = tr.cells;
+            for (cell of cells) {
+                if (cell.className == idName) {
+                    idValue = cell.children.namedItem('id').innerHTML;
+                }
+            }
+
+            return idValue;
+        }
+
+        var items = [];
+
+
+        var v = null;
+
+        function findRecursively(el, name) {
+
+            if (el.namedItem('id')) {
+                console.log('found it!');
+                v = el.namedItem('id').innerHTML.trim();
+                console.log(v);
+                return;
+            }
+
+            if (!isIterable(el)) {
+                return;
+            }
+
+            for (c of el) {
+                console.log(c);
+
+                if (c.children.length > 0) {
+                    findRecursively(c.children, name);
+                }
+            }
+        }
+
+        function onEnableDisableChanged(e) {
+            const idName = "identifier";
+
+            let idValue = null;
+
+            let tr = e.closest("tr");
+            let cells = tr.cells;
+
+            for (cell of cells) {
+                if (cell.className == idName) {
+                    idValue = cell.textContent;
+                }
+            }
+
+            console.log(idValue);
+
+            findRecursively(cells, 'id');
+            console.log(v);
+            toggleEnableDisableStatusRequest(v);
+            
+            return;
+
+
+            if (!idValue) {
+                return;
+            }
+
+            var index = items.indexOf(idValue);
+            
+            if (index === -1) {
+                items.push(idValue);
+            } else {
+                items.splice(index, 1);
+            }
+        }
+
+
+        var xhr = null;
+
+        function toggleEnableDisableStatusRequest(itemId) {
+            console.log(itemId);
+            var token = $('input[name="__RequestVerificationToken"]').val();
+
+            xhr = $.ajax({
+                type: "POST",
+                url: "/Items?handler=ToggleItemEnabledDisabledStatus",
+                data: {
+                    __RequestVerificationToken: token,
+                    itemId: itemId
+                },
+                success: function (response) {
+                    // response
+                    console.log("success");
+                    showSnackbar("Item status toggled successfully.", snackbarType.INFO);
+                },
+                error: function (xhr, status, error) {
+                    // xhr, status, error
+                    let response = JSON.parse(xhr.responseText);
+                    showSnackbar(response.message, snackbarType.DANGER);
+                }
+            });
+        }
+
+
+        function onApplyClicked(e) {
+            var token = $('input[name="__RequestVerificationToken"]').val();
+
+            xhr = $.ajax({
+                type: "POST",
+                url: "/Items?handler=EnableDisableItem",
+                data: {
+                    __RequestVerificationToken: token,
+                    itemIds: items
+                },
+                success: function (response) {
+                    // response
+                    console.log("success");
+                    showSnackbar("Item status toggled successfully.", snackbarType.INFO);
+                },
+                error: function (xhr, status, error) {
+                    // xhr, status, error
+                    let response = JSON.parse(xhr.responseText);
+                    showSnackbar(response.message, snackbarType.DANGER);
+                }
+            });
+        }
+    </script>
+}

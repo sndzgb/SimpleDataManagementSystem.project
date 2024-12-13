@@ -1,27 +1,38 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Localization;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
+using System.Threading;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
 {
-    public class ItemsModel : BasePageModel<ItemsViewModel>
+    [ValidateAntiForgeryToken]
+    public class ItemsModel : BasePageModel<GetMultipleItemsResponseViewModel>
     {
         private readonly IItemsService _itemsService;
         private readonly IAuthorizationService _authorizationService;
+        
 
-
-        public ItemsModel(IItemsService itemsService, IAuthorizationService authorizationService)
+        public ItemsModel(
+                IItemsService itemsService, 
+                IAuthorizationService authorizationService
+            )
         {
             _itemsService = itemsService;
             _authorizationService = authorizationService;
         }
+
+
+        [FromQuery(Name = "enabled_only")]
+        public bool EnabledOnly { get; set; }
 
 
         public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
@@ -44,11 +55,44 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
         }
 
 
-        public async Task OnGet([FromQuery] int take = 8, [FromQuery] int page = 1)
+        public async Task OnGet(
+                CancellationToken cancellationToken,
+                [FromQuery(Name = "enabled_only")] bool enabledOnly = true, 
+                [FromQuery] int take = 8, 
+                [FromQuery] int page = 1
+            )
         {
-            Model = await _itemsService.GetAllItemsAsync(take, page);
+            EnabledOnly = enabledOnly;
+            
+            Model = await _itemsService.GetMultipleItemsAsync(cancellationToken, EnabledOnly, take, page);
 
             return;
+        }
+
+        public async Task<IActionResult> OnPostToggleItemEnabledDisabledStatus(string itemId, CancellationToken cancellationToken)
+        {
+            using (var cts = CancellationTokenSource.CreateLinkedTokenSource(HttpContext.RequestAborted, cancellationToken))
+            {
+                await _itemsService.ToggleItemEnabledDisabledStatusAsync(itemId, cancellationToken);
+                
+                return new JsonResult(null)
+                {
+                    StatusCode = StatusCodes.Status200OK
+                };
+            }
+        }
+        
+        public async Task<IActionResult> OnPostToggleMonitoredItem(string itemId, CancellationToken cancellationToken)
+        {
+            using (var cts = CancellationTokenSource.CreateLinkedTokenSource(HttpContext.RequestAborted, cancellationToken))
+            {
+                await _itemsService.ToggleMonitoredItemAsync(itemId, cts.Token);
+
+                return new JsonResult(null)
+                {
+                    StatusCode = StatusCodes.Status200OK
+                };
+            }
         }
     }
 }
