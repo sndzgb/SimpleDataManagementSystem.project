@@ -1,5 +1,8 @@
 ﻿@page
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<IndexModel> loc
+
 @model IndexModel
 
 @{
@@ -7,5 +10,5 @@
 }
 
 <div style="display:flex; justify-content:center; text-align:center;">
-    <h1>Welcome to Simple Data Management System.</h1>
+    <h1>@loc["Welcome to Simple Data Management System."]</h1>
 </div>
