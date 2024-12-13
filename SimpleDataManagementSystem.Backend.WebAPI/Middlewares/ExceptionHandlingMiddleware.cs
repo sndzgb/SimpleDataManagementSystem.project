@@ -2,7 +2,8 @@
 using System.Net;
 using System.Text.Json;
 using SimpleDataManagementSystem.Backend.Logic.Exceptions;
-using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
+using Microsoft.Data.SqlClient;
+using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Middlewares
 {
@@ -34,30 +35,20 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Middlewares
 
         private async Task HandleExceptionAsync(HttpContext context, Exception ex)
         {
-            string message = string.Empty;
+            string message = "Unexpected error occured.";
             int httpStatusCode = (int)HttpStatusCode.InternalServerError;
             List<string> details = new List<string>();
 
             var type = ex.GetType();
 
-            if (type == typeof(NotAllowedException))
+
+            // -- framework exceptions START --
+            if (type == typeof(InvalidOperationException))
             {
-                message = ex.Message;
-                httpStatusCode = (int)HttpStatusCode.BadRequest;
+                message = "Unexpected error occured while processing your request.";
+                httpStatusCode = (int)HttpStatusCode.InternalServerError;
             }
 
-            if (type == typeof(RecordExistsException))
-            {
-                message = ex.Message;
-                httpStatusCode = (int)HttpStatusCode.BadRequest;
-            }
-            
-            if (type == typeof(RequiredRecordNotFoundException))
-            {
-                message = ex.Message;
-                httpStatusCode = (int)HttpStatusCode.BadRequest;
-            }
-            
             if (type == typeof(ArgumentNullException))
             {
                 message = string.IsNullOrEmpty(ex.Message) ? "Request parameters not valid." : ex.Message;
@@ -69,6 +60,42 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Middlewares
                 message = string.IsNullOrEmpty(ex.Message) ? "Request was cancelled." : ex.Message;
                 httpStatusCode = (int)HttpStatusCode.NoContent;
             }
+            
+            if (type == typeof(TaskCanceledException))
+            {
+                message = "Request was cancelled.";
+                httpStatusCode = (int)HttpStatusCode.NoContent;
+            }
+
+            if (type == typeof(SqlException))
+            {
+                // TODO log
+                message = "Error occured while processing your request.";
+                httpStatusCode = (int)HttpStatusCode.InternalServerError;
+            }
+            // -- framework exceptions END --
+
+
+            // -- custom exceptions START --
+            if (type == typeof(NotAllowedException))
+            {
+                message = ex.Message;
+                httpStatusCode = (int)HttpStatusCode.BadRequest;
+            }
+
+            if (type == typeof(RecordExistsException))
+            {
+                message = ex.Message;
+                httpStatusCode = (int)HttpStatusCode.BadRequest;
+            }
+
+            if (type == typeof(RequiredRecordNotFoundException))
+            {
+                message = "Required record was not found.";
+                httpStatusCode = (int)HttpStatusCode.BadRequest;
+            }
+            // -- custom exceptions END --
+
 
             if (type == typeof(Exception))
             {
@@ -79,10 +106,11 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Middlewares
             context.Response.StatusCode = httpStatusCode;
 
             var response = new ErrorWebApiModel(httpStatusCode, message, details);
-            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            var options = new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
             var json = JsonSerializer.Serialize(response, options);
             await context.Response.WriteAsync(json);
+            await context.Response.CompleteAsync();
         }
     }
 }
