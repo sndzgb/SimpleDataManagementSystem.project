@@ -1,4 +1,4 @@
-﻿using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
+﻿using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels;
 using System.Runtime.Serialization;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions
