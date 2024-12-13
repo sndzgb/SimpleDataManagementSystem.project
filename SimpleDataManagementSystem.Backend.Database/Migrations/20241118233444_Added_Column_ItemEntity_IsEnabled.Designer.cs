@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SimpleDataManagementSystem.Backend.Database;
 
@@ -11,9 +12,11 @@ using SimpleDataManagementSystem.Backend.Database;
 namespace SimpleDataManagementSystem.Backend.Database.Migrations
 {
     [DbContext(typeof(SimpleDataManagementSystemDbContext))]
-    partial class SimpleDataManagementSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241118233444_Added_Column_ItemEntity_IsEnabled")]
+    partial class Added_Column_ItemEntity_IsEnabled
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,27 +95,6 @@ namespace SimpleDataManagementSystem.Backend.Database.Migrations
                     b.HasIndex("RetailerID");
 
                     b.ToTable("Items", "dbo");
-                });
-
-            modelBuilder.Entity("SimpleDataManagementSystem.Backend.Database.Entities.MonitoredItemEntity", b =>
-                {
-                    b.Property<string>("ItemNazivproizvoda")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartedMonitoringAtUtc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.HasKey("ItemNazivproizvoda", "UserId")
-                        .HasName("PK_MonitoredItems_Nazivproizvoda_UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("MonitoredItems", "dbo");
                 });
 
             modelBuilder.Entity("SimpleDataManagementSystem.Backend.Database.Entities.RetailerEntity", b =>
@@ -234,27 +216,6 @@ namespace SimpleDataManagementSystem.Backend.Database.Migrations
                     b.Navigation("Retailer");
                 });
 
-            modelBuilder.Entity("SimpleDataManagementSystem.Backend.Database.Entities.MonitoredItemEntity", b =>
-                {
-                    b.HasOne("SimpleDataManagementSystem.Backend.Database.Entities.ItemEntity", "Item")
-                        .WithMany("MonitoredItems")
-                        .HasForeignKey("ItemNazivproizvoda")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_MonitoredItems_Items_ItemNazivproizvoda_Nazivproizvoda");
-
-                    b.HasOne("SimpleDataManagementSystem.Backend.Database.Entities.UserEntity", "User")
-                        .WithMany("MonitoredItems")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_MonitoredItems_Users_UserId_Id");
-
-                    b.Navigation("Item");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("SimpleDataManagementSystem.Backend.Database.Entities.UserEntity", b =>
                 {
                     b.HasOne("SimpleDataManagementSystem.Backend.Database.Entities.RoleEntity", "Role")
@@ -271,11 +232,6 @@ namespace SimpleDataManagementSystem.Backend.Database.Migrations
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("SimpleDataManagementSystem.Backend.Database.Entities.ItemEntity", b =>
-                {
-                    b.Navigation("MonitoredItems");
-                });
-
             modelBuilder.Entity("SimpleDataManagementSystem.Backend.Database.Entities.RetailerEntity", b =>
                 {
                     b.Navigation("Items");
@@ -284,11 +240,6 @@ namespace SimpleDataManagementSystem.Backend.Database.Migrations
             modelBuilder.Entity("SimpleDataManagementSystem.Backend.Database.Entities.RoleEntity", b =>
                 {
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("SimpleDataManagementSystem.Backend.Database.Entities.UserEntity", b =>
-                {
-                    b.Navigation("MonitoredItems");
                 });
 #pragma warning restore 612, 618
         }

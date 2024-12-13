@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SimpleDataManagementSystem.Backend.Database;
 
@@ -11,9 +12,11 @@ using SimpleDataManagementSystem.Backend.Database;
 namespace SimpleDataManagementSystem.Backend.Database.Migrations
 {
     [DbContext(typeof(SimpleDataManagementSystemDbContext))]
-    partial class SimpleDataManagementSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241119164852_Added_Table_MonitoredItems")]
+    partial class Added_Table_MonitoredItems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
