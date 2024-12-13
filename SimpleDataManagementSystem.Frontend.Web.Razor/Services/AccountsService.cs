@@ -1,10 +1,11 @@
-﻿using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using System.Net;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Extensions;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 {
@@ -19,12 +20,12 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
         }
 
 
-        public async Task<AuthTokenViewModel?> LogInAsync(string username, string password)
+        public async Task<LogInResponseViewModel?> LogInAsync(string username, string password, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var content = new StringContent(
-                JsonSerializer.Serialize(new UserLogInRequestViewModel()
+                JsonSerializer.Serialize(new LogInRequestViewModel()
                 {
                     Username = username,
                     Password = password
@@ -33,7 +34,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
                 "application/json"
             );
 
-            var response = await httpClient.PostAsync("api/accounts", content);
+            var response = await httpClient.PostAsync("api/accounts", content, cancellationToken);
 
             // THIS
             if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -42,7 +43,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
 
             // USE THIS FOR ALL METHODS BUT THIS ONE!!
-            return await response.HandleResponseAsync<AuthTokenViewModel>();
+            return await response.HandleResponseAsync<LogInResponseViewModel>(cancellationToken);
             //await response.HandleIfInvalidResponseAsync();
             //response.EnsureSuccessStatusCode();
 
@@ -87,15 +88,15 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             //}
         }
 
-        public async Task<UserViewModel?> GetAccountDetailsAsync()
+        public async Task<GetSingleUserResponseViewModel?> GetAccountDetailsAsync(CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var response = await httpClient.GetAsync($"/api/accounts/details");
+            var response = await httpClient.GetAsync($"/api/accounts/details", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -103,13 +104,13 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
             else
             {
-                var json = await response.Content.ReadAsStringAsync();
-                var responseContent = JsonSerializer.Deserialize<UserViewModel>(json);
+                var json = await response.Content.ReadAsStringAsync(cancellationToken);
+                var responseContent = JsonSerializer.Deserialize<GetSingleUserResponseViewModel>(json);
                 return responseContent;
             }
         }
 
-        public async Task UpdatePasswordAsync(string oldPassword, string newPassword)
+        public async Task UpdatePasswordAsync(string oldPassword, string newPassword, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
@@ -120,11 +121,11 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
                 Encoding.UTF8, "application/json"
             );
 
-            var response = await httpClient.PutAsync($"api/accounts/password", content);
+            var response = await httpClient.PutAsync($"api/accounts/password", content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 

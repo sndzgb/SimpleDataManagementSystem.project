@@ -1,8 +1,8 @@
 ﻿using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
 using System.Text.Json;
 using System.Text;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 {
@@ -17,15 +17,15 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
         }
 
 
-        public async Task<List<RoleViewModel>> GetAllRolesAsync()
+		public async Task<GetAllRolesResponseViewModel> GetAllRolesAsync(CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var response = await httpClient.GetAsync("api/roles");
+            var response = await httpClient.GetAsync("api/roles", cancellationToken);
             
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -33,8 +33,8 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
             else
             {
-                var json = await response.Content.ReadAsStringAsync();
-                var responseContent = JsonSerializer.Deserialize<List<RoleViewModel>>(json);
+                var json = await response.Content.ReadAsStringAsync(cancellationToken);
+                var responseContent = JsonSerializer.Deserialize<GetAllRolesResponseViewModel>(json);
                 return responseContent;
             }
         }

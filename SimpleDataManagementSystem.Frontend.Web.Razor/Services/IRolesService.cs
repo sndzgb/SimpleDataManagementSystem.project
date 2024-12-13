@@ -1,9 +1,9 @@
-﻿using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
+﻿using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 {
     public interface IRolesService
     {
-        Task<List<RoleViewModel>> GetAllRolesAsync();
+		Task<GetAllRolesResponseViewModel> GetAllRolesAsync(CancellationToken cancellationToken);
     }
 }

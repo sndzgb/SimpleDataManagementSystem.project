@@ -1,6 +1,7 @@
 ﻿using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -22,28 +23,28 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
         }
 
 
-        public async Task<int> AddNewRetailerAsync(NewRetailerViewModel newRetailerViewModel)
+        public async Task<int> CreateRetailerAsync(CreateRetailerViewModel createRetailerViewModel, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var content = new MultipartFormDataContent();
 
-            if (newRetailerViewModel.LogoImage != null)
+            if (createRetailerViewModel.LogoImage != null)
             {
-                var fileContent = new StreamContent(newRetailerViewModel.LogoImage.OpenReadStream());
-                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(newRetailerViewModel.LogoImage.ContentType);
+                var fileContent = new StreamContent(createRetailerViewModel.LogoImage.OpenReadStream());
+                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(createRetailerViewModel.LogoImage.ContentType);
 
-                content.Add(fileContent, "LogoImage", newRetailerViewModel.LogoImage.FileName);
+                content.Add(fileContent, "LogoImage", createRetailerViewModel.LogoImage.FileName);
             }
 
-            content.Add(new StringContent(newRetailerViewModel.Name, Encoding.UTF8, MediaTypeNames.Text.Plain), "name");
-            content.Add(new StringContent(Convert.ToString(newRetailerViewModel.Priority), Encoding.UTF8, MediaTypeNames.Text.Plain), "priority");
+            content.Add(new StringContent(createRetailerViewModel.Name, Encoding.UTF8, MediaTypeNames.Text.Plain), "name");
+            content.Add(new StringContent(Convert.ToString(createRetailerViewModel.Priority), Encoding.UTF8, MediaTypeNames.Text.Plain), "priority");
 
-            var response = await httpClient.PostAsync("api/retailers", content);
+            var response = await httpClient.PostAsync("api/retailers", content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -51,7 +52,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
             else
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var responseContent = await JsonSerializer.DeserializeAsync<int>(contentStream);
 
@@ -59,15 +60,15 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
         }
 
-        public async Task DeleteRetailerAsync(int retailerId)
+        public async Task DeleteRetailerAsync(int retailerId, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var response = await httpClient.DeleteAsync($"/api/retailers/{retailerId}");
+            var response = await httpClient.DeleteAsync($"/api/retailers/{retailerId}", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -79,15 +80,17 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
         }
 
-        public async Task<RetailersViewModel> GetAllRetailersAsync(int? take = 8, int? page = 1)
+        public async Task<GetMultipleRetailersResponseViewModel> GetMultipleRetailersAsync(
+                CancellationToken cancellationToken, int? take = 8, int? page = 1
+            )
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var response = await httpClient.GetAsync($"/api/retailers?take={take}&page={page}");
+            var response = await httpClient.GetAsync($"/api/retailers?take={take}&page={page}", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -95,21 +98,21 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
             else
             {
-                var json = await response.Content.ReadAsStringAsync();
-                var responseContent = JsonSerializer.Deserialize<RetailersViewModel>(json);
+                var json = await response.Content.ReadAsStringAsync(cancellationToken);
+                var responseContent = JsonSerializer.Deserialize<GetMultipleRetailersResponseViewModel>(json);
                 return responseContent;
             }
         }
 
-        public async Task<RetailerViewModel> GetRetailerByIdAsync(int retailerId)
+        public async Task<GetSingleRetailerResponseViewModel> GetSingleRetailerAsync(int retailerId, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var response = await httpClient.GetAsync($"/api/retailers/{retailerId}");
+            var response = await httpClient.GetAsync($"/api/retailers/{retailerId}", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -117,13 +120,13 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
             else
             {
-                var json = await response.Content.ReadAsStringAsync();
-                var responseContent = JsonSerializer.Deserialize<RetailerViewModel>(json);
+                var json = await response.Content.ReadAsStringAsync(cancellationToken);
+                var responseContent = JsonSerializer.Deserialize<GetSingleRetailerResponseViewModel>(json);
                 return responseContent;
             }
         }
 
-        public async Task UpdateRetailerAsync(int retailerId, UpdateRetailerViewModel updateRetailerViewModel)
+        public async Task UpdateRetailerAsync(int retailerId, UpdateRetailerViewModel updateRetailerViewModel, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
@@ -139,35 +142,24 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 
             content.Add(new StringContent(updateRetailerViewModel.Name, Encoding.UTF8, MediaTypeNames.Text.Plain), "name");
             content.Add(new StringContent(Convert.ToString(updateRetailerViewModel.Priority), Encoding.UTF8, MediaTypeNames.Text.Plain), "priority");
+            content.Add
+            (
+                new StringContent
+                (
+                    updateRetailerViewModel.DeleteCurrentLogoImage.ToString(), Encoding.UTF8, MediaTypeNames.Text.Plain
+                ),
+                "deleteCurrentLogoImage"
+            );
 
-            var response = await httpClient.PutAsync($"api/retailers/{retailerId}", content);
+            var response = await httpClient.PutAsync($"api/retailers/{retailerId}", content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
                 throw new WebApiCallException(message);
-            }
-            else
-            {
-                return;
-            }
-        }
-
-        public async Task UpdateRetailerPartialAsync(int retailerId)
-        {
-            var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
-
-            var response = await httpClient.PatchAsync($"/api/retailers/{retailerId}", null);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-                var error = JsonSerializer.Deserialize<ErrorViewModel>(json);
-                throw new WebApiCallException(error);
-
             }
             else
             {

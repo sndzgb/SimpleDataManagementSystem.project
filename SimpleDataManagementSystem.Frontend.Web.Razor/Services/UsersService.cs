@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using System.Text;
 using System.Text.Json;
 
@@ -18,17 +19,17 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
         }
 
 
-        public async Task<int> AddNewUserAsync(NewUserViewModel newUserViewModel)
+        public async Task<int> CreateUserAsync(CreateUserViewModel createUserViewModel, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var content = new StringContent(JsonSerializer.Serialize(newUserViewModel), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonSerializer.Serialize(createUserViewModel), Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PostAsync("api/users", content);
+            var response = await httpClient.PostAsync("api/users", content, cancellationToken);
             
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -36,7 +37,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
             else
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 //await response.Content.ReadAsStringAsync()
 
@@ -46,15 +47,15 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
         }
 
-        public async Task DeleteUserAsync(int userId)
+        public async Task DeleteUserAsync(int userId, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var response = await httpClient.DeleteAsync($"api/users/{userId}");
+            var response = await httpClient.DeleteAsync($"api/users/{userId}", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -66,15 +67,15 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
         }
 
-        public async Task<UsersViewModel> GetAllUsersAsync(int? take = 8, int? page = 1)
+        public async Task<GetMultipleUsersResponseViewModel> GetMultipleUsersAsync(CancellationToken cancellationToken, int? take = 8, int? page = 1)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var response = await httpClient.GetAsync($"/api/users?take={take}&page={page}");
+            var response = await httpClient.GetAsync($"/api/users?take={take}&page={page}", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -82,21 +83,21 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
             else
             {
-                var json = await response.Content.ReadAsStringAsync();
-                var responseContent = JsonSerializer.Deserialize<UsersViewModel>(json);
+                var json = await response.Content.ReadAsStringAsync(cancellationToken);
+                var responseContent = JsonSerializer.Deserialize<GetMultipleUsersResponseViewModel>(json);
                 return responseContent;
             }
         }
 
-        public async Task<UserViewModel> GetUserByIdAsync(int userId)
+		public async Task<GetSingleUserResponseViewModel> GetSingleUserAsync(int userId, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var response = await httpClient.GetAsync($"/api/users/{userId}");
+            var response = await httpClient.GetAsync($"/api/users/{userId}", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -104,23 +105,23 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
             else
             {
-                var json = await response.Content.ReadAsStringAsync();
-                var responseContent = JsonSerializer.Deserialize<UserViewModel>(json);
+                var json = await response.Content.ReadAsStringAsync(cancellationToken);
+                var responseContent = JsonSerializer.Deserialize<GetSingleUserResponseViewModel>(json);
                 return responseContent;
             }
         }
 
-        public async Task UpdatePasswordAsync(int userId, UpdatePasswordViewModel updatePasswordViewModel)
+        public async Task UpdatePasswordAsync(int userId, UpdatePasswordViewModel updatePasswordViewModel, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var content = new StringContent(JsonSerializer.Serialize(updatePasswordViewModel), Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PutAsync($"api/users/{userId}/password", content);
+            var response = await httpClient.PutAsync($"api/users/{userId}/password", content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -132,17 +133,17 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
         }
 
-        public async Task UpdateUserAsync(int userId, UpdateUserViewModel updateUserViewModel)
+        public async Task UpdateUserAsync(int userId, UpdateUserViewModel updateUserViewModel, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var content = new StringContent(JsonSerializer.Serialize(updateUserViewModel), Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PutAsync($"api/users/{userId}", content);
+            var response = await httpClient.PutAsync($"api/users/{userId}", content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 

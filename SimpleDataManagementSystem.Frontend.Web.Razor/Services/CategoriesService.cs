@@ -1,8 +1,9 @@
 ﻿using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
 using System.Text.Json;
 using System.Text;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
 {
@@ -17,17 +18,17 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
         }
 
 
-        public async Task<int> AddNewCategoryAsync(NewCategoryViewModel newCategoryViewModel)
+        public async Task CreateCategoryAsync(CreateCategoryViewModel createCategoryViewModel, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var content = new StringContent(JsonSerializer.Serialize(newCategoryViewModel), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonSerializer.Serialize(createCategoryViewModel), Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PostAsync("api/categories", content);
+            var response = await httpClient.PostAsync("api/categories", content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -35,23 +36,24 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
             else
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                return;
+                //using var contentStream = await response.Content.ReadAsStreamAsync();
 
-                var responseContent = await JsonSerializer.DeserializeAsync<int>(contentStream);
+                //var responseContent = await JsonSerializer.DeserializeAsync<int>(contentStream);
 
-                return Convert.ToInt32(responseContent);
+                //return Convert.ToInt32(responseContent);
             }
         }
 
-        public async Task DeleteCategoryAsync(int categoryId)
+        public async Task DeleteCategoryAsync(int categoryId, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var response = await httpClient.DeleteAsync($"api/categories/{categoryId}");
+            var response = await httpClient.DeleteAsync($"api/categories/{categoryId}", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -59,19 +61,21 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
             else
             {
-                await Task.CompletedTask;
+                return;
             }
         }
 
-        public async Task<CategoriesViewModel> GetAllCategoriesAsync(int? take = 8, int? page = 1)
+        public async Task<GetMultipleCategoriesResponseViewModel> GetMultipleCategoriesAsync(
+                CancellationToken cancellationToken, int? take = 8, int? page = 1
+            )
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var response = await httpClient.GetAsync($"/api/categories?take={take}&page={page}");
+            var response = await httpClient.GetAsync($"/api/categories?take={take}&page={page}", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -79,21 +83,21 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
             else
             {
-                var json = await response.Content.ReadAsStringAsync();
-                var responseContent = JsonSerializer.Deserialize<CategoriesViewModel>(json);
+                var json = await response.Content.ReadAsStringAsync(cancellationToken);
+                var responseContent = JsonSerializer.Deserialize<GetMultipleCategoriesResponseViewModel>(json);
                 return responseContent;
             }
         }
 
-        public async Task<CategoryViewModel> GetCategoryByIdAsync(int categoryId)
+        public async Task<GetSingleCategoryResponseViewModel> GetSingleCategoryAsync(int categoryId, CancellationToken cancellationToken)
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
-            var response = await httpClient.GetAsync($"/api/categories/{categoryId}");
+            var response = await httpClient.GetAsync($"/api/categories/{categoryId}", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
@@ -101,23 +105,27 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Services
             }
             else
             {
-                var json = await response.Content.ReadAsStringAsync();
-                var responseContent = JsonSerializer.Deserialize<CategoryViewModel>(json);
+                var json = await response.Content.ReadAsStringAsync(cancellationToken);
+                var responseContent = JsonSerializer.Deserialize<GetSingleCategoryResponseViewModel>(json);
                 return responseContent;
             }
         }
 
-        public async Task UpdateCategoryAsync(int categoryId, UpdateCategoryViewModel updateCategoryViewModel)
+        public async Task UpdateCategoryAsync(
+                int categoryId, 
+                UpdateCategoryViewModel updateCategoryViewModel, 
+                CancellationToken cancellationToken
+            )
         {
             var httpClient = _httpClientFactory.CreateClient(Constants.HttpClients.SimpleDataManagementSystemHttpClient.Name);
 
             var content = new StringContent(JsonSerializer.Serialize(updateCategoryViewModel), Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PutAsync($"api/categories/{categoryId}", content);
+            var response = await httpClient.PutAsync($"api/categories/{categoryId}", content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
                 var message = await JsonSerializer.DeserializeAsync<ErrorViewModel>(contentStream);
 
