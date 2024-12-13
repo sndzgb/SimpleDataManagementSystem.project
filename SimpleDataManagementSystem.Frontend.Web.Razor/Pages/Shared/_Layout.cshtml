@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -8,35 +10,41 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SimpleDataManagementSystem.Frontend.Web.Razor.styles.css" asp-append-version="true" />
-    
+
+    @* <script src="~/lib/signalr/dist/browser/signalr.min.js"></script> *@
+
     <script src="~/lib/jquery/dist/jquery.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
-    <script src="~/js/bundle.min.js"></script>
+    @* <script src="~/js/bundle.min.js"></script> *@ @* TODO *@
 </head>
 <body style="min-height: 100vh; display: flex; flex-direction: column;">
     <partial name="_Menu" model="null" />
     
-    <div class="container">
-        @* @if (ViewData["Error"] != null)
-        {
-            <p style="color:red;">Not empty</p>
-        }
-        else
-        {
-            <p style="color:green;">Empty</p>
-        }
+    @await Component.InvokeAsync(typeof(DisplayErrorViewComponent), null)
 
-        @if (Context.Items["Error"] != null)
-        {
-            <p style="color:red;">Not empty 2</p>
-            <p style="color:red;">@Context.Items["Error"]</p>
-            <p style="color:red;">@ViewData["Error"]</p>
-        }
-        else
-        {
-            <p style="color:green;">Empty 2</p>
-        } *@
+    <div class="container">
+
+        @* TODO component *@
+        <div class="ns" id="notes">
+            <div id="no-notifications-messsage">
+                <label>No new notifications.</label>
+            </div>
+
+            <div class="content-cont">
+                <div class="togg" id="notes-toggler" onclick="onToggleNotificationsSidebarClicked(this);">
+                    <div class="notes-t coll ex">
+                        <label class="n-notifier">Notifications</label>
+                    </div>
+                    <div class="notes-t expa">
+                        <i class="notifications-sidebar fa-solid fa-chevron-right xl"></i>
+                    </div>
+                </div>
+                <div class="notes-cont">
+                </div>
+            </div>
+        </div>
+
         <main role="main" class="pb-3">
             
             @* hubs notifications *@
@@ -84,5 +92,7 @@
 
 
     <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+    <script src="~/js/itemUpdatedNotifierHub.js"></script>
+
 </body>
 </html>
