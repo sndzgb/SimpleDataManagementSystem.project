@@ -5,14 +5,14 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Globalization;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
 {
-    public class CreateItemModel : BasePageModel<NewItemViewModel>
+    public class CreateItemModel : BasePageModel<CreateItemRequestViewModel>
     {
         private readonly IItemsService _itemsService;
         private readonly ICategoriesService _categoriesService;
@@ -34,12 +34,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
         }
 
 
-        [FromQuery(Name = "test")]
-        public string? Test { get; set; }
+        public GetMultipleCategoriesResponseViewModel AvailableCategories { get; set; }
 
-        public CategoriesViewModel AvailableCategories { get; set; }
-
-        public RetailersViewModel AvailableRetailers { get; set; }
+        public GetMultipleRetailersResponseViewModel AvailableRetailers { get; set; }
 
 
         public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
@@ -62,21 +59,25 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
         }
 
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
         {
             var tasks = new List<Task>();
 
-            tasks.Add(Task.Run(async () => AvailableCategories = await _categoriesService.GetAllCategoriesAsync(int.MaxValue, 1)));
-            tasks.Add(Task.Run(async () => AvailableRetailers = await _retailersService.GetAllRetailersAsync(int.MaxValue, 1)));
+            tasks.Add(Task.Run(async () => 
+                AvailableCategories = await _categoriesService.GetMultipleCategoriesAsync(cancellationToken, int.MaxValue, 1))
+            );
+            tasks.Add(Task.Run(async () => 
+                AvailableRetailers = await _retailersService.GetMultipleRetailersAsync(cancellationToken, int.MaxValue, 1))
+            );
 
             await Task.WhenAll(tasks);
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPost(NewItemViewModel newItemViewModel)
+        public async Task<IActionResult> OnPost(CreateItemRequestViewModel createItemRequestViewModel, CancellationToken cancellationToken)
         {
-            var newItemId = await _itemsService.AddNewItemAsync(newItemViewModel);
+            var newItemId = await _itemsService.CreateItemAsync(createItemRequestViewModel, cancellationToken);
 
             return RedirectToPage("/Items/Items");
         }
