@@ -5,7 +5,7 @@
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.DeleteItemModel
 
 @{
-    ViewData["Title"] = "Delete item - '" + (Model?.Model?.Nazivproizvoda ?? "-") + "'";
+    ViewData["Title"] = "Delete item - '" + (Model?.Model?.Item?.Nazivproizvoda ?? "-") + "'";
 }
 
 <div class="header">
@@ -37,7 +37,7 @@
                             </div>
                             <div>
                                 <em>
-                                    <label>@Model?.Model?.Nazivproizvoda</label>
+                                    <label>@Model?.Model?.Item?.Nazivproizvoda</label>
                                 </em>
                             </div>
                         </div>
@@ -50,7 +50,7 @@
                             </div>
                             <div>
                                 <em>
-                                    <label>@Model?.Model?.Opis</label>
+                                    <label>@Model?.Model?.Item?.Opis</label>
                                 </em>
                             </div>
                         </div>
@@ -63,7 +63,20 @@
                             </div>
                             <div>
                                 <em>
-                                    <label>@Model?.Model?.Cijena.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)</label>
+                                    <label>@Model?.Model?.Item?.Cijena.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)</label>
+                                </em>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="readonly-control single-per-line">
+                            <div>
+                                <label>Enabled:</label>
+                            </div>
+                            <div>
+                                <em>
+                                    <label>@(Model?.Model?.Item?.IsEnabled.ToString().ToLower() == "true" ? "Yes" : "No")</label>
                                 </em>
                             </div>
                         </div>
@@ -76,7 +89,7 @@
                             </div>
                             <div>
                                 <em>
-                                    <label>@Model?.Model?.Datumakcije</label>
+                                    <label>@Model?.Model?.Item?.Datumakcije</label>
                                 </em>
                             </div>
                         </div>
@@ -89,7 +102,7 @@
                             </div>
                             <div>
                                 <em>
-                                    <label>@Model?.Model?.Kategorija</label>
+                                    <label>@Model?.Model?.Item?.Category?.Name</label>
                                 </em>
                             </div>
                         </div>
@@ -102,10 +115,10 @@
                             <img height="300"
                                  width="300"
                                  id="thumbnailPreview"
-                                 src="@(Model?.Model?.URLdoslikeUri == null ?
+                                 src="@(Model?.Model?.Item?.URLdoslike == null ?
                                         "/Resources/image_not_available.png"
                                         :
-                                        Model.Model.URLdoslikeUri)" />
+                                        Model.Model.Item?.URLdoslike)" />
                         </div>
                     </div>
 

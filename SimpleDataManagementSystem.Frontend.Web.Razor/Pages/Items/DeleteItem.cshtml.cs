@@ -4,14 +4,14 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Net;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
 {
     [ValidateAntiForgeryToken]
-    public class DeleteItemModel : BasePageModel<ItemViewModel>
+    public class DeleteItemModel : BasePageModel<GetSingleItemResponseViewModel>
     {
         private readonly IItemsService _itemsService;
         private readonly IAuthorizationService _authorizationService;
@@ -47,16 +47,16 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items
             base.OnPageHandlerExecuting(context);
         }
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
         {
-            Model = await _itemsService.GetItemByIdAsync(ItemId);
+            Model = await _itemsService.GetSingleItemAsync(ItemId, cancellationToken);
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPost()
+        public async Task<IActionResult> OnPost(CancellationToken cancellationToken)
         {
-            await _itemsService.DeleteItemAsync(ItemId);
+            await _itemsService.DeleteItemAsync(ItemId, cancellationToken);
 
             return RedirectToPage("/Items/Items");
         }
