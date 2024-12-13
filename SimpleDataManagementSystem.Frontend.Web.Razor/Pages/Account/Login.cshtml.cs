@@ -7,13 +7,14 @@ using SimpleDataManagementSystem.Frontend.Web.Razor.Constants;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Helpers;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Security.Claims;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Account
 {
-    public class LoginModel : BasePageModel<UserLogInRequestViewModel>
+    public class LoginModel : BasePageModel<LogInRequestViewModel>
     {
         private readonly IAccountsService _accountsService;
 
@@ -30,7 +31,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Account
         }
 
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
         {
             if (HttpContext!.User!.Identity!.IsAuthenticated)
             {
@@ -40,15 +41,15 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Account
             return Page();
         }
 
-        public async Task<IActionResult> OnPost(string username, string password)
+        public async Task<IActionResult> OnPost(string username, string password, CancellationToken cancellationToken)
         {
-            var authTokenViewModel = await _accountsService.LogInAsync(username, password);
+            var authTokenViewModel = await _accountsService.LogInAsync(username, password, cancellationToken);
 
             if (authTokenViewModel?.Jwt == null)
             {
                 Error = new ErrorViewModel(StatusCodes.Status401Unauthorized, "Login failed.", null);
 
-                return await OnGet();
+                return await OnGet(cancellationToken);
             }
             
 
