@@ -236,6 +236,44 @@ namespace SimpleDataManagementSystem.Backend.Database
                 .Property(p => p.Cijena)
                 .HasPrecision(18, 2);
 
+            modelBuilder.Entity<ItemEntity>()
+                .Property(p => p.IsEnabled)
+                .HasColumnType("bit")
+                .HasDefaultValue(1);
+
+
+            #endregion
+
+
+            #region MonitoredItemEntity
+
+            modelBuilder.Entity<MonitoredItemEntity>()
+                .ToTable("MonitoredItems", "dbo");
+
+            modelBuilder.Entity<MonitoredItemEntity>()
+                .Property(p => p.StartedMonitoringAtUtc)
+                .HasColumnType("datetime2")
+                .HasDefaultValueSql("GETUTCDATE()")
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<MonitoredItemEntity>()
+                .HasKey(a => new { a.ItemNazivproizvoda, a.UserId })
+                .HasName("PK_MonitoredItems_Nazivproizvoda_UserId");
+
+            modelBuilder.Entity<MonitoredItemEntity>()
+                .HasOne(e => e.User)
+                .WithMany(x => x.MonitoredItems)
+                .HasForeignKey(e => e.UserId)
+                .HasConstraintName("FK_MonitoredItems_Users_UserId_Id")
+                .IsRequired();
+
+            modelBuilder.Entity<MonitoredItemEntity>()
+                .HasOne(e => e.Item)
+                .WithMany(x => x.Monitored)
+                .HasForeignKey(e => e.ItemNazivproizvoda)
+                .HasConstraintName("FK_MonitoredItems_Items_ItemNazivproizvoda_Nazivproizvoda")
+                .IsRequired();
+
             #endregion
         }
 
@@ -244,5 +282,6 @@ namespace SimpleDataManagementSystem.Backend.Database
         public DbSet<RoleEntity> Roles { get; set; }
         public DbSet<CategoryEntity> Categories { get; set; }
         public DbSet<RetailerEntity> Retailers { get; set; }
+        public DbSet<MonitoredItemEntity> MonitoredItems { get; set; }
     }
 }
