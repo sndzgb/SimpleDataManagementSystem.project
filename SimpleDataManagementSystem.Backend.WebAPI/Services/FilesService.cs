@@ -5,6 +5,11 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Services
     // TODO IFilesService; demo purposes only
     public static class FilesService
     {
+        public static string GetBasePath()
+        {
+            return Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+        }
+
         public static void Upload(string relativePath, Stream stream)
         {
             if (string.IsNullOrEmpty(relativePath))
