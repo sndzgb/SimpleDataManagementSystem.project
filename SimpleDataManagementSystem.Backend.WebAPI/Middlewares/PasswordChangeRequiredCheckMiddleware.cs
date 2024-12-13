@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Read;
+using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Net;
 using System.Text;
