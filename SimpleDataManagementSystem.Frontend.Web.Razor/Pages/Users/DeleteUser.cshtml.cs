@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using SimpleDataManagementSystem.Shared.Common.Policies;
 using System.Net;
@@ -12,7 +12,7 @@ using System.Net;
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
 {
     [ValidateAntiForgeryToken]
-    public class DeleteUserModel : BasePageModel<UserViewModel>
+    public class DeleteUserModel : BasePageModel<GetSingleUserResponseViewModel>
     {
         private readonly IUsersService _usersService;
         private readonly IAuthorizationService _authorizationService;
@@ -54,16 +54,16 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
             base.OnPageHandlerExecuting(context);
         }
 
-        public async Task<IActionResult> OnPost()
+        public async Task<IActionResult> OnPost(CancellationToken cancellationToken)
         {
-            await _usersService.DeleteUserAsync(UserId);
+            await _usersService.DeleteUserAsync(UserId, cancellationToken);
 
             return RedirectToPage("/Users/Users");
         }
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
         {
-            Model = await _usersService.GetUserByIdAsync(UserId);
+            Model = await _usersService.GetSingleUserAsync(UserId, cancellationToken);
 
             return Page();
         }

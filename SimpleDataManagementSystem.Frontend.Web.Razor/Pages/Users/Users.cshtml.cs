@@ -5,13 +5,12 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
 {
-    public class UsersModel : BasePageModel<UsersViewModel>
+    public class UsersModel : BasePageModel<GetMultipleUsersResponseViewModel>
     {
         private readonly IUsersService _usersService;
         private readonly IAuthorizationService _authorizationService;
@@ -23,15 +22,6 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
             _authorizationService = authorizationService;
         }
 
-
-        public UsersViewModel Users { get; set; }
-
-        // TODO use properties instead of method parameters
-        //[BindProperty(Name = "pagenr", SupportsGet = true)]
-        //public int PageNr { get; set; } = 1;
-
-        //[BindProperty(Name = "ipp", SupportsGet = true)]
-        //public int ItemsPerPage { get; set; } = 8;
 
         public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
         {
@@ -53,9 +43,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
         }
 
 
-        public async Task<IActionResult> OnGet([FromQuery] int take = 8, [FromQuery] int page = 1)
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken, [FromQuery] int take = 8, [FromQuery] int page = 1)
         {
-            Users = await _usersService.GetAllUsersAsync(take, page);
+            Model = await _usersService.GetMultipleUsersAsync(cancellationToken, take, page);
             return Page();
         }
     }

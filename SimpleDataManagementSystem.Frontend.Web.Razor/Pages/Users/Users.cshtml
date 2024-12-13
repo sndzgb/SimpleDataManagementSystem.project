@@ -4,7 +4,6 @@
 
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Helpers
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
-@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 @using System.Security.Claims
 @using SimpleDataManagementSystem.Shared.Common.Constants
 
@@ -67,14 +66,14 @@
             </tr>
         </thead>
         <tbody>
-            @if (Model.Users.Users != null)
+            @if (Model.Model.Users != null)
             {
-                @foreach (var u in Model!.Users!.Users)
+                @foreach (var u in Model!.Model!.Users)
                 {
                     <tr style="max-height: 70px; height:70px;">
-                        <td>@u.ID</td>
+                        <td>@u.Id</td>
                         <td>@u.Username</td>
-                        <td>@u.RoleName</td>
+                        <td>@u.Role.Name</td>
                         <td class="@(u.IsPasswordChangeRequired ? "text-danger" : "")">
                             @(u.IsPasswordChangeRequired ? "Yes" : "No")
                         </td>
@@ -86,17 +85,17 @@
                         )
                         {
                             <td class="options">
-                                <a href="/Users/@(u.ID)/Details">
+                                <a href="/Users/@(u.Id)/Details">
                                     <i class="fa-solid fa-circle-info"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Users/@(u.ID)/Edit">
+                                <a href="/Users/@(u.Id)/Edit">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Users/@(u.ID)/Delete">
+                                <a href="/Users/@(u.Id)/Delete">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </td>
@@ -107,7 +106,7 @@
         </tbody>
     </table>
 
-    @if ((Model == null) || (Model?.Users?.Users?.Count == 0) || (Model?.Users == null))
+    @if ((Model == null) || (Model?.Model?.Users?.Count == 0) || (Model?.Model == null))
     {
         <div class="no-data">
             No data to show.
@@ -117,6 +116,6 @@
 
 
 <!-- #region Pagination -->
-@await Component.InvokeAsync(typeof(PagerViewComponent), Model?.Users?.PageInfo)
+@await Component.InvokeAsync(typeof(PagerViewComponent), Model?.Model?.PageInfo)
 <!-- #endregion Pagination -->
 

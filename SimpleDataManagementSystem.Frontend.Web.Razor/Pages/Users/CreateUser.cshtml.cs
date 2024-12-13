@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
 {
-    public class CreateUserModel : BasePageModel<NewUserViewModel>
+    public class CreateUserModel : BasePageModel<CreateUserViewModel>
     {
         private readonly IUsersService _usersService;
         private readonly IRolesService _rolesService;
@@ -24,7 +24,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
         }
 
 
-        public List<RoleViewModel> AvailableRoles { get; set; }
+        public GetAllRolesResponseViewModel AvailableRoles { get; set; }
 
 
         public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
@@ -47,19 +47,23 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
         }
 
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
         {
-            var roles = await _rolesService.GetAllRolesAsync();
+            var roles = await _rolesService.GetAllRolesAsync(cancellationToken);
 
-            // TODO filter roles on server!
-            AvailableRoles = roles.Where(x => x.Id != (int)Roles.Admin).ToList(); // creating new admins not allowed
+            AvailableRoles = new GetAllRolesResponseViewModel(); // creating new admins not allowed
+            AvailableRoles.Roles = new List<GetAllRolesResponseViewModel.RolesViewModel>();
+            AvailableRoles.PageInfo = roles.PageInfo; //new GetAllRolesResponseViewModel.();
 
-            return Page();
+            AvailableRoles.Roles.AddRange(roles.Roles.Where(x => x.Name.ToLower() != Roles.Admin.ToString().ToLower()).ToList());
+			//AvailableRoles = roles.Roles.Where(x => x.Id != (int)Roles.Admin); // creating new admins not allowed
+
+			return Page();
         }
 
-        public async Task<IActionResult> OnPost(NewUserViewModel newUserViewModel)
+        public async Task<IActionResult> OnPost(CreateUserViewModel createUserViewModel, CancellationToken cancellationToken)
         {
-            var newUserId = await _usersService.AddNewUserAsync(newUserViewModel);
+            var newUserId = await _usersService.CreateUserAsync(createUserViewModel, cancellationToken);
 
             return RedirectToPage("/Users/Users");
         }

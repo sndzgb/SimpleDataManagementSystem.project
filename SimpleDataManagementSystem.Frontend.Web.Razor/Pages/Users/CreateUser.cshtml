@@ -3,7 +3,6 @@
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.CreateUserModel
 
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
-@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 @using Microsoft.AspNetCore.Mvc.ModelBinding
 
 @{
@@ -61,7 +60,7 @@
                         <select name="roleId">
                             @if (Model?.AvailableRoles != null)
                             {
-                                @foreach (var r in Model.AvailableRoles)
+                                @foreach (var r in Model.AvailableRoles.Roles)
                                 {
                                     <option value="@r.Id" selected="@(Model?.Model?.RoleId == r.Id)">@r.Name</option>
                                 }

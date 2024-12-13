@@ -6,8 +6,8 @@ using SimpleDataManagementSystem.Frontend.Web.Razor.Constants;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
@@ -19,7 +19,11 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
         private readonly IAuthorizationService _authorizationService;
 
 
-        public EditUserModel(IUsersService usersService, IRolesService rolesService, IAuthorizationService authorizationService)
+        public EditUserModel(
+                IUsersService usersService, 
+                IRolesService rolesService, 
+                IAuthorizationService authorizationService
+            )
         {
             _usersService = usersService;
             _rolesService = rolesService;
@@ -30,10 +34,10 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
         [FromRoute]
         public int UserId { get; set; }
 
-        public UserViewModel User { get; set; } // user details
+        public GetSingleUserResponseViewModel User { get; set; } // user details
 
-        public List<RoleViewModel> AvailableRoles { get; set; } // roles to choose from
-
+        public GetAllRolesResponseViewModel AvailableRoles { get; set; } // roles to choose from
+        
 
         public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
         {
@@ -55,14 +59,14 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
         }
 
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
         {
             var tasks = new List<Task>();
 
-            tasks.Add(Task.Run(async () => User = await _usersService.GetUserByIdAsync(UserId)));
+            tasks.Add(Task.Run(async () => User = await _usersService.GetSingleUserAsync(UserId, cancellationToken)));
             tasks.Add(Task.Run(async () => {
-                AvailableRoles = await _rolesService.GetAllRolesAsync();
-                AvailableRoles = AvailableRoles.Where(x => x.Id != (int)Roles.Admin).ToList();
+                AvailableRoles = await _rolesService.GetAllRolesAsync(cancellationToken);
+                AvailableRoles.Roles = AvailableRoles.Roles.Where(x => x.Id != (int)Roles.Admin).ToList();
             }));
 
             await Task.WhenAll(tasks);
@@ -70,9 +74,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
             return Page();
         }
 
-        public async Task<IActionResult> OnPost()
+        public async Task<IActionResult> OnPost(UpdateUserViewModel updateUserViewModel, CancellationToken cancellationToken)
         {
-            await _usersService.UpdateUserAsync(UserId, Model);
+            await _usersService.UpdateUserAsync(UserId, updateUserViewModel, cancellationToken);
 
             return RedirectToPage("/Users/Users");
         }

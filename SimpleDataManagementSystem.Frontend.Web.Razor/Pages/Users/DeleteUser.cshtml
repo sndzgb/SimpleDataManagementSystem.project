@@ -10,7 +10,7 @@
 }
 
 <div class="header">
-    <h1>Delete user - '<b>@Model?.Model?.Username }}</b>'</h1>
+    <h1>Delete user - '<b>@Model?.Model?.Username</b>'</h1>
 </div>
 
 
@@ -37,7 +37,7 @@
                         </div>
                         <div>
                             <em>
-                                <label>@Model.Model.ID</label>
+                                <label>@Model.Model.Id</label>
                             </em>
                         </div>
                     </div>
@@ -89,7 +89,7 @@
                     @if (
                         (
                             PermissionsHelper.IsResourceOwner(
-                                Model.Model.ID.ToString(),
+                                Model.Model.Id.ToString(),
                                 User.Claims?.Where(x => x.Type == ExtendedClaims.Type.UserId)?.FirstOrDefault()?.Value!
                             )
                         )

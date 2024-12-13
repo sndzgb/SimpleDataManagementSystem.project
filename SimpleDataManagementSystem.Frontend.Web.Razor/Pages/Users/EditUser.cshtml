@@ -67,7 +67,7 @@
                         </div>
                         <div>
                             <select id="role" name="roleId">
-                                @foreach (var r in Model.AvailableRoles)
+                                @foreach (var r in Model.AvailableRoles.Roles)
                                 {
                                     <option value="@r.Id" selected="@(r.Id == Model.User.RoleId)">@r.Name</option>
                                 }
