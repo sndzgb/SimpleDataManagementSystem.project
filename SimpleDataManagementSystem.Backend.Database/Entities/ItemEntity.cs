@@ -16,13 +16,16 @@ namespace SimpleDataManagementSystem.Backend.Database.Entities
         public string? Nazivretailera { get; set; }
 
         [Required(AllowEmptyStrings = true)]
-        public string? URLdoslike { get; set; }
+        public string URLdoslike { get; set; }
         public decimal Cijena { get; set; }
+        public bool IsEnabled { get; set; } // TODO
 
         public int? Kategorija { get; set; }
         public CategoryEntity? Category { get; set; }
 
         public int RetailerID { get; set; }
         public RetailerEntity Retailer { get; set; }
+
+        public ICollection<MonitoredItemEntity> Monitored { get; set; }
     }
 }
