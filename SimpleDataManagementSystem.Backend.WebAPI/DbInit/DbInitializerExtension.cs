@@ -16,13 +16,15 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
 
             try
             {
+                var logger = services.GetRequiredService<ILogger<DbInitializer>>();
+
                 var context = services.GetRequiredService<SimpleDataManagementSystemDbContext>();
                 var emailService = services.GetRequiredService<IEmailService>();
 
                 var emailClientOptions = services.GetRequiredService<IOptions<EmailClientOptions>>();
                 var appOptions = services.GetRequiredService<IOptions<AppOptions>>();
 
-                DbInitializer.Initialize(context, emailService, appOptions, emailClientOptions);
+                DbInitializer.Initialize(context, emailService, appOptions, emailClientOptions, logger);
             }
             catch (Exception ex)
             {

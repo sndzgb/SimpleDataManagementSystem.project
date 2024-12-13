@@ -19,12 +19,15 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
                 SimpleDataManagementSystemDbContext dbContext,
                 IEmailService emailService,
                 IOptions<AppOptions> appOptions,
-                IOptions<EmailClientOptions> emailClientOptions
+                IOptions<EmailClientOptions> emailClientOptions,
+                ILogger<DbInitializer> logger
             )
         {
             ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
 
             bool isMigrationNeeded = (dbContext.Database.GetPendingMigrationsAsync().GetAwaiter().GetResult()).Any();
+
+            logger.LogInformation("isMigrationNeeded: {isMigrationNeeded}", isMigrationNeeded);
 
             if (isMigrationNeeded)
             {
@@ -88,7 +91,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
         {
             var user = new UserEntity();
             user.Username = "admin";
-            user.Id = 0;
+            user.Id = 1;
             user.RoleId = (int)Roles.Admin;
             
             var existingAdmin = dbContext.Users.Find(user.Id);
