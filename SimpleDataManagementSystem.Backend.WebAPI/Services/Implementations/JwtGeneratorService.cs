@@ -26,7 +26,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Services.Implementations
         }
 
 
-        public Task<string?> GenerateTokenAsync(AuthenticatedUser authenticatedUser)
+        public Task<string?> GenerateTokenAsync(AuthenticatedUser authenticatedUser, CancellationToken cancellationToken)
         {
             if (authenticatedUser == null)
             {

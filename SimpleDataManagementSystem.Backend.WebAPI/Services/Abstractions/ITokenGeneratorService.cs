@@ -1,5 +1,4 @@
-﻿using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
-using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Records;
+﻿using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Records;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Services.Abstractions
 {
@@ -10,6 +9,6 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Services.Abstractions
         /// </summary>
         /// <param name="authenticatedUser"></param>
         /// <returns></returns>
-        Task<string?> GenerateTokenAsync(AuthenticatedUser authenticatedUser);
+        Task<string?> GenerateTokenAsync(AuthenticatedUser authenticatedUser, CancellationToken cancellationToken);
     }
 }
