@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting.Internal;
@@ -18,6 +19,7 @@ using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
 using SimpleDataManagementSystem.Backend.Logic.Services.Implementations;
 using SimpleDataManagementSystem.Backend.WebAPI.DbInit;
 using SimpleDataManagementSystem.Backend.WebAPI.Filters;
+using SimpleDataManagementSystem.Backend.WebAPI.Hubs;
 using SimpleDataManagementSystem.Backend.WebAPI.Middlewares;
 using SimpleDataManagementSystem.Backend.WebAPI.Options;
 using SimpleDataManagementSystem.Backend.WebAPI.Services.Abstractions;
@@ -181,6 +183,10 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
 
             builder.Services.AddOptions<SqliteOptions>().BindConfiguration(nameof(SqliteOptions));
 
+            builder.Services.AddDbContextFactory<SimpleDataManagementSystemDbContext>(options =>
+                options.UseSqlServer(connectionString)
+            );
+
             builder.Services.AddDbContext<SimpleDataManagementSystemDbContext>(options =>
                 options.UseSqlServer(connectionString)
             );
@@ -209,21 +215,23 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
             builder.Services.AddSignalR(cfg => cfg.EnableDetailedErrors = true);
             //builder.Services.AddHttpContextAccessor();
 
+            builder.Services.AddTransient<INotificationsService, NotificationsService>();
+            builder.Services.AddTransient<IItemUpdatedNotifierService, ItemUpdatedNotifierService>();
+            builder.Services.AddTransient<IUserConnectionTrackerService, UserConnectionTrackerService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
-            builder.Services.AddScoped<IItemsService, ItemsService>();
-            builder.Services.AddScoped<IItemsRepository, ItemsRepository>();
-            builder.Services.AddScoped<IUsersService, UsersService>();
-            builder.Services.AddScoped<IUsersRepository, UsersRepository>();
-            builder.Services.AddScoped<IRetailersService, RetailersService>();
-            builder.Services.AddScoped<IRetailersRepository, RetailersRepository>();
-            builder.Services.AddScoped<ICategoriesService, CategoriesService>();
-            builder.Services.AddScoped<ICategoriesRepository, CategoriesRepository>();
-            builder.Services.AddScoped<IRolesService, RolesService>();
-            builder.Services.AddScoped<IRolesRepository, RolesRepository>();
+            builder.Services.AddScoped<IItemsCoreService, ItemsCoreService>();
+            builder.Services.AddScoped<IItemsCoreRepository, ItemsCoreRepository>();
+            builder.Services.AddScoped<IUsersCoreService, UsersCoreService>();
+            builder.Services.AddScoped<IUsersCoreRepository, UsersCoreRepository>();
+            builder.Services.AddScoped<IRetailersCoreService, RetailersCoreService>();
+            builder.Services.AddScoped<IRetailersCoreRepository, RetailersCoreRepository>();
+            builder.Services.AddScoped<ICategoriesCoreService, CategoriesCoreService>();
+            builder.Services.AddScoped<ICategoriesCoreRepository, CategoriesCoreRepository>();
+            builder.Services.AddScoped<IRolesCoreService, RolesCoreService>();
+            builder.Services.AddScoped<IRolesCoreRepository, RolesCoreRepository>();
             builder.Services.AddScoped<ITokenGeneratorService, JwtGeneratorService>();
 
             builder.Services.Configure<JwtOptions>(config.GetSection(JwtOptions.Jwt));
-            //builder.Services.Configure<JwtOptions>(config.GetSection("JwtOptions"));
 
             // Configure the HTTP request pipeline.
             var app = builder.Build();
@@ -245,6 +253,8 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
             app.UseMiddleware<PasswordChangeRequiredCheckMiddleware>();
 
             app.MapControllers();
+
+            app.MapHub<ItemUpdatedNotifierHub>($"{HUBS_PREFIX}/itemUpdatedNotifier");
 
             app.UseSeedSqlServer();
 
