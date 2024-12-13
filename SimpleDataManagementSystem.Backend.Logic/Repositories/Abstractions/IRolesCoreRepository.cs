@@ -1,4 +1,4 @@
-﻿using SimpleDataManagementSystem.Backend.Logic.DTOs.Read;
+﻿using SimpleDataManagementSystem.Backend.Logic.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace SimpleDataManagementSystem.Backend.Logic.Repositories.Abstractions
 {
-    public interface IRolesRepository
+    public interface IRolesCoreRepository
     {
-        Task<List<RoleDTO>?> GetAllRolesAsync();
+        Task<List<Role>> GetAllRolesAsync(CancellationToken cancellationToken);
     }
 }
