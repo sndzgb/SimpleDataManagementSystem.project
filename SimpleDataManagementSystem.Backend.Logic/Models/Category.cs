@@ -14,6 +14,6 @@ namespace SimpleDataManagementSystem.Backend.Logic.Models
 
         public int Priority { get; set; }
 
-        public ICollection<Item>? Items { get; }
+        public ICollection<Item>? Items { get; set; }
     }
 }

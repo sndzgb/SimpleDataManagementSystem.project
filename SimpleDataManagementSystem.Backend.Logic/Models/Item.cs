@@ -8,10 +8,14 @@ namespace SimpleDataManagementSystem.Backend.Logic.Models
 {
     public class Item
     {
-        public string Nazivproizvoda { get; set; } = string.Empty;
+        public string Nazivproizvoda { get; set; }
+        public decimal Cijena { get; set; }
+        
+        public bool IsEnabled { get; set; } = true;
         public string? Opis { get; set; }
         public string? Datumakcije { get; set; }
         public string? Nazivretailera { get; set; }
+        public string? URLdoslike { get; set; }
 
         public string? URLdoslike { get; set; }
         public decimal Cijena { get; set; }
