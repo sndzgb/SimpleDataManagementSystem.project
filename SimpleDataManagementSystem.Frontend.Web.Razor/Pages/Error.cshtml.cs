@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels;
 using System.Diagnostics;
 using System.Net;
 
@@ -24,7 +24,6 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
         // USE MIDDLEWARE FOR EXCEPTIONS & handling, THIS FOR showing error HttpStatusCodes -- Call web api and return 500, 400, 401, 403, 404, ...
         public IActionResult OnGet(int? statusCode)
         {
-            
             var error = HttpContext.Items.TryGetValue(nameof(ErrorViewModel), out object? r);
             ErrorViewModel? result = (ErrorViewModel?)r;
 
@@ -91,6 +90,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
 
             if (type == typeof(ForbiddenException)) // not allowed
             {
+                // redirect?
                 Error = new ErrorViewModel(403, "Forbidden.", null);
                 return null;
             }
