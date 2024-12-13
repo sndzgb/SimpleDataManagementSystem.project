@@ -5,13 +5,13 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
 {
     [ValidateAntiForgeryToken]
-    public class CreateRetailerModel : BasePageModel<NewRetailerViewModel>
+    public class CreateRetailerModel : BasePageModel<CreateRetailerViewModel>
     {
         private readonly IRetailersService _retailersService;
         private readonly IAuthorizationService _authorizationService;
@@ -49,9 +49,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
             return Page();
         }
 
-        public async Task<IActionResult> OnPost(NewRetailerViewModel newRetailerViewModel)
+        public async Task<IActionResult> OnPost(CreateRetailerViewModel createRetailerViewModel, CancellationToken cancellationToken)
         {
-            var newUserId = await _retailersService.AddNewRetailerAsync(newRetailerViewModel);
+            var newUserId = await _retailersService.CreateRetailerAsync(createRetailerViewModel, cancellationToken);
 
             return RedirectToPage("/Retailers/Retailers");
         }

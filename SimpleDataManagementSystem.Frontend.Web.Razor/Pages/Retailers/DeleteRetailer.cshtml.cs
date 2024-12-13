@@ -4,14 +4,14 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Net;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
 {
     [ValidateAntiForgeryToken]
-    public class DeleteRetailerModel : BasePageModel<RetailerViewModel>
+    public class DeleteRetailerModel : BasePageModel<GetSingleRetailerResponseViewModel>
     {
         private readonly IRetailersService _retailersService;
         private readonly IAuthorizationService _authorizationService;
@@ -48,16 +48,16 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
         }
 
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
         {
-            Model = await _retailersService.GetRetailerByIdAsync(RetailerId);
+            Model = await _retailersService.GetSingleRetailerAsync(RetailerId, cancellationToken);
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPost()
+        public async Task<IActionResult> OnPost(CancellationToken cancellationToken)
         {
-            await _retailersService.DeleteRetailerAsync(RetailerId);
+            await _retailersService.DeleteRetailerAsync(RetailerId, cancellationToken);
             return RedirectToPage("/Retailers/Retailers");
         }
     }

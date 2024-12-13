@@ -3,8 +3,6 @@
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers.RetailersModel
 
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
-@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
-@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
 @using System.Security.Claims
 @using SimpleDataManagementSystem.Shared.Common.Constants
 
@@ -88,12 +86,12 @@
                 @foreach (var r in Model.Model.Retailers)
                 {
                     <tr style="max-height: 70px; height:70px;">
-                        <td>@r.ID</td>
+                        <td>@r.Id</td>
                         <td>@r.Name</td>
                         <td>@r.Priority</td>
                         <td>
                             <img width="64" height="64"
-                                 src="@(r.LogoImageUri != null ? r.LogoImageUri : "/resources/image_not_available.png")" 
+                                 src="@(r.LogoImageUrl != null ? r.LogoImageUrl : "/resources/image_not_available.png")" 
                             />
                         </td>
                         @if (
@@ -111,17 +109,17 @@
                         )
                         {
                             <td class="options">
-                                <a href="/Retailers/@r.ID)/Details">
+                                <a href="/Retailers/@r.Id/Details">
                                     <i class="fa-solid fa-circle-info"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Retailers/@r.ID/Edit">
+                                <a href="/Retailers/@r.Id/Edit">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Retailers/@r.ID/Delete">
+                                <a href="/Retailers/@r.Id/Delete">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </td>

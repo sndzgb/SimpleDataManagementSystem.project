@@ -4,13 +4,12 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
 {
-    public class RetailersModel : BasePageModel<RetailersViewModel>
+    public class RetailersModel : BasePageModel<GetMultipleRetailersResponseViewModel>
     {
         private readonly IRetailersService _retailersService;
         private readonly IAuthorizationService _authorizationService;
@@ -43,9 +42,9 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
         }
 
 
-        public async Task<IActionResult> OnGet([FromQuery] int take = 8, [FromQuery] int page = 1)
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken, [FromQuery] int take = 8, [FromQuery] int page = 1)
         {
-            Model = await _retailersService.GetAllRetailersAsync(take, page);
+            Model = await _retailersService.GetMultipleRetailersAsync(cancellationToken, take, page);
 
             return Page();
         }

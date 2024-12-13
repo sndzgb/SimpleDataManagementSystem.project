@@ -3,8 +3,6 @@
 @model EditRetailerModel
 
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
-@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write
-@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read
 
 @{
     ViewData["Title"] = "Edit retailer - '" + (Model?.Retailer?.Name ?? "-") + "'";
@@ -70,13 +68,13 @@
                                         <img height="300"
                                              width="300"
                                              id="thumbnailPreview"
-                                             src="@(Model.Retailer.LogoImageUri == null ?
+                                             src="@(Model.Retailer.LogoImageUrl == null ?
                                                         "/Resources/image_not_available.png"
                                                         :
-                                                        Model.Retailer.LogoImageUri)" />
+                                                        Model.Retailer.LogoImageUrl)" />
                                     </div>
 
-                                    <div class="thumbnail-preview-delete-control @(Model.Retailer.LogoImageUri ?? " element-invisible-no-space ")"
+                                    <div class="thumbnail-preview-delete-control @(Model.Retailer.LogoImageUrl ?? " element-invisible-no-space ")"
                                          style="position:absolute; top:5px; right: 5px;">
                                         <button type="button" style="border:none;
                                                 cursor:default;
@@ -85,8 +83,8 @@
                                                 border: none;
                                                 overflow: hidden;
                                                 outline: none;">
-                                            <i @(Model.Retailer.LogoImageUri != null ?
-                                                $"onclick=deleteImage('{Model.Retailer.ID}')"
+                                            <i @(Model.Retailer.LogoImageUrl != null ?
+                                                $"onclick=deleteImage('{Model.Retailer.Id}')"
                                                 :
                                                 $"onclick=removePreview(event)")
                                                style="cursor: pointer;"
@@ -97,12 +95,16 @@
                                 </div>
 
                                 @* style="visibility: @(Model.Item.URLdoslikeUri != null ? "hidden" : "")" *@
-                                <div class="thumbnail-upload-control @(Model.Retailer.LogoImageUri != null ? " element-invisible-no-space " : "")">
+                                <div class="thumbnail-upload-control @(Model.Retailer.LogoImageUrl != null ? " element-invisible-no-space " : "")">
                                     <div>
                                         <label id="thumbnailAddOrUpdate">Add new thumbnail:</label>
                                     </div>
                                     <div>
                                         <input id="thumbnailUpload" type="file" name="logoImage" onchange="loadThumbnailPreview(event)" />
+                                        @if (Model.Model.LogoImage != null)
+                                        {
+                                            <input name="deleteCurrentLogoImage" hidden value="false" />
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -131,25 +133,10 @@
 
     <script>
         function deleteImage(retailerId) {
-            var token = $('input[name="__RequestVerificationToken"]').val();
+            var el = document.getElementsByName('deleteCurrentLogoImage')[0];
+            el.value = true;
 
-            $.ajax({
-                type: "POST",
-                url: "/Retailers/" + retailerId + "/Edit/?handler=DeleteImage",
-                data: {
-                    __RequestVerificationToken: token,
-                },
-                success: function (r) {
-                    removePreview(null);
-                    location.reload();
-                },
-                error: function (xhr, status, error) {
-                    // TODO display error
-                    console.log(xhr.responseText);
-                    console.log(status);
-                    console.log(error);
-                }
-            });
+            removePreview(null);
         }
     </script>
 

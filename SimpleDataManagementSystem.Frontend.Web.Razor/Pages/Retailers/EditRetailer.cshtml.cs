@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Exceptions;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Read;
-using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Write;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
+using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Net;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -29,7 +29,7 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
         [FromRoute]
         public int RetailerId { get; set; }
 
-        public RetailerViewModel Retailer { get; set; }
+        public GetSingleRetailerResponseViewModel Retailer { get; set; }
 
 
         public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
@@ -52,26 +52,18 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers
         }
 
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
         {
-            Retailer = await _retailersService.GetRetailerByIdAsync(RetailerId);
+            Retailer = await _retailersService.GetSingleRetailerAsync(RetailerId, cancellationToken);
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPost()
+        public async Task<IActionResult> OnPost(CancellationToken cancellationToken)
         {
-            await _retailersService.UpdateRetailerAsync(RetailerId, Model);
+            await _retailersService.UpdateRetailerAsync(RetailerId, Model, cancellationToken);
 
             return RedirectToPage("/Retailers/Retailers");
-        }
-
-        public async Task<IActionResult> OnPostDeleteImage([FromRoute] int retailerId)
-        {
-            // TODO use RetailerId property
-            await _retailersService.UpdateRetailerPartialAsync(retailerId);
-
-            return new JsonResult(null) { StatusCode = (int)HttpStatusCode.OK };
         }
     }
 }
