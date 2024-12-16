@@ -51,7 +51,6 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
             //builder.Logging.ClearProviders();
 
             var configuration = new ConfigurationBuilder()
-                //.SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
                 .AddJsonFile("appsettings.User.json", optional: true, reloadOnChange: true)
@@ -71,6 +70,8 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
 
             builder.Services.AddOptions<CorsOptions>().BindConfiguration(nameof(CorsOptions));
+            
+            builder.Services.AddSerilog();
 
             builder.Services.AddCors(options =>
             {
@@ -154,14 +155,15 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
 
             builder.Services.AddControllers(options =>
             {
-                options.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor((x, y) => 
+                options.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor((x, y) =>
                     $"The value '{x}' is not valid for {y.SplitCamelCase()}."
                 );
-                options.ModelBindingMessageProvider.SetNonPropertyAttemptedValueIsInvalidAccessor(x => 
+                options.ModelBindingMessageProvider.SetNonPropertyAttemptedValueIsInvalidAccessor(x =>
                     $"The value for '{x.SplitCamelCase()}' is not valid."
                 );
 
-                options.Filters.Add(new ValidateModelActionFilter());
+                options.Filters.Add(new ValidateModelActionFilter() { Order = 2 });
+                options.Filters.Add(new LoggingActionFilter() { Order = 1 });
             }).AddJsonOptions(x =>
             {
                 x.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
@@ -236,10 +238,10 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
             // Configure the HTTP request pipeline.
             var app = builder.Build();
 
-            InitiateSqliteDb(builder.Configuration);
+            app.UseInitializeSqliteDb(builder.Configuration);
 
             app.UseCors(myCorsPolicy);
-
+            
             app.UseMiddleware<ExceptionHandlingMiddleware>();
             app.UseMiddleware<AccessTokenMiddleware>();
             app.UseMiddleware<TokenSlidingExpirationMiddleware>();
@@ -259,36 +261,6 @@ namespace SimpleDataManagementSystem.Backend.WebAPI
             app.UseSeedSqlServer();
 
             app.Run();
-        }
-
-
-        // Add table: Notifications content: Body (JSON), Receiver, IsRead, IsSent, /DateTime/, Sender, 
-        private static void InitiateSqliteDb(ConfigurationManager configuration)
-        {
-            // TODO clear table on startup; delete all items from table(s) -- WHERE 1 = 1
-            const string CONNECTIONS_TABLE_NAME = "connections";
-            var sqliteOptions = configuration.GetSection(nameof(SqliteOptions)).Get<SqliteOptions>();
-
-            ArgumentNullException.ThrowIfNull(sqliteOptions, nameof(sqliteOptions));
-
-            using (SqliteConnection con = new SqliteConnection(sqliteOptions.GetConnectionString()))
-            using (SqliteCommand command = con.CreateCommand())
-            {
-                con.Open();
-
-                command.CommandText = $@"
-CREATE TABLE IF NOT EXISTS {CONNECTIONS_TABLE_NAME}
-(
-    userId INTEGER NOT NULL,
-    connectionId TEXT NOT NULL,
-    hubId INTEGER NOT NULL,
-    PRIMARY KEY (userId, connectionId, hubId)
-) 
-WITHOUT ROWID
-";
-
-                command.ExecuteScalar();
-            }
         }
     }
 }

@@ -7,11 +7,15 @@ using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Filters
 {
-    public class ValidateModelActionFilter : IActionFilter
+    public class ValidateModelActionFilter : IActionFilter, IOrderedFilter
     {
+        public int Order { get; set; }
+
+
         public void OnActionExecuted(ActionExecutedContext context)
         {
         }
+
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
