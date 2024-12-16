@@ -18,8 +18,13 @@ using System.Text.Json.Serialization;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Base
 {
-    public class BasePageModel<T> : PageModel
+    public abstract class BasePageModel<T> : PageModel
     {
+        protected int GetUserId()
+        {
+            return Convert.ToInt32(HttpContext.User.Identity?.Name);
+        }
+
         public ErrorViewModel? Error { get; set; }
 
         private T? _model;
