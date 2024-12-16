@@ -3,55 +3,6 @@
 
 // Write your JavaScript code.
 
-const snackbarType = {
-    INFO: 0,
-    WARNING: 1,
-    DANGER: 2
-}
-
-function showSnackbar(message, snackbarType) {
-    
-    var x = document.getElementById("snackbar");
-
-    switch (snackbarType) {
-        case 0:
-            console.log("info");
-            x.classList.add("info");
-            break;
-        case 1:
-            console.log("warning");
-            x.classList.add("warning");
-            break;
-        case 2:
-            console.log("danger");
-            x.classList.add("danger");
-            break;
-        default:
-            //x.classList.add("info");
-            break;
-    }
-    
-    x.innerHTML = message;
-    x.classList.add("show");
-
-    // Add the "show" class to DIV
-    //x.className = "show";
-
-    // After 3 seconds, remove the show class from DIV
-    setTimeout(function () {
-        x.className = x.className.replace("show", "");
-        x.className = x.className.replace("info", "");
-        x.className = x.className.replace("warning", "");
-        x.className = x.className.replace("danger", "");
-        x.innerHTML = "";
-
-        // Replace with default placeholder
-        var element = document.createElement("em");
-        element.appendChild(document.createTextNode('Placeholder Test'));
-        document.getElementById('snackbar').appendChild(element);
-    }, 3 * 1000);
-}
-
 //function onHambToggle(event) {
 //    document.getElementById('navBarLinks').classList.toggle('collapsed');
 //}
