@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Logging;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Constants;
@@ -7,9 +8,11 @@ using SimpleDataManagementSystem.Frontend.Web.Razor.Events;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Middlewares;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Options;
 using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
+using SimpleDataManagementSystem.Frontend.Web.Razor.SharedResources;
 using SimpleDataManagementSystem.Shared.Extensions;
 using SimpleDataManagementSystem.Shared.Options;
 using System.Globalization;
+using System.Reflection;
 using System.Security.Claims;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor
@@ -63,7 +66,15 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor
 
             // Add services to the container.
             builder.Services.AddRazorPages()
-                .AddViewLocalization();
+                .AddViewLocalization()
+                .AddDataAnnotationsLocalization(options =>
+                {
+                    var type = typeof(SharedResource);
+                    var assemblyName = new AssemblyName(type.GetTypeInfo().Assembly.FullName);
+                    var factory = builder.Services.BuildServiceProvider().GetService<IStringLocalizerFactory>();
+                    var localizer = factory.Create(nameof(SharedResource), assemblyName.Name);
+                    options.DataAnnotationLocalizerProvider = (t, f) => localizer;
+                });
 
             builder.Services.AddMvc((options) =>
             {
