@@ -1,14 +1,11 @@
 ﻿"use strict";
 
 const connection = new signalR.HubConnectionBuilder()
-    .configureLogging(signalR.LogLevel.Trace) // None to disable
+    .configureLogging(signalR.LogLevel.None)
     .withUrl("https://localhost:7006/hubs/itemUpdatedNotifier", {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
         accessTokenFactory: async () => {
-            //return new Promise((resolve) => {
-            //    $.get('/Account/AccessToken?handler=Token').done((token) => resolve(token));
-            //});
             return await getAccessToken();
         }
     })
