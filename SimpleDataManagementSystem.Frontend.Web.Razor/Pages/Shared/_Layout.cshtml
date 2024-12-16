@@ -25,26 +25,8 @@
 
     <div class="container">
 
-        @* TODO component *@
-        <div class="ns" id="notes">
-            <div id="no-notifications-messsage">
-                <label>No new notifications.</label>
-            </div>
-
-            <div class="content-cont">
-                <div class="togg" id="notes-toggler" onclick="onToggleNotificationsSidebarClicked(this);">
-                    <div class="notes-t coll ex">
-                        <label class="n-notifier">Notifications</label>
-                    </div>
-                    <div class="notes-t expa">
-                        <i class="notifications-sidebar fa-solid fa-chevron-right xl"></i>
-                    </div>
-                </div>
-                <div class="notes-cont">
-                </div>
-            </div>
-        </div>
-
+        @await Component.InvokeAsync(typeof(NotificationsSidebarViewComponent), null)
+        
         <main role="main" class="pb-3">
             
             @* hubs notifications *@
@@ -52,15 +34,9 @@
         </main>
     </div>
 
+    @await Component.InvokeAsync(typeof(SnackbarViewComponent), null)
+    
     @* TODO component *@
-    @* #region - snackbar *@
-    <div id="snackbar">
-        <em>
-            Placeholder
-        </em>
-    </div>
-    @* #endregion - snackbar *@
-
     <footer style="margin-top: auto;" class="border-top">
         <div class="container">
             <div class="row" style="padding:20px;">
