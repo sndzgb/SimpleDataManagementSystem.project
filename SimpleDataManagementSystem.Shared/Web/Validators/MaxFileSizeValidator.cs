@@ -14,11 +14,13 @@ namespace SimpleDataManagementSystem.Shared.Web.Validators
     public class MaxFileSizeValidator : ValidationAttribute
     {
         private readonly int _maxFileSizeBytes;
+        private readonly decimal _maxFileSizeMegaBytes;
 
 
         public MaxFileSizeValidator(int maxFileSizeBytes)
         {
             _maxFileSizeBytes = maxFileSizeBytes;
+            _maxFileSizeMegaBytes = _maxFileSizeBytes / (1024 * 1024);
         }
 
 
@@ -39,7 +41,7 @@ namespace SimpleDataManagementSystem.Shared.Web.Validators
 
         public string GetErrorMessage()
         {
-            return $"Maximum allowed file size is {_maxFileSizeBytes} bytes.";
+            return $"Maximum allowed file size is {_maxFileSizeBytes} bytes ({_maxFileSizeMegaBytes} MB).";
         }
     }
 }
