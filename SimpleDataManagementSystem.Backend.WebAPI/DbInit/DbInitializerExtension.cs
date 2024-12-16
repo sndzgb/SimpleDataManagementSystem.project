@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using Serilog;
 using SimpleDataManagementSystem.Backend.Database;
 using SimpleDataManagementSystem.Backend.Logic.Options;
 using SimpleDataManagementSystem.Backend.Logic.Services.Abstractions;
@@ -17,7 +18,6 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
             try
             {
                 var logger = services.GetRequiredService<ILogger<DbInitializer>>();
-
                 var context = services.GetRequiredService<SimpleDataManagementSystemDbContext>();
                 var emailService = services.GetRequiredService<IEmailService>();
 
@@ -28,7 +28,8 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.DbInit
             }
             catch (Exception ex)
             {
-                // check why init failed; only required on startup/ init
+                Log.Logger.Error(exception: ex, string.Empty);
+                throw;
             }
 
             return app;
