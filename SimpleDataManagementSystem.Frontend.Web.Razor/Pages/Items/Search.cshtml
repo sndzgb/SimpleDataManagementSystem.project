@@ -6,13 +6,16 @@
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.SearchModel
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SearchModel> loc
+
 @{
-    ViewData["Title"] = "Items search";
+    ViewData["Title"] = loc["Items search"];
 }
 
 <div class="header">
     <h1>
-        Search items - '<b>@(Model?.Query ?? "-")</b>'
+        @loc["Search items"] - '<b>@(Model?.Query ?? "-")</b>'
     </h1>
 </div>
 
@@ -29,7 +32,7 @@
         <div class="search-spacer">
         </div>
         <div class="search-title">
-            <label>Search options:</label>
+            <label>@loc["Search options"]:</label>
         </div>
         <div class="search-toggler">
             <button type="button" class="search-toggler-button">
@@ -43,11 +46,11 @@
             <div class="search-input-controls">
                 <div class="search-query">
                     <div>
-                        <label for="query">Search query:</label>
+                        <label for="query">@loc["Search query"]:</label>
                     </div>
                     <div>
                         <input 
-                            title="Search query" 
+                            title="@loc["Search query"]" 
                             name="query" 
                             id="query" 
                             value="@Model?.Query"
@@ -56,14 +59,14 @@
                 </div>
                 <div class="search-sort">
                     <div>
-                        <label for="sortBy">Sort by:</label>
+                        <label for="sortBy">@loc["Sort by"]:</label>
                     </div>
                     <div>
                         <select id="sortBy" name="sortBy">
                             @foreach (SortableItem si in Enum.GetValues(typeof(SortableItem)))
                             {
                                 <option value="@((int)si)" selected="@((Model?.SortBy ?? Model?.SortBy) == (int)si)">
-                                    @si.GetDescription()
+                                    @loc[si.GetDescription()]
                                 </option>
                             }
                         </select>
@@ -71,7 +74,7 @@
                 </div>
                 <div class="search-take">
                     <div>
-                        <label for="take">Take:</label>
+                        <label for="take">@loc["Take"]:</label>
                     </div>
                     <div>
                         <input style="text-align: center; width:4ch;" name="take" id="take" value="@(Model?.ItemsPerPage ?? Model?.ItemsPerPage)" />
@@ -79,7 +82,7 @@
                 </div>
                 <div class="search-page">
                     <div>
-                        <label for="page">Page:</label>
+                        <label for="page">@loc["Page"]:</label>
                     </div>
                     <div>
                         <input style="text-align: center; width:4ch;" name="page" id="page" value="@(Model?.PageNumber ?? Model?.PageNumber)" />
@@ -89,11 +92,11 @@
             <div class="search-form-submit-control">
                 <div>
                     <button type="submit" class="button-default">
-                        Search
+                        @loc["Search"]
                     </button>
                 </div>
                 <div>
-                    <button onclick="onClearFormFieldsClick(this)" type="button" class="button-danger">Clear</button>
+                    <button onclick="onClearFormFieldsClick(this)" type="button" class="button-danger">@loc["Clear"]</button>
                 </div>
             </div>
         </form>
@@ -105,7 +108,7 @@
 <div class="search-statistics" style="display:flex; justify-content:space-between;">
     <div class="search-total">
         <div>
-            <label>Total found:<span>&nbsp;</span></label>
+            <label>@loc["Total found"]:<span>&nbsp;</span></label>
         </div>
         <div>
             <b>
@@ -115,7 +118,7 @@
     </div>
     <div class="search-query-text">
         <div>
-            <label>Search query:<span>&nbsp;</span></label>
+            <label>@loc["Search query"]:<span>&nbsp;</span></label>
         </div>
         <div>
             <label>
@@ -133,9 +136,9 @@
     <table style="table-layout: fixed; width: 100%;">
         <thead>
             <tr>
-                <th>Naziv proizvoda</th>
-                <th>Cijena</th>
-                <th>Thumbnail</th>
+                <th>@loc["Naziv proizvoda"]</th>
+                <th>@loc["Cijena"]</th>
+                <th>@loc["Thumbnail"]</th>
             </tr>
         </thead>
         <tbody>
@@ -162,7 +165,7 @@
     @if (Model?.Model?.Items.Count == 0)
     {
         <div class="no-data">
-            No data to show.
+            @loc["No data to show."]
         </div>
     }
 </div>

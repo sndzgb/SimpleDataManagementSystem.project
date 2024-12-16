@@ -9,7 +9,7 @@ using SimpleDataManagementSystem.Shared.Common.Constants;
 using SimpleDataManagementSystem.Shared.Common.Policies;
 using System.Net;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Users
 {
     [ValidateAntiForgeryToken]
     public class DeleteUserModel : BasePageModel<GetSingleUserResponseViewModel>

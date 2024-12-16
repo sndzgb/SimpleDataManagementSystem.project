@@ -1,15 +1,17 @@
 ﻿@page "/Items/{ItemId}/Edit"
 
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
-
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.EditItemModel
+
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<EditItemModel> loc
 
 @{
     ViewData["Title"] = "Edit item - '" + (Model?.Item?.Item.Nazivproizvoda ?? "-") + "'";
 }
 
 <div class="header">
-    <h1>Edit item - '<b>@Model?.Item?.Item.Nazivproizvoda</b>'</h1>
+    <h1>@loc["Edit item"] - '<b>@Model?.Item?.Item.Nazivproizvoda</b>'</h1>
 </div>
 
 
@@ -37,7 +39,7 @@
                     <div class="port-side">
                         <div class="input-control single-per-line">
                             <div>
-                                <label for="opis">Opis:</label>
+                                <label for="opis">@loc["Opis"]:</label>
                             </div>
                             <div>
                                 <textarea name="opis"
@@ -51,7 +53,7 @@
 
                         <div class="input-control single-per-line">
                             <div>
-                                <label for="datumakcije">Datum akcije:</label>
+                                <label for="datumakcije">@loc["Datum akcije"]:</label>
                             </div>
                             <div>
                                 <input name="datumakcije" type="text" id="datumakcije" value="@Model.Item.Item.Datumakcije" />
@@ -62,7 +64,7 @@
 
                         <div class="input-control single-per-line">
                             <div>
-                                <label for="isMonitoredByUser">Monitoring:</label>
+                                <label for="isMonitoredByUser">@loc["Monitoring"]:</label>
                             </div>
                             <div>
                                 @if (Model.Item.Monitoring.IsMonitoredByUser)
@@ -99,7 +101,7 @@
 
                         <div class="input-control single-per-line">
                             <div class="required">
-                                <label for="cijena">Cijena:</label>
+                                <label for="cijena">@loc["Cijena"]:</label>
                             </div>
                             <div>
                                 <input 
@@ -113,7 +115,7 @@
 
                         <div class="input-control single-per-line">
                             <div>
-                                <label for="isEnabled">Enabled:</label>
+                                <label for="isEnabled">@loc["Enabled"]:</label>
                             </div>
                             <div>
                                 @if (Model.Item.Item.IsEnabled)
@@ -152,7 +154,7 @@
 
                         <div class="input-control single-per-line">
                             <div class="required">
-                                <label for="retailer">Retailer:</label>
+                                <label for="retailer">@loc["Retailer"]:</label>
                             </div>
                             <div>
                                 <select id="retailer" name="retailerId">
@@ -168,7 +170,7 @@
 
                         <div class="input-control single-per-line">
                             <div class="required">
-                                <label for="kategorija">Category:</label>
+                                <label for="kategorija">@loc["Category"]:</label>
                             </div>
                             <div>
                                 <select id="kategorija" name="kategorija">
@@ -184,7 +186,7 @@
                     <div class="starboard-side">
                         <div class="image-control">
                             <div>
-                                <label>Thumbnail:</label>
+                                <label>@loc["Thumbnail"]:</label>
                             </div>
                             <div id="thumbnail">
                                 <div style="position: relative">
@@ -222,7 +224,7 @@
 
                                 <div class="thumbnail-upload-control @(Model.Item.Item.URLdoslike != null ? " element-invisible-no-space " : "")">
                                     <div>
-                                        <label id="thumbnailAddOrUpdate">Add new thumbnail:</label>
+                                        <label id="thumbnailAddOrUpdate">@loc["Add new thumbnail"]:</label>
                                     </div>
                                     <div>
                                         <input id="thumbnailUpload" type="file" name="URLdoslike" onchange="loadThumbnailPreview(event)" />
@@ -245,7 +247,7 @@
 
                 <div class="flex-justify-center">
                     <button class="button-default" type="submit">
-                        Edit
+                        @loc["Update"]
                     </button>
                 </div>
             </div>

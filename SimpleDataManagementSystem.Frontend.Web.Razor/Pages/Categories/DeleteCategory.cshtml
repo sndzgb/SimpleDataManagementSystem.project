@@ -3,12 +3,15 @@
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories.DeleteCategoryModel
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<DeleteCategoryModel> loc
+
 @{
-    ViewData["Title"] = "Delete category - '" + (Model?.Model?.Name ?? "-") + "'";
+    ViewData["Title"] = loc["Delete category"] + " - '" + (Model?.Model?.Name ?? "-") + "'";
 }
 
 <div class="header">
-    <h1>Delete category - '<b>@Model?.Model?.Name</b>'</h1>
+    <h1>@loc["Delete category"] - '<b>@Model?.Model?.Name</b>'</h1>
 </div>
 
 
@@ -31,7 +34,7 @@
 
                     <div class="readonly-control single-per-line">
                         <div>
-                            <label>Category ID:</label>
+                            <label>@loc["Category ID"]:</label>
                         </div>
                         <div>
                             <em>
@@ -44,7 +47,7 @@
 
                     <div class="readonly-control single-per-line">
                         <div>
-                            <label>Category name:</label>
+                            <label>@loc["Category name"]:</label>
                         </div>
                         <div>
                             <em>
@@ -55,7 +58,7 @@
 
                     <div class="readonly-control single-per-line">
                         <div>
-                            <label>Priority:</label>
+                            <label>@loc["Priority"]:</label>
                         </div>
                         <div>
                             <em>
@@ -71,7 +74,7 @@
                 <div class="flex-justify-center">
                     <div>
                         <button class="button-danger" type="submit">
-                            Delete
+                            @loc["Delete"]
                         </button>
                     </div>
                 </div>

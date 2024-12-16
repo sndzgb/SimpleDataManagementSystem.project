@@ -5,12 +5,15 @@
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers.CreateRetailerModel
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<CreateRetailerModel> loc
+
 @{
-    ViewData["Title"] = "Create new retailer";
+    ViewData["Title"] = loc["Create new retailer"];
 }
 
 <div class="header">
-    <h1>Create new retailer</h1>
+    <h1>@loc["Create new retailer"]</h1>
 </div>
 
     
@@ -35,7 +38,7 @@
                 <div class="port-side">
                     <div class="input-control">
                         <div class="required">
-                            <label>Name:</label>
+                            <label>@loc["Name"]:</label>
                         </div>
                         <div>
                             <input type="text" name="name" value="@Model?.Model?.Name" />
@@ -46,7 +49,7 @@
 
                     <div class="input-control">
                         <div class="required">
-                            <label>Priority:</label>
+                            <label>@loc["Priority"]:</label>
                         </div>
                         <div>
                             <input type="number" name="priority" value="@Model?.Model?.Priority" />
@@ -57,7 +60,7 @@
                 <div class="starboard-side">
                     <div class="image-control">
                         <div>
-                            <label>Thumbnail:</label>
+                            <label>@loc["Thumbnail"]:</label>
                         </div>
                         <div id="thumbnail">
                             <div style="position: relative">
@@ -85,7 +88,7 @@
 
                             <div class="thumbnail-upload-control">
                                 <div>
-                                    <label id="thumbnailAddOrUpdate">Add new thumbnail:</label>
+                                    <label id="thumbnailAddOrUpdate">@loc["Add new thumbnail"]:</label>
                                 </div>
                                 <div>
                                     <input id="thumbnailUpload" value="@Model?.Model?.LogoImage" type="file" name="logoImage" onchange="loadThumbnailPreview(event)" />
@@ -104,7 +107,7 @@
 
             <div class="flex-justify-center">
                 <button class="button-default" type="submit">
-                    Create
+                    @loc["Create"]
                 </button>
             </div>
         </div>

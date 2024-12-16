@@ -5,12 +5,15 @@
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories.CategoriesModel
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<CategoriesModel> loc
+
 @{
-    ViewData["Title"] = "Categories";
+    ViewData["Title"] = loc["Categories"];
 }
 
 <div class="header">
-    <h1>Categories</h1>
+    <h1>@loc["Categories"]</h1>
 </div>
 
 
@@ -33,7 +36,7 @@
             )
         )
         {
-            <a href="/Categories/Create"><button class="button-default" type="button">Create</button></a>
+            <a href="/Categories/Create"><button class="button-default" type="button">@loc["Create"]</button></a>
         }
     </div>
 
@@ -59,7 +62,7 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Name</th>
+                <th>@loc["Name"]</th>
                 @if (
                     PermissionsHelper.IsInRole
                     (
@@ -74,7 +77,7 @@
                     )
                 )
                 {
-                    <th>Management</th>
+                    <th>@loc["Management"]</th>
                 }
             </tr>
         </thead>
@@ -101,17 +104,17 @@
                         )
                         {
                             <td class="options">
-                                <a href="/Categories/@c.Id/Details">
+                                <a href="/Categories/@c.Id/Details" title="@loc["Details"]">
                                     <i class="fa-solid fa-circle-info"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Categories/@c.Id/Edit">
+                                <a href="/Categories/@c.Id/Edit" title="@loc["Edit"]">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Categories/@c.Id/Delete">
+                                <a href="/Categories/@c.Id/Delete" title="@loc["Delete"]">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </td>
@@ -125,7 +128,7 @@
     @if (Model?.Model?.Categories?.Count == 0)
     {
         <div class="no-data">
-            No data to show.
+            @loc["No data to show."]
         </div>
     }
 </div>

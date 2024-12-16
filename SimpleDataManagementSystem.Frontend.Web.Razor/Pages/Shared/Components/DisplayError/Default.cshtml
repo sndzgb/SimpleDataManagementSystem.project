@@ -1,9 +1,13 @@
-﻿@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels
+﻿@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
+@using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels
+
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<DisplayErrorViewComponent> loc
 
 @model ErrorViewModel
 
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = loc["Error"];
 }
 
 @if (Model != null)
@@ -11,7 +15,7 @@
     <div style="display:flex; flex-flow: wrap; text-align:center; justify-content:center; color:red;">
         <div>
             <i>
-                @Model.Message
+                @loc[Model.Message]
             </i>
         </div>
 
@@ -22,12 +26,10 @@
                 {
                     <div>
                         <span>&#8226;</span>
-                        <label>@e</label>
+                        <label>@loc[e]</label>
                     </div>
                 }
             </div>
         }
     </div>
-
-    <br />
 }

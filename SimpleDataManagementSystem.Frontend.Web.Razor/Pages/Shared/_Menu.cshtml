@@ -6,6 +6,9 @@
 @inject IHttpContextAccessor context
 @inject Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions> localizationOptions;
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<_MenuModel> loc
+
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Shared._MenuModel
 
 @{
@@ -37,7 +40,7 @@
 	@if (User.Identity.IsAuthenticated)
 	{
 		<div class="link toggleable collapsed not-collapsed">
-			<a href="/Categories" class="@Html.ActiveClass("/Categories")">Categories</a>
+			<a href="/Categories" class="@Html.ActiveClass("/Categories")">@loc["Categories"]</a>
 		</div>
 
 		@if (
@@ -49,12 +52,12 @@
 		)
 		{
 			<div class="link toggleable collapsed not-collapsed">
-				<a href="/Users" class="@Html.ActiveClass("/Users")">Users</a>
+				<a href="/Users" class="@Html.ActiveClass("/Users")">@loc["Users"]</a>
 			</div>
 		}
 
 		<div class="link toggleable collapsed not-collapsed">
-			<a href="/Retailers" class="@Html.ActiveClass("/Retailers")">Retailers</a>
+			<a href="/Retailers" class="@Html.ActiveClass("/Retailers")">@loc["Retailers"]</a>
 		</div>
 
 		@if (
@@ -73,7 +76,7 @@
 		{
 			<div class="link toggleable collapsed not-collapsed dropdown-container">
 				<div>
-					<a href="/Items" class="@Html.ActiveClass("/Items")">Items</a><!--
+					<a href="/Items" class="@Html.ActiveClass("/Items")">@loc["Items"]</a><!--
 					--><button class="dropdown" onclick="onExpandClicked(this)">
 						<span class="dropdown-caret">
 							<i class="fa-solid fa-caret-up"></i>
@@ -89,12 +92,14 @@
 							)
 						)
 					{
-						<a href="/Items/Monitored" class="dropdown-item @Html.ActiveClass("/Items/Monitored")">Items Being Monitored</a>
+						<a href="/Items/Monitored" class="dropdown-item @Html.ActiveClass("/Items/Monitored")">@loc["Items Being Monitored"]</a>
 						<div class="divider-hd-visible">
 							<hr class="visual-divider" />
 						</div>
 					}
-					<a href="/Items/My-Monitored-Items" class="dropdown-item @Html.ActiveClass("/Items/My-Monitored-Items")">My Monitored Items</a>
+					<a href="/Items/My-Monitored-Items" class="dropdown-item @Html.ActiveClass("/Items/My-Monitored-Items")">
+						@loc["My Monitored Items"]
+					</a>
 					<!-- small screen divider START -->
 					<div class="divider"> 
 						<hr class="visual-divider" />
@@ -106,20 +111,20 @@
 
 		<div class="link toggleable collapsed not-collapsed">
 			<div>
-				<a href="/Account/Details" class="@Html.ActiveClass("/Account")">Account</a>
+				<a href="/Account/Details" class="@Html.ActiveClass("/Account")">@loc["Account"]</a>
 			</div>
 		</div>
 
 		<div class="link logout toggleable collapsed not-collapsed">
 			<form method="post" name="form-logout" asp-page="/Account/Logout" asp-area="">
-				<a onclick="onLogoutClicked(event)" href="/Account/Logout">Logout</a>
+				<a onclick="onLogoutClicked(event)" href="/Account/Logout">@loc["Logout"]</a>
 			</form>
 		</div>
 	} 
 	else 
 	{
 		<div class="link logout toggleable collapsed not-collapsed">
-			<a href="/Account/Login" class="@Html.ActiveClass("/Account/Login")">Login</a>
+			<a href="/Account/Login" class="@Html.ActiveClass("/Account/Login")">@loc["Login"]</a>
 		</div>
 	}
 

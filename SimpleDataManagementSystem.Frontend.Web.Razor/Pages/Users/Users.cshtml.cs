@@ -8,7 +8,7 @@ using SimpleDataManagementSystem.Frontend.Web.Razor.Services;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Users
 {
     public class UsersModel : BasePageModel<GetMultipleUsersResponseViewModel>
     {

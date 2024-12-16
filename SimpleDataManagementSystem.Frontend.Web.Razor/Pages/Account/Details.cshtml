@@ -1,11 +1,15 @@
 ﻿@page "/Account/Details"
+
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Account.DetailsModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<DetailsModel> loc
+
 @{
-    ViewData["Title"] = "Account details";
+    ViewData["Title"] = loc["Account details"];
 }
 
 <div class="header">
-    <h1>Account details - <b>'@Model?.Model?.Username'</b></h1>
+    <h1>@loc["Account details"] - <b>'@Model?.Model?.Username'</b></h1>
 </div>
 
 
@@ -19,7 +23,7 @@
 
             <div class="readonly-control single-per-line">
                 <div>
-                    <label>Change password:</label>
+                    <label>@loc["Change password"]:</label>
                 </div>
             </div>
 
@@ -27,7 +31,7 @@
                 <div>
                     <a href="/account/password-change">
                         <button class="button-default">
-                            Change
+                            @loc["Change"]
                         </button>
                     </a>
                 </div>

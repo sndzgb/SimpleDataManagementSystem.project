@@ -10,7 +10,7 @@ using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request;
 using SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 
-namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages
+namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Users
 {
     public class EditUserModel : BasePageModel<UpdateUserViewModel>
     {

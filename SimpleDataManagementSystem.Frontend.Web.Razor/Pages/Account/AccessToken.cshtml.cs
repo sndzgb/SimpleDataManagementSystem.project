@@ -12,7 +12,6 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Account
     {
         public async Task<IActionResult> OnGetToken()
         {
-            //await HttpContext.GetTokenAsync("access_token")
             var accessToken = HttpContext.User?.Claims?.Where(x => x.Type == ExtendedClaims.Type.Jwt).FirstOrDefault()?.Value;
             
             return new JsonResult(accessToken)

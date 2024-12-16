@@ -3,12 +3,15 @@
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories.EditCategoryModel
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<EditCategoryModel> loc
+
 @{
-    ViewData["Title"] = "Edit category - '" + (Model?.Category?.Name ?? "-") + "'";
+    ViewData["Title"] = loc["Edit category"] + " - '" + (Model?.Category?.Name ?? "-") + "'";
 }
 
 <div class="header">
-    <h1>Edit category - '<b>@Model?.Category?.Name</b>'</h1>
+    <h1>@loc["Edit category"] - '<b>@Model?.Category?.Name</b>'</h1>
 </div>
 
 
@@ -35,7 +38,7 @@
 
                     <div class="input-control single-per-line">
                         <div class="required">
-                            <label>Name:</label>
+                            <label>@loc["Name"]:</label>
                         </div>
                         <div>
                             <input type="text" name="name" value="@Model.Category.Name" />
@@ -46,7 +49,7 @@
 
                     <div class="input-control">
                         <div class="required">
-                            <label>Priority:</label>
+                            <label>@loc["Priority"]:</label>
                         </div>
                         <div>
                             <input type="number" name="priority" value="@Model.Category.Priority" />
@@ -59,7 +62,7 @@
 
                 <div>
                     <button class="button-default" type="submit">
-                        Edit
+                        @loc["Edit"]
                     </button>
                 </div>
 

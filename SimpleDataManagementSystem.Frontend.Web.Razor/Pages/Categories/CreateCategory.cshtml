@@ -5,12 +5,15 @@
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Categories.CreateCategoryModel
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<CreateCategoryModel> loc
+
 @{
-    ViewData["Title"] = "Create new category";
+    ViewData["Title"] = loc["Create new category"];
 }
 
 <div class="header">
-    <h1>Create new category</h1>
+    <h1>@loc["Create new category"]</h1>
 </div>
 
 
@@ -35,7 +38,7 @@
 
                 <div class="input-control single-per-line">
                     <div class="required">
-                        <label>Name</label>
+                        <label>@loc["Name"]</label>
                     </div>
                     <div>
                         <input name="name" type="text" value="@Model?.Model?.Name" />
@@ -46,7 +49,7 @@
 
                 <div class="input-control single-per-line">
                     <div class="required">
-                        <label>Priority</label>
+                        <label>@loc["Priority"]</label>
                     </div>
                     <div>
                         <input name="priority" type="number" value="@Model?.Model?.Priority" />
@@ -59,7 +62,7 @@
 
             <div class="flex-justify-center">
                 <button class="button-default" type="submit">
-                    Create
+                    @loc["Create"]
                 </button>
             </div>
 

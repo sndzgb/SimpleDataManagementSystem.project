@@ -24,8 +24,6 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Account
 
         public override async void OnPageHandlerExecuting(PageHandlerExecutingContext context)
         {
-            // TODO
-
             base.OnPageHandlerExecuting(context);
         }
 

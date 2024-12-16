@@ -3,12 +3,15 @@
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Retailers.DeleteRetailerModel
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<DeleteRetailerModel> loc
+
 @{
-    ViewData["Title"] = "Delete retailer - '" + (Model?.Model?.Name ?? "-") + "'";
+    ViewData["Title"] = loc["Delete retailer"] + " - '" + (Model?.Model?.Name ?? "-") + "'";
 }
 
 <div class="header">
-    <h1>Delete retailer - '<b>@Model?.Model?.Name</b>'</h1>
+    <h1>@loc["Delete retailer"] - '<b>@Model?.Model?.Name</b>'</h1>
 </div>
 
 
@@ -32,7 +35,7 @@
                     <div class="port-side">
                         <div class="readonly-control">
                             <div>
-                                <label>Name:</label>
+                                <label>@loc["Name"]:</label>
                             </div>
                             <div>
                                 <em>
@@ -45,7 +48,7 @@
 
                         <div class="readonly-control">
                             <div>
-                                <label>Priority:</label>
+                                <label>@loc["Priority"]:</label>
                             </div>
                             <div>
                                 <em>
@@ -73,7 +76,7 @@
 
                 <div class="flex-justify-center">
                     <button class="button-danger" type="submit">
-                        Delete
+                        @loc["Delete"]
                     </button>
                 </div>
             </div>

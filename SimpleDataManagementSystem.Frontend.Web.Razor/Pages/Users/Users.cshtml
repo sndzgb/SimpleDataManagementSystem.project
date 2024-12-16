@@ -7,13 +7,16 @@
 @using System.Security.Claims
 @using SimpleDataManagementSystem.Shared.Common.Constants
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<UsersModel> loc
+
 @{
-    ViewData["Title"] = "Users";
+    ViewData["Title"] = loc["Users"];
 }
 
 
 <div class="header">
-    <h1>Users</h1>
+    <h1>@loc["Users"]</h1>
 </div>
 
 <br>
@@ -28,7 +31,7 @@
                 )
         )
         {
-            <a href="/Users/Create"><button class="button-default" type="button">Create</button></a>
+            <a href="/Users/Create"><button class="button-default" type="button">@loc["Create"]</button></a>
         }
     </div>
 
@@ -50,9 +53,9 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Username</th>
-                <th>Role name</th>
-                <th>Password change required</th>
+                <th>@loc["Username"]</th>
+                <th>@loc["Role name"]</th>
+                <th>@loc["Password change required"]</th>
                 @if (
                         PermissionsHelper.IsInRole
                         (
@@ -61,7 +64,7 @@
                         )
                 )
                 {
-                    <th>Management</th>
+                    <th>@loc["Management"]</th>
                 }
             </tr>
         </thead>
@@ -75,7 +78,7 @@
                         <td>@u.Username</td>
                         <td>@u.Role.Name</td>
                         <td class="@(u.IsPasswordChangeRequired ? "text-danger" : "")">
-                            @(u.IsPasswordChangeRequired ? "Yes" : "No")
+                            @(u.IsPasswordChangeRequired ? loc["Yes"] : loc["No"])
                         </td>
                         @if (
                                 PermissionsHelper.IsInRole(
@@ -85,17 +88,17 @@
                         )
                         {
                             <td class="options">
-                                <a href="/Users/@(u.Id)/Details">
+                                <a href="/Users/@(u.Id)/Details" title="@loc["Details"]">
                                     <i class="fa-solid fa-circle-info"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Users/@(u.Id)/Edit">
+                                <a href="/Users/@(u.Id)/Edit" title="@loc["Edit"]">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Users/@(u.Id)/Delete">
+                                <a href="/Users/@(u.Id)/Delete" title="@loc["Delete"]">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </td>
@@ -109,7 +112,7 @@
     @if ((Model == null) || (Model?.Model?.Users?.Count == 0) || (Model?.Model == null))
     {
         <div class="no-data">
-            No data to show.
+            @loc["No data to show."]
         </div>
     }
 </div>

@@ -3,14 +3,17 @@
 @using SimpleDataManagementSystem.Shared.Common.Constants
 @using System.Security.Claims
 
-@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.DeleteUserModel
+@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Users.DeleteUserModel
+
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<DeleteUserModel> loc
 
 @{
-    ViewData["Title"] = "Delete user - '" + (Model?.Model?.Username ?? "-") + "'";
+    ViewData["Title"] = loc["Delete user"] + " - '" + (Model?.Model?.Username ?? "-") + "'";
 }
 
 <div class="header">
-    <h1>Delete user - '<b>@Model?.Model?.Username</b>'</h1>
+    <h1>@loc["Delete user"] - '<b>@Model?.Model?.Username</b>'</h1>
 </div>
 
 
@@ -33,7 +36,7 @@
 
                     <div class="readonly-control single-per-line">
                         <div>
-                            <label>User ID:</label>
+                            <label>@loc["User ID"]:</label>
                         </div>
                         <div>
                             <em>
@@ -46,7 +49,7 @@
 
                     <div class="readonly-control single-per-line">
                         <div>
-                            <label>Username:</label>
+                            <label>@loc["Username"]:</label>
                         </div>
                         <div>
                             <em>
@@ -59,7 +62,7 @@
 
                     <div class="readonly-control single-per-line">
                         <div>
-                            <label>Role ID:</label>
+                            <label>@loc["Role ID"]:</label>
                         </div>
                         <div>
                             <em>
@@ -72,7 +75,7 @@
 
                     <div class="readonly-control single-per-line">
                         <div>
-                            <label>Role name:</label>
+                            <label>@loc["Role name"]:</label>
                         </div>
                         <div>
                             <em>
@@ -104,7 +107,7 @@
                     {
                         <div>
                             <button class="button-danger" type="submit">
-                                Delete
+                                @loc["Delete"]
                             </button>
                         </div>
                     }
@@ -119,7 +122,7 @@
                         <div>
                             <a href="/account/details">
                                 <button class="button-default">
-                                    Account
+                                    @loc["Account"]
                                 </button>
                             </a>
                         </div>

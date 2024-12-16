@@ -6,12 +6,15 @@
 @using System.Security.Claims
 @using SimpleDataManagementSystem.Shared.Common.Constants
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<RetailersModel> loc
+
 @{
-    ViewData["Title"] = "Retailers";
+    ViewData["Title"] = loc["Retailers"];
 }
 
 <div class="header">
-    <h1>Retailers</h1>
+    <h1>@loc["Retailers"]</h1>
 </div>
 
 
@@ -33,7 +36,7 @@
             )
         )
         {
-            <a href="/Retailers/Create"><button class="button-default" type="button">Create</button></a>
+            <a href="/Retailers/Create"><button class="button-default" type="button">@loc["Create"]</button></a>
         }
     </div>
 
@@ -59,9 +62,9 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Name</th>
-                <th>Priority</th>
-                <th>Logo</th>
+                <th>@loc["Name"]</th>
+                <th>@loc["Priority"]</th>
+                <th>@loc["Logo"]</th>
                 @if (
                     PermissionsHelper.IsInRole
                     (
@@ -76,7 +79,7 @@
                     )
                 )
                 {
-                    <th>Management</th>
+                    <th>@loc["Management"]</th>
                 }
             </tr>
         </thead>
@@ -109,17 +112,17 @@
                         )
                         {
                             <td class="options">
-                                <a href="/Retailers/@r.Id/Details">
+                                <a href="/Retailers/@r.Id/Details" title="@loc["Details"]">
                                     <i class="fa-solid fa-circle-info"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Retailers/@r.Id/Edit">
+                                <a href="/Retailers/@r.Id/Edit" title="@loc["Edit"]">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a href="/Retailers/@r.Id/Delete">
+                                <a href="/Retailers/@r.Id/Delete" title="@loc["Delete"]">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </td>
@@ -133,7 +136,7 @@
     @if (Model?.Model?.Retailers?.Count == 0)
     {
         <div class="no-data">
-            No data to show.
+            @loc["No data to show."]
         </div>
     }
 

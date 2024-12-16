@@ -1,17 +1,20 @@
 ﻿@page "/Users/Create"
 
-@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.CreateUserModel
+@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Users.CreateUserModel
 
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 @using Microsoft.AspNetCore.Mvc.ModelBinding
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<CreateUserModel> loc
+
 @{
-    ViewData["Title"] = "Create new user";
+    ViewData["Title"] = loc["Create new user"];
 }
 
 
 <div class="header">
-    <h1>Create new user</h1>
+    <h1>@loc["Create new user"]</h1>
 </div>
 
 
@@ -36,7 +39,7 @@
 
                 <div class="input-control single-per-line">
                     <div class="required">
-                        <label>Username:</label>
+                        <label>@loc["Username"]:</label>
                     </div>
                     <div>
                         <input type="text" name="username" value="@Model?.Model?.Username" />
@@ -45,7 +48,7 @@
 
                 <div class="input-control single-per-line">
                     <div class="required">
-                        <label>Password:</label>
+                        <label>@loc["Password"]:</label>
                     </div>
                     <div>
                         <input type="password" name="password" value="@Model?.Model?.Password" />
@@ -54,7 +57,7 @@
 
                 <div class="input-control single-per-line">
                     <div class="required">
-                        <label>Role:</label>
+                        <label>@loc["Role"]:</label>
                     </div>
                     <div>
                         <select name="roleId">
@@ -62,7 +65,7 @@
                             {
                                 @foreach (var r in Model.AvailableRoles.Roles)
                                 {
-                                    <option value="@r.Id" selected="@(Model?.Model?.RoleId == r.Id)">@r.Name</option>
+                                    <option value="@r.Id" selected="@(Model?.Model?.RoleId == r.Id)">@loc[r.Name]</option>
                                 }
                             }
                         </select>
@@ -75,7 +78,7 @@
 
             <div class="flex-justify-center">
                 <button class="button-default" type="submit">
-                    Create
+                    @loc["Create"]
                 </button>
             </div>
 

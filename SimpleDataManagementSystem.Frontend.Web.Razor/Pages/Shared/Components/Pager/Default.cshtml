@@ -5,6 +5,9 @@
 
 @model Paged
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<PagerViewComponent> loc
+
 @{
     NameValueCollection? queryStringParameters = null;
     var left = Context.Request.Path.Value;
@@ -38,12 +41,12 @@
                 {
                     <li>
                         <a href="@(final)take=@(Model.PageInfo.Take)&page=1">
-                            First
+                            @loc["First"]
                         </a>
                     </li>
                     <li>
                         <a href="@(final)take=@(Model.PageInfo.Take)&page=@(Model.PageInfo.Page - 1)">
-                            Previous
+                            @loc["Previous"]
                         </a>
                     </li>
                 }
@@ -61,12 +64,12 @@
                 {
                     <li>
                         <a href="@(final)take=@(Model.PageInfo.Take)&page=@(Model.PageInfo.Page + 1)">
-                            Next
+                            @loc["Next"]
                         </a>
                     </li>
                     <li>
                         <a href="@(final)take=@(Model.PageInfo.Take)&page=@(Model.PageInfo.TotalPages)">
-                            Last
+                            @loc["Last"]
                         </a>
                     </li>
                 }

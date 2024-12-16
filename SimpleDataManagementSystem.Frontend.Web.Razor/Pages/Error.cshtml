@@ -3,12 +3,15 @@
 
 @model ErrorModel
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<ErrorModel> loc
+
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = loc["Error"];
 }
 
 <div class="header">
-    <h1>Error</h1>
+    <h1>@loc["Error"]</h1>
 </div>
 
 <br />
@@ -27,7 +30,7 @@
     >
         <div style="text-decoration:underline;">
             <h1>
-                @(Model.Error?.Message ?? "Something went wrong while processing your request. Please try again.")
+                @(loc[Model.Error?.Message] ?? loc["Something went wrong while processing your request. Please try again."])
             </h1>
         </div>
 
@@ -38,7 +41,7 @@
                 {
                     <div>
                         <span>&#8226;</span>
-                        <label>@e</label>
+                        <label>@loc[e]</label>
                     </div>
                 }
             </div>

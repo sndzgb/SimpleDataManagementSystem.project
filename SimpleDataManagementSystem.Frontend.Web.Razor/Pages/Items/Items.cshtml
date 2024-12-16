@@ -6,16 +6,17 @@
 @using System.Web
 @using System.Security.Claims
 @using SimpleDataManagementSystem.Shared.Common.Constants
+
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer<ItemsModel> loc
 
 @{
-    ViewData["Title"] = "Items";
+    ViewData["Title"] = loc["Items"];
 }
 
 
 <div class="header">
-    <h1>Items - Total found: <b>@Model?.Model?.PageInfo.Total</b></h1>
+    <h1>@loc["Items"] - @loc["Total found"]: <b>@Model?.Model?.PageInfo.Total</b></h1>
 </div>
 
 
@@ -45,7 +46,6 @@
                     </div>
                     <div style="display:inline-block;">
                         <label>@loc["Create new item"]</label>
-                        @* <label>Create new item</label> *@
                     </div>
                 </div>
 
@@ -57,11 +57,11 @@
                             data-target="enable-disable" 
                             type="button" 
                             class="button-default toggle-enable-disable-column">
-                            Toggle
+                            @loc["Toggle"]
                         </button>
                     </div>
                     <div style="display:inline-block;">
-                        <label>Toggle enable/ disable items column</label>
+                        <label>@loc["Toggle enable/ disable items column"]</label>
                     </div>
                 </div>
 
@@ -79,7 +79,7 @@
                         </form>
                     </div>
                     <div style="display:inline-block;">
-                        <label>Show enabled items only</label>
+                        <label>@loc["Show enabled items only"]</label>
                     </div>
                 </div>
             </div>
@@ -96,8 +96,8 @@
                     class="" 
                     form-field-required 
                     name="query"
-                    data-validation-required-error-message="Search query is required."
-                    placeholder="Enter a search query..."
+                    data-validation-required-error-message="@loc["Search query is required."]"
+                    placeholder="@loc["Enter a search query..."]"
                     style="outline: none;  border: none; border-bottom: 1px solid gainsboro;" 
                 />
                 <button 
@@ -120,14 +120,14 @@
     <table style="table-layout: fixed; width: 100%;">
         <thead>
             <tr>
-                <th class="enable-disable">Toggle enabled status</th>
-                <th>Naziv proizvoda</th>
-                <th>Enabled</th>
-                <th>Opis</th>
-                <th>Datum akcije</th>
-                <th>Cijena</th>
-                <th>Kategorija</th>
-                <th>Thumbnail</th>
+                <th class="enable-disable">@loc["Toggle enabled status"]</th>
+                <th>@loc["Naziv proizvoda"]</th>
+                <th>@loc["Enabled"]</th>
+                <th>@loc["Opis"]</th>
+                <th>@loc["Datum akcije"]</th>
+                <th>@loc["Cijena"]</th>
+                <th>@loc["Kategorija"]</th>
+                <th>@loc["Thumbnail"]</th>
                 @if (
                         PermissionsHelper.IsInRole
                         (
@@ -142,7 +142,7 @@
                         )
                 )
                 {
-                    <th>Management</th>
+                    <th>@loc["Management"]</th>
                 }
             </tr>
         </thead>
@@ -174,7 +174,7 @@
                         <td class="identifier">
                             @if (item.IsEnabled)
                             {
-                                <div class="monitored-favorites-counter" title="Total number of users monitoring this item">
+                                <div class="monitored-favorites-counter" title="@loc["Total number of users monitoring this item"]">
                                     <i class="fa-solid fa-bookmark light-color"></i>
                                     <label class="total-users-monitoring-counter">
                                         @item.Monitoring.TotalUsersMonitoringThisItem
@@ -185,7 +185,7 @@
                                 @(item.Nazivproizvoda ?? "-")
                             </div>
                         </td>
-                        <td>@(item.IsEnabled ? "Yes" : "No")</td>
+                        <td>@(item.IsEnabled ? loc["Yes"] : loc["No"])</td>
                         <td>@(item.Opis ?? "-")</td>
                         <td>@(item.Datumakcije ?? "-")</td>
                         <td>@(item.Cijena.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))</td>
@@ -215,7 +215,7 @@
                                     <label
                                         class="monitored"
                                         style="cursor:pointer; color: Dodgerblue;" 
-                                        title="Add to monitor list"
+                                        title="@loc["Add to monitor list"]"
                                     >
                                         @if (item.Monitoring.IsMonitoredByCurrentUser)
                                         {
@@ -231,18 +231,18 @@
                                 @* TODO implement *@
                                 <a 
                                     style="pointer-events:none; color: grey;" 
-                                    title="Go to details" 
+                                    title="@loc["Go to details"]"
                                     href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Details">
                                     <i class="fa-solid fa-circle-info"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a title="Go to edit" href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Edit">
+                                <a title="@loc["Go to edit"]" href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Edit">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
                                 <span>&nbsp;</span>
                                 <span>&nbsp;</span>
-                                <a title="Go to delete" href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Delete">
+                                <a title="@loc["Go to delete"]" href="/Items/@Uri.EscapeDataString(item.Nazivproizvoda!)/Delete">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </td>
@@ -256,7 +256,7 @@
     @if (Model?.Model?.Items?.Count == 0)
     {
         <div class="no-data">
-            No data to show.
+            @loc["No data to show."]
         </div>
     }
 
@@ -282,7 +282,7 @@
                 type: 'GET',
                 timeout: (30 * 1000),
                 success: (response) => {
-                    console.log("Got access_token: " + response);
+                    //console.log("Got access_token: " + response);
                 },
                 error: (response) => {
                     console.error('Unable to retrieve access_token');
@@ -495,31 +495,7 @@
                 success: function (response) {
                     // response
                     console.log("success");
-                    showSnackbar("Item status toggled successfully.", snackbarType.INFO);
-                },
-                error: function (xhr, status, error) {
-                    // xhr, status, error
-                    let response = JSON.parse(xhr.responseText);
-                    showSnackbar(response.message, snackbarType.DANGER);
-                }
-            });
-        }
-
-
-        function onApplyClicked(e) {
-            var token = $('input[name="__RequestVerificationToken"]').val();
-
-            xhr = $.ajax({
-                type: "POST",
-                url: "/Items?handler=EnableDisableItem",
-                data: {
-                    __RequestVerificationToken: token,
-                    itemIds: items
-                },
-                success: function (response) {
-                    // response
-                    console.log("success");
-                    showSnackbar("Item status toggled successfully.", snackbarType.INFO);
+                    showSnackbar('@loc["Item status toggled successfully."]', snackbarType.INFO);
                 },
                 error: function (xhr, status, error) {
                     // xhr, status, error

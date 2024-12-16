@@ -4,15 +4,18 @@
 @using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
 @using SimpleDataManagementSystem.Shared.Common.Constants
 
-@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.EditUserModel
+@model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Users.EditUserModel
+
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<EditUserModel> loc
 
 @{
-    ViewData["Title"] = "Edit user - '" + (Model?.User.Username ?? "-") + "'";
+    ViewData["Title"] = loc["Edit user"] + " - '" + (Model?.User.Username ?? "-") + "'";
 }
 
 
 <div class="header">
-    <h1>Edit user - <b>'@Model?.User?.Username'</b></h1>
+    <h1>@loc["Edit user"] - <b>'@Model?.User?.Username'</b></h1>
 </div>
 
 
@@ -41,11 +44,11 @@
 
                     <div class="readonly-control single-per-line">
                         <div>
-                            <label>Password change required:</label>
+                            <label>@loc["Password change required"]:</label>
                         </div>
                         <div style="color: @(Model.User.IsPasswordChangeRequired ? "red" : "white")">
                             <em>
-                                <label>@(Model.User.IsPasswordChangeRequired ? "Yes" : "No")</label>
+                                <label>@(Model.User.IsPasswordChangeRequired ? loc["Yes"] : loc["No"])</label>
                             </em>
                         </div>
                     </div>
@@ -54,7 +57,7 @@
 
                     <div class="input-control single-per-line">
                         <div class="required">
-                            <label>Username:</label>
+                            <label>@loc["Username"]:</label>
                         </div>
                         <div>
                             <input type="text" name="username" value="@Model.User.Username" />
@@ -63,13 +66,13 @@
 
                     <div>
                         <div class="required">
-                            <label for="role">Role:</label>
+                            <label for="role">@loc["Role"]:</label>
                         </div>
                         <div>
                             <select id="role" name="roleId">
                                 @foreach (var r in Model.AvailableRoles.Roles)
                                 {
-                                    <option value="@r.Id" selected="@(r.Id == Model.User.RoleId)">@r.Name</option>
+                                    <option value="@r.Id" selected="@(r.Id == Model.User.RoleId)">@loc[r.Name]</option>
                                 }
                             </select>
                         </div>
@@ -81,7 +84,7 @@
 
                 <div>
                     <button class="button-default" type="submit">
-                        Edit
+                        @loc["Edit"]
                     </button>
                 </div>
             </div>

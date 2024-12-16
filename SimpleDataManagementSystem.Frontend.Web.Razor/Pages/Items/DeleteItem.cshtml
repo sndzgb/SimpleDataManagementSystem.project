@@ -4,12 +4,15 @@
 
 @model SimpleDataManagementSystem.Frontend.Web.Razor.Pages.Items.DeleteItemModel
 
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<DeleteItemModel> loc
+
 @{
-    ViewData["Title"] = "Delete item - '" + (Model?.Model?.Item?.Nazivproizvoda ?? "-") + "'";
+    ViewData["Title"] = loc["Delete item"] + " - '" + (Model?.Model?.Item?.Nazivproizvoda ?? "-") + "'";
 }
 
 <div class="header">
-    <h1>Delete item - '<b>@Model?.ItemId</b>'</h1>
+    <h1>@loc["Delete item"] - '<b>@Model?.ItemId</b>'</h1>
 </div>
 
 
@@ -33,7 +36,7 @@
                     <div class="port-side">
                         <div class="readonly-control single-per-line">
                             <div>
-                                <label>Naziv proizvoda:</label>
+                                <label>@loc["Naziv proizvoda"]:</label>
                             </div>
                             <div>
                                 <em>
@@ -46,7 +49,7 @@
 
                         <div class="readonly-control single-per-line">
                             <div>
-                                <label>Opis:</label>
+                                <label>@loc["Opis"]:</label>
                             </div>
                             <div>
                                 <em>
@@ -59,7 +62,7 @@
 
                         <div class="readonly-control single-per-line">
                             <div>
-                                <label>Cijena:</label>
+                                <label>@loc["Cijena"]:</label>
                             </div>
                             <div>
                                 <em>
@@ -72,7 +75,7 @@
 
                         <div class="readonly-control single-per-line">
                             <div>
-                                <label>Enabled:</label>
+                                <label>@loc["Enabled"]:</label>
                             </div>
                             <div>
                                 <em>
@@ -85,7 +88,7 @@
 
                         <div class="readonly-control single-per-line">
                             <div>
-                                <label>Datum akcije:</label>
+                                <label>@loc["Datum akcije"]:</label>
                             </div>
                             <div>
                                 <em>
@@ -98,7 +101,7 @@
 
                         <div class="readonly-control single-per-line">
                             <div>
-                                <label>Kategorija:</label>
+                                <label>@loc["Kategorija"]:</label>
                             </div>
                             <div>
                                 <em>
@@ -128,7 +131,7 @@
 
                 <div class="flex-justify-center">
                     <button class="button-danger" type="submit">
-                        Delete
+                        @loc["Delete"]
                     </button>
                 </div>
             </div>
