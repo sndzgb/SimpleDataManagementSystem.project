@@ -9,6 +9,6 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Priority is required")]
-        public int Priority { get; set; }
+        public int? Priority { get; set; }
     }
 }

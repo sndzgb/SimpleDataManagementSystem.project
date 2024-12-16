@@ -1,6 +1,7 @@
 ﻿using SimpleDataManagementSystem.Shared.Web.Validators;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request
 {
@@ -8,13 +9,13 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.ViewModels.Request
     {
         [Required(ErrorMessage = "Name is required")]
         [StringLength(maximumLength: 255, ErrorMessage = "Invalid name", MinimumLength = 2)]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [Required(ErrorMessage = "Priority is required")]
-        public int Priority { get; set; }
+        public int? Priority { get; set; }
 
-        [IgnoreDataMember]
-        [MaxFileSizeValidator(8 * 1024 * 1024, ErrorMessage = "Maximum allowed file size is {0} bytes")]
+        [JsonIgnore]
+        [MaxFileSizeValidator(4 * 1024 * 1024)]
         [AllowedExtensionsValidator(new string[] { ".jpg", ".jpeg", ".png" })]
         public IFormFile? LogoImage { get; set; }
     }
