@@ -1,0 +1,29 @@
+﻿@using SimpleDataManagementSystem.Frontend.Web.Razor.Pages.ViewComponents
+
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<NotificationsSidebarViewComponent> loc
+
+@{
+    ViewData["Title"] = loc["Notifications"];
+}
+
+<div class="ns" id="notes">
+    <div id="no-notifications-messsage">
+        <label>@loc["No new notifications."]</label>
+    </div>
+
+    <div class="content-cont">
+        <div class="togg" id="notes-toggler" onclick="onToggleNotificationsSidebarClicked(this);">
+            <div class="notes-t coll ex">
+                <label class="n-notifier">@loc["Notifications"]</label>
+            </div>
+            <div class="notes-t expa">
+                <i class="notifications-sidebar fa-solid fa-chevron-right xl"></i>
+            </div>
+        </div>
+        <div class="notes-cont">
+        </div>
+    </div>
+</div>
+
+<script src="~/js/notificationssidebar.js"></script>
