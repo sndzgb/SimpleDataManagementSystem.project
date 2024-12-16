@@ -58,7 +58,11 @@ namespace SimpleDataManagementSystem.Frontend.Web.Razor.Extensions
 
                 var jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken);
 
-                var responseMessage = new ErrorViewModel((int)httpResponseMessage.StatusCode, httpResponseMessage.ReasonPhrase, null);
+                var responseMessage = new ErrorViewModel(
+                    (int)httpResponseMessage.StatusCode, 
+                    httpResponseMessage.ReasonPhrase, 
+                    null
+                );
 
                 if (!jsonResponse.IsNullOrEmpty())
                 {
