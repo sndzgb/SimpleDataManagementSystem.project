@@ -22,11 +22,113 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Resources\Pages\Account\DetailsModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Account\LoginModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Account\PasswordChangeModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Categories\CategoriesModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Categories\CreateCategoryModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Categories\DeleteCategoryModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Categories\EditCategoryModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\ErrorModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\ForbiddenModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Pages\IndexModel.en.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Pages\IndexModel.hr.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Items\CreateItemModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Items\EditItemModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Items\ItemsModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Items\SearchModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Retailers\CreateRetailerModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Retailers\DeleteRetailerModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Retailers\EditRetailerModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Shared\_MenuModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Users\CreateUserModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Users\DeleteUserModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Users\EditUserModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Users\UsersModel.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\ViewComponents\DisplayErrorViewComponent.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\ViewComponents\InvalidModelStateViewComponent.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\ViewComponents\NotificationsSidebarViewComponent.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\SharedResources\SharedResource.hr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
 
