@@ -117,7 +117,34 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Welcome to Simple Data Management System." xml:space="preserve">
-    <value>Welcome to Simple Data Management System.</value>
+  <data name="Create" xml:space="preserve">
+    <value>Kreiraj</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Brisanje</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Detalji</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Izmjena</value>
+  </data>
+  <data name="Logo" xml:space="preserve">
+    <value>Slika</value>
+  </data>
+  <data name="Management" xml:space="preserve">
+    <value>Upravljanje</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Naziv</value>
+  </data>
+  <data name="No data to show." xml:space="preserve">
+    <value>Nema podataka za prikazati.</value>
+  </data>
+  <data name="Priority" xml:space="preserve">
+    <value>Prioritet</value>
+  </data>
+  <data name="Retailers" xml:space="preserve">
+    <value>Trgovci</value>
   </data>
 </root>
