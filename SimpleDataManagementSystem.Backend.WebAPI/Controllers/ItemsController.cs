@@ -15,6 +15,7 @@ using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Request;
 using SimpleDataManagementSystem.Backend.WebAPI.WebApiModels.Response;
 using SimpleDataManagementSystem.Shared.Common.Constants;
 using System.Linq;
+using System.Net;
 
 namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
 {
@@ -24,11 +25,13 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
     {
         private readonly IItemsCoreService _itemsCoreService;
         private readonly IAuthorizationService _authorizationService;
-
         private const string ITEM_IMAGE_BASE_RELATIVE_PATH = "Images\\Items";
 
 
-        public ItemsController(IItemsCoreService itemsCoreService, IAuthorizationService authorizationService)
+        public ItemsController(
+                IItemsCoreService itemsCoreService, 
+                IAuthorizationService authorizationService
+            )
         {
             _itemsCoreService = itemsCoreService;
             _authorizationService = authorizationService;
@@ -48,6 +51,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
                 return Forbid();
             }
 
+            itemId = WebUtility.HtmlDecode(itemId.Trim());
             itemId = Uri.UnescapeDataString(itemId.Trim());
 
             await _itemsCoreService.ToggleMonitoredItemAsync(
@@ -66,8 +70,6 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
                 CancellationToken cancellationToken
             )
         {
-            //return NotFound(new ErrorWebApiModel(404, "Item not found.", null));
-
             var canToggleItemEnabledDisabledStatus = await CanToggleItemEnabledDisabledStatusAsync(HttpContext);
 
             if (!canToggleItemEnabledDisabledStatus)
@@ -75,6 +77,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
                 return Forbid();
             }
 
+            itemId = WebUtility.HtmlDecode(itemId.Trim());
             itemId = Uri.UnescapeDataString(itemId);
 
             await _itemsCoreService.ToggleItemEnabledDisabledStatusAsync(new ToggleItemEnabledDisabledStatusRequestDTO(
@@ -97,6 +100,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
                 return Forbid();
             }
 
+            itemId = WebUtility.HtmlDecode(itemId.Trim());
             itemId = Uri.UnescapeDataString(itemId);
 
             var item = await _itemsCoreService.GetItemAsync(new Logic.DTOs.Request.GetItemRequestDTO()
@@ -137,8 +141,6 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
             {
                 return Forbid();
             }
-
-            //enabledOnly = false;
 
             var items = await _itemsCoreService.GetItemsAsync(new Logic.DTOs.Request.GetItemsRequestDTO()
             {
@@ -221,6 +223,7 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
                 return Forbid();
             }
 
+            itemId = WebUtility.HtmlDecode(itemId.Trim());
             itemId = Uri.UnescapeDataString(itemId);
 
             // get item so we can delete image
@@ -271,7 +274,8 @@ namespace SimpleDataManagementSystem.Backend.WebAPI.Controllers
                 return Forbid();
             }
 
-            itemId = Uri.UnescapeDataString(itemId);
+            itemId = WebUtility.HtmlDecode(itemId.Trim()); // TODO put in "NormalizeQueryParamsMiddelware"
+            itemId = Uri.UnescapeDataString(itemId);       //
 
             var existingItem = await _itemsCoreService.GetItemAsync(new Logic.DTOs.Request.GetItemRequestDTO()
             {
